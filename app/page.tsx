@@ -1,5 +1,5 @@
 import {redirect} from "next/navigation";
 
 export default function RootPage() {
-    redirect('/organizer/sign-in');
+    redirect('/moderator/sign-in');
 }
