@@ -17,7 +17,7 @@ export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(""); // Track specific error text
+    const [errorMessage, setErrorMessage] = useState("");
     const [shouldShowPassword, setShouldShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -130,7 +130,7 @@ export default function LoginPage() {
                         <h1 className="text-4xl font-display font-black tracking-tight text-white uppercase">
                             Sign In
                         </h1>
-                        <p className="mt-4 text-sm text-gray-400">
+                        <p className="mt-4 text-sm text-[#C2C2C2]">
                             Please log in to access the{" "}
                             <span className="font-semibold text-gray-200">moderator</span> account.
                         </p>
@@ -169,19 +169,21 @@ export default function LoginPage() {
                                         hasError ? "border-[#C44E52]" : "border-[#574272]"
                                     )}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 focus:outline-none"
-                                >
-                                    {shouldShowPassword ? (
-                                        <Eye
-                                            className="h-6 w-6 text-brand-accent hover:text-white transition-colors"/>
-                                    ) : (
-                                        <EyeOff
-                                            className="h-6 w-6 text-brand-accent hover:text-white transition-colors"/>
-                                    )}
-                                </button>
+                                {formData.password.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShouldShowPassword(!shouldShowPassword)}
+                                        className="absolute right-4 top-9 -translate-y-1/2"
+                                    >
+                                        {shouldShowPassword ? (
+                                            <Eye
+                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                        ) : (
+                                            <EyeOff
+                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                        )}
+                                    </button>
+                                )}
                             </div>
 
                             {hasError && (
@@ -199,15 +201,15 @@ export default function LoginPage() {
                                     Keep me logged in
                                 </Label>
                             </div>
-                            <Link href="#" className="text-sm font-bold text-[#E05723] hover:underline">
+                            <Link href="forgot-password" className="text-sm font-bold text-[#E05723] hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
 
                         <Button
-                            type="submit" // Trigger the form onSubmit
+                            type="submit"
                             variant={"elevated"}
-                            disabled={isLoading}
+                            disabled={isLoading || (!formData.email.trim() || !formData.password.trim())}
                             className="mt-4 h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
                         >
                             {isLoading ? (

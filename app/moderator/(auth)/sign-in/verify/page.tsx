@@ -1,7 +1,7 @@
 "use client";
 
-import {useState} from "react";
-import {useRouter, useSearchParams} from "next/navigation"; // Added for redirection
+import {useState, useEffect} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -17,7 +17,7 @@ export default function VerifyPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(""); // Track specific error text
+    const [errorMessage, setErrorMessage] = useState("");
     const [otp, setOtp] = useState("")
     const [countdown, setCountdown] = useState(0);
     const [isResending, setIsResending] = useState(false);
@@ -68,9 +68,10 @@ export default function VerifyPage() {
                 setIsLoading(false);
                 setHasError(true);
                 setErrorMessage(verifyError.message);
+                return;
             }
 
-            router.push("moderator/dashboard");
+            router.push("../dashboard");
 
         } catch (error: unknown) {
             setIsLoading(false);
@@ -92,30 +93,28 @@ export default function VerifyPage() {
         }
 
         setIsResending(true);
-
-        const {error: error} = await supabase.auth.signInWithOtp({
-            email: email,
-        });
+        const {error: error} = await supabase.auth.signInWithOtp({email: email,});
 
         if (error) {
             setHasError(true);
             setErrorMessage(error.message);
-            setIsResending(false);
         } else {
             setCountdown(60);
-            setIsResending(false);
+        }
+        setIsResending(false);
+    };
 
-            const timer = setInterval(() => {
-                setCountdown((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prev) => prev - 1);
             }, 1000);
         }
-    };
+
+        return () => clearInterval(timer);
+    }, [countdown]);
 
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
@@ -151,8 +150,9 @@ export default function VerifyPage() {
 
                             <button
                                 type="button"
+                                disabled={isResending}
                                 onClick={handleResendEmail}
-                                className="cursor-pointer ml-auto text-[#C2C2C2] text-sm font-semibold transition-colors hover:text-white active:opacity-70 focus:outline-none"
+                                className="cursor-pointer ml-auto text-[#FC3436] text-sm font-semibold transition-colors hover:brightness-90 active:opacity-70 focus:outline-none"
                             >
                                 Resend Again {countdown > 0 ? `in ${countdown}s` : ""}
                             </button>
@@ -169,7 +169,8 @@ export default function VerifyPage() {
                             <Button
                                 type="submit"
                                 variant={"elevated"}
-                                disabled={isLoading}
+                                onClick={handleVerify}
+                                disabled={isLoading || !otp.trim()}
                                 className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all"
                             >
                                 {isLoading ? (
