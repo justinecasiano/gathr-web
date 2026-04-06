@@ -22,7 +22,6 @@ export default function LoadingPage() {
                        className="object-contain"
                    />
                </div>
-
            </div>
        </main>
    );

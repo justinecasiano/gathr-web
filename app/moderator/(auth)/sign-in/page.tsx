@@ -8,9 +8,9 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
-import WelcomeSide from "@/components/custom/welcome-side";
+import WelcomeSide from "@/components/WelcomeSide";
 import {cn} from "@/lib/utils";
-import {supabase} from "@/lib/supabase";
+import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
 
 export default function LoginPage() {

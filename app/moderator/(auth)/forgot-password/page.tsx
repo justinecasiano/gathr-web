@@ -9,7 +9,7 @@ import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useState} from "react";
 import {z} from "zod";
-import {supabase} from "@/lib/supabase";
+import {supabase} from "@/lib/supabase/supabase";
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         try {
             const { data: userData, error: userError } = await supabase
                 .from("users")
-                .select("id")
+                .select("id, role")
                 .eq("email", email)
                 .single();
 
@@ -60,7 +60,16 @@ export default function ForgotPasswordPage() {
                 return;
             }
 
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+            if (userData.role !== "MODERATOR") {
+                setIsLoading(false);
+                setHasError(true);
+                setErrorMessage("Access denied. This account is not a Moderator.");
+                return;
+            }
+
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/moderator/reset-password?email=${encodeURIComponent(email)}`,
+            });
 
             if (resetError) {
                 setIsLoading(false);
@@ -69,7 +78,7 @@ export default function ForgotPasswordPage() {
                 return;
             }
 
-            router.push(`reset-password?email=${encodeURIComponent(email)}`);
+            setIsLoading(false);
 
         } catch (error: unknown) {
             setIsLoading(false);

@@ -9,7 +9,7 @@ export default function LoadingPage() {
 
                 <motion.div
                     className="absolute top-1/2 left-1/2 h-50 w-50"
-                    initial={{ x: "-50%", y: "-50%", scale: 1, opacity: 0.8 }}
+                    initial={{x: "-50%", y: "-50%", scale: 1, opacity: 0.8}}
                     animate={{
                         scale: [1, 1.15, 1],
                         opacity: [0.7, 1, 0.7]
@@ -41,7 +41,7 @@ export default function LoadingPage() {
                 <motion.div
                     className="absolute -top-20 -right-55 h-80 w-80 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
-                    whileHover={{x: 50, scale: 1.1}}
+                    whileHover={{x: 50}}
                     transition={{
                         type: "spring",
                         stiffness: 200,

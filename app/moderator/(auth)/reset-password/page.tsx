@@ -7,9 +7,10 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {cn} from "@/lib/utils";
 import {Eye, EyeOff, Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {z} from "zod";
-import {supabase} from "@/lib/supabase";
+import {supabase} from "@/lib/supabase/supabase";
+import LoadingPage from "@/app/moderator/(dashboard)/loading";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -21,10 +22,47 @@ export default function ResetPasswordPage() {
     const [errorMessage, setErrorMessage] = useState("");
     const [shouldShowPassword, setShouldShowPassword] = useState(false);
     const [shouldShowConfirmPassword, setShouldShowConfirmPassword] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
+
     const [formData, setFormData] = useState({
         password: "",
         confirmPassword: "",
     });
+
+    useEffect(() => {
+        const checkSession = async () => {
+            // Wait for Supabase to check cookies/local storage
+            const {data: {session}} = await supabase.auth.getSession();
+
+            if (!session) {
+                // Not authorized: redirect them
+                // router.replace("/sign-in");
+            } else {
+                // Authorized: allow them to see the form
+                setIsAuthorized(true);
+            }
+
+            // Critical: Turn off loading AFTER the check is done
+            setIsLoading(false);
+        };
+
+        checkSession();
+    }, [router]);
+
+    // --- THE GUARDS ---
+
+    // 1. If we are still checking, show a pulse logo or spinner
+    if (isLoading) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-brand-dark">
+                <LoadingPage/> {/* That pulsing logo we built earlier! */}
+            </main>
+        );
+    }
+
+    // 2. If the check is done but they aren't authorized, show nothing
+    // (The router.replace will kick in and move them shortly)
+    if (!isAuthorized) return null;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {id, value} = e.target;
@@ -46,7 +84,6 @@ export default function ResetPasswordPage() {
         .refine((data) => data.password === data.confirmPassword, {
             message: "Passwords do not match",
         });
-    ;
 
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -5,9 +5,9 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import WelcomeSide from "@/components/custom/welcome-side";
+import WelcomeSide from "@/components/WelcomeSide";
 import {cn} from "@/lib/utils";
-import {supabase} from "@/lib/supabase";
+import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
 
 export default function VerifyPage() {
