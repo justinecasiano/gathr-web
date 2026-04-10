@@ -28,16 +28,16 @@ export default function VerifyPage() {
 
     const otpSchema = z.string().length(6, "OTP must be exactly 6 digits");
 
-    // useEffect(() => {
-    //     const fetchUserEmail = async () => {
-    //         if (!email) {
-    //             router.replace("/sign-in");
-    //         } else {
-    //             setIsAuthorized(true);
-    //         }
-    //     };
-    //     fetchUserEmail();
-    // }, [email, router]);
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            if (!email) {
+                router.replace("/moderator/sign-in");
+            } else {
+                setIsAuthorized(true);
+            }
+        };
+        fetchUserEmail();
+    }, [email, router]);
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,13 +104,13 @@ export default function VerifyPage() {
         return () => clearInterval(timer);
     }, [countdown]);
 
-    // if (!isAuthorized) {
-    //     return (
-    //         <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
-    //             <Loader2 className="h-12 w-12 animate-spin text-white" />
-    //         </div>
-    //     );
-    // }
+    if (!isAuthorized) {
+        return (
+            <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+            </div>
+        );
+    }
 
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">

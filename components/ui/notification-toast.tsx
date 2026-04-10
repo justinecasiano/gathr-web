@@ -154,7 +154,7 @@ export function NotificationToast({
                         </div>
                     </div>
 
-                    <div className="absolute -bottom-1 pb-0.5 left-3 right-3 md:left-4 md:right-4 h-1.5 md:h-2.5 flex justify-center z-20 rounded-full">
+                    <div className="absolute -bottom-1 pb-0.5 left-3 right-3 md:left-4 md:right-4 h-2.5 flex justify-center z-20 rounded-full">
                         <motion.div
                             initial={{ scaleX: 1 }}
                             animate={{ scaleX: 0 }}

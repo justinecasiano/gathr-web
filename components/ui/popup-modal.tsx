@@ -64,11 +64,11 @@ export default function PopupModal({
                             <div className={cn("absolute bottom-3 left-11 h-36 w-36 rounded-full", colors.circle)} />
                         </div>
 
-                        <div className="relative z-10 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white mb-4 sm:mb-6">
+                        <div className="relative z-10 flex items-center justify-center w-18 h-18 sm:w-20 sm:h-20 rounded-full mb-4 sm:mb-6">
                             <Image
                                 src="/svgs/neutral-icon-toast.svg"
                                 alt="Toast Icon"
-                                className="object-contain p-3 sm:p-4"
+                                className="object-contain p-3"
                                 priority
                                 fill
                             />
