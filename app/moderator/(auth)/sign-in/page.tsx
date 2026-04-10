@@ -1,14 +1,14 @@
 "use client";
 
 import {useState} from "react";
-import {useRouter} from "next/navigation"; // Added for redirection
+import {useRouter} from "next/navigation";
 import Link from "next/link";
 import {Eye, EyeOff, Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
-import WelcomeSide from "@/components/WelcomeSide";
+import WelcomeSide from "@/components/ui/welcome-side";
 import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
@@ -106,8 +106,9 @@ export default function LoginPage() {
                 setHasError(true);
                 setIsLoading(false);
                 setErrorMessage(otpError.message);
-            } else
+            } else {
                 router.push(`sign-in/verify?email=${encodeURIComponent(formData.email)}`);
+            }
 
         } catch (error: unknown) {
             setHasError(true);
@@ -124,6 +125,7 @@ export default function LoginPage() {
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
             <WelcomeSide/>
+
             <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-10">
@@ -201,7 +203,8 @@ export default function LoginPage() {
                                     Keep me logged in
                                 </Label>
                             </div>
-                            <Link href="forgot-password" className="text-sm font-bold text-[#E05723] hover:underline">
+                            <Link href="forgot-password" data-ignore-ms-personalization
+                                  className="text-sm font-bold text-[#E05723] hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
@@ -214,7 +217,7 @@ export default function LoginPage() {
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                    <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                     Please Wait
                                 </>
                             ) : (

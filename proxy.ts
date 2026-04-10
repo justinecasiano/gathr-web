@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse, type NextRequest } from 'next/server'
+import {createClient} from '@/lib/supabase/server'
+import {NextResponse, type NextRequest} from 'next/server'
 
 export async function proxy(request: NextRequest) {
     const response = NextResponse.next({
@@ -9,25 +9,25 @@ export async function proxy(request: NextRequest) {
     })
 
     const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const {data: {user}, error} = await supabase.auth.getUser()
     if (error) console.error("Supabase Auth Error:", error.message);
     console.log(user)
 
-    const { pathname } = request.nextUrl
+    const {pathname} = request.nextUrl
     const isModeratorPath = pathname.startsWith('/moderator')
     const isOrganizerPath = pathname.startsWith('/organizer')
     const authRoutes = ['/sign-in', '/sign-in/verify', '/forgot-password', '/reset-password']
     const isTryingAuth = authRoutes.some(route => pathname.endsWith(route))
 
     if (user) {
-        const { data: userData } = await supabase
+        const {data: userData} = await supabase
             .from('users')
             .select('role')
             .eq('id', user.id)
             .single()
 
         let role = userData?.role
-        role =  role === 'PARTICIPANT' ? 'organizer' : 'moderator';
+        role = role === 'PARTICIPANT' ? 'organizer' : 'moderator';
 
         if (isTryingAuth && role) {
             return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url))

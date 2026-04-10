@@ -8,7 +8,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
-import WelcomeSide from "@/components/WelcomeSide";
+import WelcomeSide from "@/components/ui/welcome-side";
 import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
@@ -214,7 +214,7 @@ export default function LoginPage() {
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                    <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                     Please Wait
                                 </>
                             ) : (

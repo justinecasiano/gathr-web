@@ -5,7 +5,7 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import WelcomeSide from "@/components/WelcomeSide";
+import WelcomeSide from "@/components/ui/welcome-side";
 import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
@@ -175,7 +175,7 @@ export default function VerifyPage() {
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                        <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                         Please Wait
                                     </>
                                 ) : (

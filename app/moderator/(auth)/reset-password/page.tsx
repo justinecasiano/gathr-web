@@ -1,21 +1,18 @@
 "use client";
 import Image from "next/image";
-import {motion} from "motion/react";
-import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
-import {useRouter, useSearchParams} from "next/navigation";
-import {cn} from "@/lib/utils";
-import {Eye, EyeOff, Loader2} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {useState, useEffect} from "react";
-import {z} from "zod";
-import {supabase} from "@/lib/supabase/supabase";
-import LoadingPage from "@/app/moderator/(dashboard)/loading";
+import { motion } from "motion/react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useRouter} from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { supabase } from "@/lib/supabase/supabase";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const email = searchParams.get("email");
 
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
@@ -23,6 +20,7 @@ export default function ResetPasswordPage() {
     const [shouldShowPassword, setShouldShowPassword] = useState(false);
     const [shouldShowConfirmPassword, setShouldShowConfirmPassword] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [userEmail, setUserEmail] = useState("");
 
     const [formData, setFormData] = useState({
         password: "",
@@ -30,42 +28,34 @@ export default function ResetPasswordPage() {
     });
 
     useEffect(() => {
-        const checkSession = async () => {
-            // Wait for Supabase to check cookies/local storage
-            const {data: {session}} = await supabase.auth.getSession();
+        const validateSession = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (!session) {
-                // Not authorized: redirect them
-                // router.replace("/sign-in");
-            } else {
-                // Authorized: allow them to see the form
-                setIsAuthorized(true);
+            if (error || !user) {
+                router.replace("sign-in");
+                return;
             }
 
-            // Critical: Turn off loading AFTER the check is done
-            setIsLoading(false);
+            const { data: userData, error: roleError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (roleError || !userData || userData.role !== 'MODERATOR') {
+                router.replace("sign-in");
+                return;
+            }
+
+            setUserEmail(user.email ?? "");
+            setIsAuthorized(true);
         };
 
-        checkSession();
+        validateSession();
     }, [router]);
 
-    // --- THE GUARDS ---
-
-    // 1. If we are still checking, show a pulse logo or spinner
-    if (isLoading) {
-        return (
-            <main className="flex min-h-screen items-center justify-center bg-brand-dark">
-                <LoadingPage/> {/* That pulsing logo we built earlier! */}
-            </main>
-        );
-    }
-
-    // 2. If the check is done but they aren't authorized, show nothing
-    // (The router.replace will kick in and move them shortly)
-    if (!isAuthorized) return null;
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = e.target;
+        const { id, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [id]: value,
@@ -105,7 +95,7 @@ export default function ResetPasswordPage() {
         }
 
         try {
-            const {data, error} = await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 password: result.data.password,
             });
 
@@ -116,23 +106,28 @@ export default function ResetPasswordPage() {
                 return;
             }
 
-            router.push("sign-in");
+            await supabase.auth.signOut();
+            router.push("sign-in?success=true");
 
         } catch (error: unknown) {
             setIsLoading(false);
             setHasError(true);
-
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-            } else {
-                setErrorMessage("Failed to verify code. Please try again.");
-            }
+            setErrorMessage(error instanceof Error ? error.message : "Failed to verify code. Please try again.");
         }
     };
+
+    if (!isAuthorized) {
+        return (
+            <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+            </div>
+        );
+    }
+
     return (
         <main className="flex flex-col min-h-screen w-full bg-brand-dark">
-            <div className="absolute flex items-center  mt-3 ml-6">
-                <div className="relative h-20 w-20">
+            <div className="absolute flex items-center mt-5 ml-6">
+                <div className="relative h-16 w-16">
                     <Image
                         src="/svgs/gathr-logo-initial.svg"
                         alt="Gathr Logo"
@@ -158,7 +153,7 @@ export default function ResetPasswordPage() {
                             Account <br/> Change Password
                         </h1>
                         <p className="mt-2 text-sm text-[#C2C2C2]">
-                            Changing password for account {email}
+                            Changing password for account {userEmail}
                         </p>
                     </div>
 
@@ -198,7 +193,7 @@ export default function ResetPasswordPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-base font-heading font-semibold text-white" htmlFor="password">
+                            <Label className="text-base font-heading font-semibold text-white" htmlFor="confirmPassword">
                                 Confirm New Password
                             </Label>
                             <div className="relative">
@@ -245,7 +240,7 @@ export default function ResetPasswordPage() {
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                    <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                     Please Wait
                                 </>
                             ) : (
@@ -265,11 +260,11 @@ export default function ResetPasswordPage() {
 
             </div>
 
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden z-50 pointer-events-none">
                 <motion.div
                     className="absolute -top-20 -right-55 h-80 w-80 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
-                    whileHover={{x: 50, scale: 1.1}}
+                    whileHover={{x: 50}}
                     transition={{
                         type: "spring",
                         stiffness: 200,
@@ -311,6 +306,5 @@ export default function ResetPasswordPage() {
                 />
             </div>
         </main>
-    )
-        ;
+    );
 }

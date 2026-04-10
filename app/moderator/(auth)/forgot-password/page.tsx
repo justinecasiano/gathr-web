@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
         }
 
         try {
-            const { data: userData, error: userError } = await supabase
+            const {data: userData, error: userError} = await supabase
                 .from("users")
                 .select("id, role")
                 .eq("email", email)
@@ -67,8 +67,8 @@ export default function ForgotPasswordPage() {
                 return;
             }
 
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/moderator/reset-password?email=${encodeURIComponent(email)}`,
+            const {error: resetError} = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/moderator/reset-password`,
             });
 
             if (resetError) {
@@ -93,8 +93,8 @@ export default function ForgotPasswordPage() {
     };
     return (
         <main className="flex flex-col min-h-screen w-full bg-brand-dark">
-            <div className="flex items-center  mt-3 ml-6">
-                <div className="relative h-20 w-20">
+            <div className="flex items-center  mt-5 ml-6">
+                <div className="relative h-16 w-16">
                     <Image
                         src="/svgs/gathr-logo-initial.svg"
                         alt="Gathr Logo"
@@ -170,7 +170,7 @@ export default function ForgotPasswordPage() {
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                        <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                         Please Wait
                                     </>
                                 ) : (
@@ -186,7 +186,7 @@ export default function ForgotPasswordPage() {
                 <motion.div
                     className="absolute -top-20 -right-55 h-80 w-80 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
-                    whileHover={{x: 50, scale: 1.1}}
+                    whileHover={{x: 50}}
                     transition={{
                         type: "spring",
                         stiffness: 200,

@@ -7,8 +7,10 @@ import {motion, Variants} from "motion/react";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import Image from "next/image";
+import {Loader2} from "lucide-react";
 import {Icon, IconName} from "@/components/icons";
-import { signOut } from '@/app/actions'
+import {signOut} from '@/app/actions'
+import {useState} from "react";
 
 interface SidebarItem {
     href: string;
@@ -79,13 +81,23 @@ const sidebarVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-    open: { opacity: 1, y: 0 },
-    closed: { opacity: 1, y: 0 }
+    open: {opacity: 1, y: 0},
+    closed: {opacity: 1, y: 0}
 };
 
 export function Sidebar() {
     const [isOpen, setIsOpen] = React.useState(false);
     const pathname = usePathname();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const handleLogout = async (e: React.FormEvent) => {
+        setIsLoggingOut(true);
+        try {
+            await signOut();
+        } catch (error) {
+            setIsLoggingOut(false);
+        }
+    };
 
     React.useEffect(() => {
         const timer = setTimeout(() => setIsOpen(true), 100);
@@ -134,15 +146,15 @@ export function Sidebar() {
                     <button
                         onClick={() => setIsOpen(true)}
                         className={cn(
-                            "min-w-[55px] absolute -left-1 transition-opacity duration-300",
+                            "min-w-[45px] absolute transition-opacity duration-300",
                             !isOpen ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
                         )}
                     >
                         <Image
                             src='/svgs/gathr-logo-initial.svg'
                             alt={`Open sidebar`}
-                            width={55}
-                            height={55}
+                            width={45}
+                            height={45}
                         />
                     </button>
                 </div>
@@ -192,7 +204,8 @@ export function Sidebar() {
             </nav>
 
             <div className={`p-4 pt-5 pb-8 border-t-2 ${colors.background} ${colors.innerBorderColor}`}>
-                <motion.div variants={itemVariants} className="flex items-center px-2 py-3 overflow-hidden whitespace-nowrap">
+                <motion.div variants={itemVariants}
+                            className="flex items-center px-2 py-3 overflow-hidden whitespace-nowrap">
                     <div className="shrink-0 min-w-[40px] flex items-center justify-center">
                         <Image src="/svgs/moderator-profile-icon.svg" alt="Profile" width={40} height={40}/>
                     </div>
@@ -200,30 +213,42 @@ export function Sidebar() {
                         "transition-all duration-300 ease-in-out flex flex-col justify-center",
                         isOpen ? "max-w-[150px] opacity-100 ml-3" : "max-w-0 opacity-0 ml-0"
                     )}>
-                        <p className={`text-sm font-display font-medium truncate ${colors.text}`}>Angela Mae Z. Cabrera</p>
+                        <p className={`text-sm font-display font-medium truncate ${colors.text}`}>Angela Mae Z.
+                            Cabrera</p>
                         <span
                             className={`text-[11px] border-1 px-3 py-0.5 rounded-xl font-display font-bold w-fit mt-0.5 ${currentRole === "moderator" ? "text-white border-white" : "text-[#261A36] border-[#261A36]"}`}>{currentRole === "moderator" ? "Moderator" : "Event Organizer"}</span>
                     </div>
                 </motion.div>
 
-                <motion.form action={signOut} className="w-full" variants={itemVariants}>
+                <motion.form
+                    onSubmit={handleLogout}
+                    action={signOut}
+                    className="w-full"
+                    variants={itemVariants}
+                >
                     <button
                         type="submit"
+                        disabled={isLoggingOut}
                         className={cn(
-                            "flex w-full items-center rounded-xl px-3 py-3 transition-colors overflow-hidden whitespace-nowrap text-left",
-                            `${colors.text} hover:bg-red-500/20 hover:text-red-500`
+                            "flex w-full items-center rounded-xl px-3 py-3 transition-colors overflow-hidden whitespace-nowrap text-left cursor-pointer",
+                            colors.text,
+                            "hover:bg-red-500/20 hover:text-red-500 disabled:opacity-70 disabled:cursor-not-allowed"
                         )}
                     >
                         <div className="shrink-0 min-w-[25px] flex items-center justify-center">
-                            <Icon name="logout" size={25} />
+                            {isLoggingOut ? (
+                                <Loader2 size={25} className="animate-spin text-red-500"/>
+                            ) : (
+                                <Icon name="logout" size={25}/>
+                            )}
                         </div>
 
                         <span className={cn(
                             "text-lg font-bold font-heading overflow-hidden transition-all duration-300 ease-in-out",
                             isOpen ? "max-w-[200px] opacity-100 ml-4" : "max-w-0 opacity-0 ml-0"
                         )}>
-                            Log Out
-                        </span>
+                    {isLoggingOut ? "Logging out..." : "Log Out"}
+                </span>
                     </button>
                 </motion.form>
             </div>

@@ -1,45 +1,51 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
-import {Loader2} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import WelcomeSide from "@/components/WelcomeSide";
-import {cn} from "@/lib/utils";
-import {supabase} from "@/lib/supabase/supabase";
-import {z} from "zod";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import WelcomeSide from "@/components/ui/welcome-side";
+import { NotificationToast } from "@/components/ui/notification-toast";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/supabase";
+import { z } from "zod";
 
 export default function VerifyPage() {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
-
     const router = useRouter();
+
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [otp, setOtp] = useState("")
+    const [otp, setOtp] = useState("");
     const [countdown, setCountdown] = useState(0);
     const [isResending, setIsResending] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
-    const otpSchema = z.string().length(6,"OTP must be exactly 6 digits");
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+    const otpSchema = z.string().length(6, "OTP must be exactly 6 digits");
+
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            if (!email) {
+                router.replace("/sign-in");
+            } else {
+                setIsAuthorized(true);
+            }
+        };
+        fetchUserEmail();
+    }, [email, router]);
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setIsLoading(true);
         setHasError(false);
-        setErrorMessage("");
 
         if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
-        }
-
-        if (!otp.trim()) {
-            setIsLoading(false);
-            setHasError(true);
-            setErrorMessage("This field is required.");
-            return;
         }
 
         const result = otpSchema.safeParse(otp);
@@ -50,16 +56,9 @@ export default function VerifyPage() {
             return;
         }
 
-        if (!email) {
-            setIsLoading(false);
-            setHasError(true);
-            setErrorMessage("Email is missing");
-            return;
-        }
-
         try {
-            const { data, error: verifyError } = await supabase.auth.verifyOtp({
-                email: email,
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+                email: email!,
                 token: otp,
                 type: 'email',
             });
@@ -71,30 +70,23 @@ export default function VerifyPage() {
                 return;
             }
 
-            router.push("../dashboard");
+            setShowSuccessToast(true);
+
+            setTimeout(() => {
+                router.push("../dashboard");
+            }, 3000);
 
         } catch (error: unknown) {
             setIsLoading(false);
             setHasError(true);
-
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-            } else {
-                setErrorMessage("Failed to verify code. Please try again.");
-            }
+            setErrorMessage(error instanceof Error ? error.message : "Verification failed");
         }
     };
 
     const handleResendEmail = async () => {
-        if (!email) {
-            setHasError(true);
-            setErrorMessage("Email is missing.");
-            return;
-        }
-
+        if (!email) return;
         setIsResending(true);
-        const {error: error} = await supabase.auth.signInWithOtp({email: email,});
-
+        const { error } = await supabase.auth.signInWithOtp({ email });
         if (error) {
             setHasError(true);
             setErrorMessage(error.message);
@@ -106,19 +98,33 @@ export default function VerifyPage() {
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
-
         if (countdown > 0) {
-            timer = setInterval(() => {
-                setCountdown((prev) => prev - 1);
-            }, 1000);
+            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
         }
-
         return () => clearInterval(timer);
     }, [countdown]);
 
+    if (!isAuthorized) {
+        return (
+            <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+            </div>
+        );
+    }
+
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
-            <WelcomeSide/>
+            <NotificationToast
+                isOpen={showSuccessToast}
+                onClose={() => setShowSuccessToast(false)}
+                variant="success"
+                title="Login Successful"
+                description="Please wait for the website to load your account."
+                duration={3000}
+            />
+
+            <WelcomeSide />
+
             <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-7">
@@ -126,11 +132,11 @@ export default function VerifyPage() {
                             Verify Login
                         </h1>
                         <p className="mt-4 text-sm text-gray-400">
-                            Please check email {email || 'in your inbox '} to see your OTP code.
+                            Please check email {email} to see your OTP code.
                         </p>
                     </div>
 
-                    <form>
+                    <form onSubmit={handleVerify}>
                         <Input
                             id="otp"
                             value={otp}
@@ -143,16 +149,15 @@ export default function VerifyPage() {
                         />
                         <div className="mt-4 flex justify-between">
                             {hasError && (
-                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1">
+                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1 font-medium">
                                     {errorMessage}
                                 </p>
                             )}
-
                             <button
                                 type="button"
-                                disabled={isResending}
+                                disabled={isResending || countdown > 0}
                                 onClick={handleResendEmail}
-                                className="cursor-pointer ml-auto text-[#FC3436] text-sm font-semibold transition-colors hover:brightness-90 active:opacity-70 focus:outline-none"
+                                className="cursor-pointer ml-auto text-[#FC3436] text-sm font-semibold hover:brightness-90 disabled:opacity-50"
                             >
                                 Resend Again {countdown > 0 ? `in ${countdown}s` : ""}
                             </button>
@@ -162,20 +167,20 @@ export default function VerifyPage() {
                             <Button
                                 type="button"
                                 onClick={() => router.back()}
-                                variant={"elevated"}
-                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg transition-all "
-                            >BACK
+                                variant="elevated"
+                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg"
+                            >
+                                BACK
                             </Button>
                             <Button
                                 type="submit"
-                                variant={"elevated"}
-                                onClick={handleVerify}
+                                variant="elevated"
                                 disabled={isLoading || !otp.trim()}
-                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all"
+                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg"
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-6 w-6 animate-spin"/>
+                                        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
                                         Please Wait
                                     </>
                                 ) : (

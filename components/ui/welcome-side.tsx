@@ -6,7 +6,7 @@ export default function WelcomeSide() {
         <div className="relative w-[35%] h-screen bg-gradient-to-b from-brand to-brand-dark overflow-hidden">
             <div className="flex items-center justify-center p-6 ">
 
-                <div className="relative h-20 w-20">
+                <div className="relative h-18 w-18">
                     <Image
                         src="/svgs/gathr-logo-initial.svg"
                         alt="Gathr Logo"
