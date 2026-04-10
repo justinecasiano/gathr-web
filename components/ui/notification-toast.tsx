@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import {X, CheckCircle2, AlertCircle, AlertTriangle, Info, Bell, LucideIcon} from "lucide-react";
-import {motion, AnimatePresence} from "motion/react";
-import {cn} from "@/lib/utils";
+import { X } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 type ToastVariant = "success" | "error" | "warning" | "info" | "neutral";
@@ -88,8 +88,6 @@ export function NotificationToast({
         textSecondary: colors?.textSecondary || "text-[#6B6B6B]",
     };
 
-    const Icon = icon || theme.icon;
-
     React.useEffect(() => {
         let timer: NodeJS.Timeout;
         if (isOpen && duration > 0) {
@@ -102,7 +100,7 @@ export function NotificationToast({
         };
     }, [isOpen, duration, onClose]);
 
-    const positionClasses = position === "top" ? "top-10" : "bottom-10";
+    const positionClasses = position === "top" ? "top-4 md:top-10" : "bottom-4 md:bottom-10";
     const initialY = position === "top" ? -50 : 50;
 
     return (
@@ -110,59 +108,57 @@ export function NotificationToast({
             {isOpen && (
                 <motion.div
                     key={`${title}-${description}`}
-                    initial={{opacity: 0, y: initialY, x: "-50%", scale: 0.95}}
-                    animate={{opacity: 1, y: 0, x: "-50%", scale: 1}}
-                    exit={{opacity: 0, scale: 0.95}}
-                    transition={{type: "spring", stiffness: 300, damping: 25}}
+                    initial={{ opacity: 0, y: initialY, x: "-50%", scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     className={cn(
-                        "fixed left-1/2 z-50",
-                        "flex w-full max-w-[22rem] flex-col rounded-2xl border-6 shadow-xl",
+                        "fixed left-1/2 z-[100]",
+                        "flex w-[90%] md:w-full md:max-w-[22rem] flex-col rounded-2xl border-4 md:border-6 shadow-2xl",
                         positionClasses,
                         activeColors.bg,
                         activeColors.border
                     )}
                 >
-                    <div className="relative flex items-center gap-3 p-3 overflow-hidden rounded-xl">
-                        <div className={cn("shrink-0 z-10")}>
+                    <div className="relative flex items-center gap-2 md:gap-3 p-3 overflow-hidden rounded-xl">
+                        <div className={cn("shrink-0 z-10 w-10 h-10 md:w-12 md:h-12 relative")}>
                             <Image
                                 src={`${theme.icon}`}
                                 alt="Toast Icon"
+                                fill
                                 className="object-contain"
                                 priority
-                                width={48}
-                                height={48}
                             />
                         </div>
 
-                        <div className="flex flex-col gap-1 pr-5 z-10">
-                            <h3 className={cn("font-heading text-lg font-bold leading-tight", activeColors.textPrimary)}>
+                        <div className="flex flex-col gap-0.5 md:gap-1 pr-6 z-10">
+                            <h3 className={cn("font-heading text-base md:text-lg font-bold leading-tight", activeColors.textPrimary)}>
                                 {title}
                             </h3>
-                            <p className={cn("font-heading text-sm font-normal leading-snug", activeColors.textSecondary)}>
+                            <p className={cn("font-heading text-xs md:text-sm font-normal leading-snug", activeColors.textSecondary)}>
                                 {description}
                             </p>
                         </div>
 
                         <button
                             onClick={onClose}
-                            className="absolute top-2 right-2 text-[#4E4E4E] hover:brightness-150 transition-all duration-200 cursor-pointer z-30"
+                            className="absolute top-2 right-2 text-[#4E4E4E] hover:brightness-150 transition-all duration-200 cursor-pointer z-30 p-1"
                         >
-                            <X size={30}/>
+                            <X size={20} className="md:w-[30px] md:h-[30px]" />
                         </button>
 
-                        <div className="absolute inset-0 pointer-events-none z-0 opacity-15">
+                        <div className="absolute inset-0 pointer-events-none z-0 opacity-10 md:opacity-15 hidden sm:block">
                             <div className={cn("h-12 w-12 rounded-full absolute right-4 top-1", activeColors.bubble)}/>
-                            <div
-                                className={cn("h-9 w-9 rounded-full absolute right-4 -bottom-1", activeColors.bubble)}/>
+                            <div className={cn("h-9 w-9 rounded-full absolute right-4 -bottom-1", activeColors.bubble)}/>
                             <div className={cn("h-4 w-4 rounded-full absolute right-1 bottom-6.5", activeColors.bubble)}/>
                         </div>
                     </div>
 
-                    <div className="absolute -bottom-1 pb-0.5 left-4 right-4 h-2.5 flex justify-center z-20 rounded-full">
+                    <div className="absolute -bottom-1 pb-0.5 left-3 right-3 md:left-4 md:right-4 h-1.5 md:h-2.5 flex justify-center z-20 rounded-full">
                         <motion.div
-                            initial={{scaleX: 1}}
-                            animate={{scaleX: 0}}
-                            transition={{duration: duration / 1000, ease: "linear"}}
+                            initial={{ scaleX: 1 }}
+                            animate={{ scaleX: 0 }}
+                            transition={{ duration: duration / 1000, ease: "linear" }}
                             className={cn("h-full w-full origin-center rounded-full", activeColors.progress)}
                         />
                     </div>

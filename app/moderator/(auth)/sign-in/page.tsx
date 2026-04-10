@@ -146,10 +146,10 @@ export default function LoginPage() {
         <main className="flex min-h-screen w-full bg-brand-dark">
             <WelcomeSide/>
 
-            <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
+            <div className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-12 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-10">
-                        <h1 className="text-4xl font-display font-black tracking-tight text-white uppercase">
+                        <h1 className="text-3xl lg:text-4xl font-display font-black tracking-tight text-white uppercase">
                             Sign In
                         </h1>
                         <p className="mt-4 text-sm text-[#C2C2C2]">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                        className="absolute right-4 top-9 -translate-y-1/2"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
                                             <Eye
@@ -215,8 +215,8 @@ export default function LoginPage() {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="mt-4 flex items-center space-x-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
+                            <div className="flex items-center space-x-2">
                                 <Checkbox
                                     id="remember"
                                     checked={rememberMe}
@@ -227,7 +227,7 @@ export default function LoginPage() {
                                     Remember me
                                 </Label>
                             </div>
-                            <Link href="forgot-password" data-ignore-ms-personalization
+                            <Link href="forgot-password"
                                   className="text-sm font-bold text-[#E05723] hover:underline">
                                 Forgot Password?
                             </Link>
@@ -237,7 +237,7 @@ export default function LoginPage() {
                             type="submit"
                             variant={"elevated"}
                             disabled={isLoading || (!formData.email.trim() || !formData.password.trim())}
-                            className="mt-4 h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
+                            className="h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
                         >
                             {isLoading ? (
                                 <>

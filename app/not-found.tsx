@@ -36,7 +36,7 @@ export default function NotFound() {
                         type="button"
                         onClick={() => router.push("dashboard")}
                         variant="elevated"
-                        className="h-16 w-[75%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg"
+                        className="h-16 w-full rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg"
                     >
                         BACK
                     </Button>

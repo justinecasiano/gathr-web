@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {useState, useEffect} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {Loader2} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 import WelcomeSide from "@/components/ui/welcome-side";
-import { NotificationToast } from "@/components/ui/notification-toast";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase/supabase";
-import { z } from "zod";
+import {NotificationToast} from "@/components/ui/notification-toast";
+import {cn} from "@/lib/utils";
+import {supabase} from "@/lib/supabase/supabase";
+import {z} from "zod";
 
 export default function VerifyPage() {
     const searchParams = useSearchParams();
@@ -28,16 +28,16 @@ export default function VerifyPage() {
 
     const otpSchema = z.string().length(6, "OTP must be exactly 6 digits");
 
-    useEffect(() => {
-        const fetchUserEmail = async () => {
-            if (!email) {
-                router.replace("/sign-in");
-            } else {
-                setIsAuthorized(true);
-            }
-        };
-        fetchUserEmail();
-    }, [email, router]);
+    // useEffect(() => {
+    //     const fetchUserEmail = async () => {
+    //         if (!email) {
+    //             router.replace("/sign-in");
+    //         } else {
+    //             setIsAuthorized(true);
+    //         }
+    //     };
+    //     fetchUserEmail();
+    // }, [email, router]);
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,7 +57,7 @@ export default function VerifyPage() {
         }
 
         try {
-            const { error: verifyError } = await supabase.auth.verifyOtp({
+            const {error: verifyError} = await supabase.auth.verifyOtp({
                 email: email!,
                 token: otp,
                 type: 'email',
@@ -86,7 +86,7 @@ export default function VerifyPage() {
     const handleResendEmail = async () => {
         if (!email) return;
         setIsResending(true);
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const {error} = await supabase.auth.signInWithOtp({email});
         if (error) {
             setHasError(true);
             setErrorMessage(error.message);
@@ -104,13 +104,13 @@ export default function VerifyPage() {
         return () => clearInterval(timer);
     }, [countdown]);
 
-    if (!isAuthorized) {
-        return (
-            <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
-                <Loader2 className="h-12 w-12 animate-spin text-white" />
-            </div>
-        );
-    }
+    // if (!isAuthorized) {
+    //     return (
+    //         <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
+    //             <Loader2 className="h-12 w-12 animate-spin text-white" />
+    //         </div>
+    //     );
+    // }
 
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
@@ -123,20 +123,22 @@ export default function VerifyPage() {
                 duration={3000}
             />
 
-            <WelcomeSide />
+            <WelcomeSide/>
 
-            <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
+            <div
+                className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-16 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-7">
-                        <h1 className="text-4xl font-display font-black tracking-tight text-white uppercase">
+                        <h1 className="text-3xl lg:text-4xl font-display font-black tracking-tight text-white uppercase">
                             Verify Login
                         </h1>
-                        <p className="mt-4 text-sm text-gray-400">
-                            Please check email {email} to see your OTP code.
+                        <p className="mt-4 text-sm text-gray-400 break-words leading-relaxed">
+                            Please check email <span className="text-white font-medium">{email}</span> to see your OTP
+                            code.
                         </p>
                     </div>
 
-                    <form onSubmit={handleVerify}>
+                    <form onSubmit={handleVerify} className="space-y-4">
                         <Input
                             id="otp"
                             value={otp}
@@ -147,28 +149,31 @@ export default function VerifyPage() {
                                 hasError ? "border-[#C44E52]" : "border-[#574272]"
                             )}
                         />
-                        <div className="mt-4 flex justify-between">
-                            {hasError && (
-                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1 font-medium">
-                                    {errorMessage}
-                                </p>
-                            )}
+
+                        <div className="flex flex-col sm:flex-row justify-between gap-2">
+                            <div className="min-h-[20px]">
+                                {hasError && (
+                                    <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1 font-medium">
+                                        {errorMessage}
+                                    </p>
+                                )}
+                            </div>
                             <button
                                 type="button"
                                 disabled={isResending || countdown > 0}
                                 onClick={handleResendEmail}
-                                className="cursor-pointer ml-auto text-[#FC3436] text-sm font-semibold hover:brightness-90 disabled:opacity-50"
+                                className="text-[#FC3436] text-sm font-semibold hover:brightness-90 disabled:opacity-50 text-right"
                             >
                                 Resend Again {countdown > 0 ? `in ${countdown}s` : ""}
                             </button>
                         </div>
 
-                        <div className="mt-6 w-full flex items-center justify-between">
+                        <div className="mt-8 w-full flex items-center justify-between gap-4">
                             <Button
                                 type="button"
                                 onClick={() => router.back()}
                                 variant="elevated"
-                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg"
+                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                             >
                                 BACK
                             </Button>
@@ -176,11 +181,11 @@ export default function VerifyPage() {
                                 type="submit"
                                 variant="elevated"
                                 disabled={isLoading || !otp.trim()}
-                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg"
+                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                                        <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                         Please Wait
                                     </>
                                 ) : (

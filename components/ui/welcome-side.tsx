@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 
 export default function WelcomeSide() {
     return (
-        <div className="relative w-[35%] h-screen bg-gradient-to-b from-brand to-brand-dark overflow-hidden">
+        <div className="hidden lg:block relative w-[35%] h-screen bg-gradient-to-b from-brand to-brand-dark overflow-hidden">
             <div className="flex items-center justify-center p-6 ">
 
                 <div className="relative h-18 w-18">
