@@ -20,8 +20,22 @@ export default function LoginPage() {
     const [errorMessage, setErrorMessage] = useState("");
     const [shouldShowPassword, setShouldShowPassword] = useState(false);
 
+    const [rememberMe, setRememberMe] = useState(() => {
+        if (typeof window !== "undefined") {
+            return !!localStorage.getItem("remembered_moderator_email");
+        }
+        return false;
+    });
+
+    const getInitialEmail = () => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("remembered_moderator_email") || "";
+        }
+        return "";
+    };
+
     const [formData, setFormData] = useState({
-        email: "",
+        email: getInitialEmail(),
         password: "",
     });
 
@@ -64,6 +78,12 @@ export default function LoginPage() {
             setHasError(true);
             setErrorMessage(result.error.issues[0].message);
             return;
+        }
+
+        if (rememberMe) {
+            localStorage.setItem("remembered_moderator_email", formData.email);
+        } else {
+            localStorage.removeItem("remembered_moderator_email");
         }
 
         try {
@@ -197,10 +217,14 @@ export default function LoginPage() {
 
                         <div className="flex items-center justify-between">
                             <div className="mt-4 flex items-center space-x-2">
-                                <Checkbox id="terms"
-                                          className="h-6 w-6 bg-[#574272] data-[state=checked]:bg-[#574272]"/>
-                                <Label htmlFor="terms" className="text-sm font-medium text-white">
-                                    Keep me logged in
+                                <Checkbox
+                                    id="remember"
+                                    checked={rememberMe}
+                                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                                    className="h-6 w-6 bg-[#574272] border-none data-[state=checked]:bg-[#574272] data-[state=checked]:text-white"
+                                />
+                                <Label htmlFor="remember" className="text-sm font-medium text-white cursor-pointer">
+                                    Remember me
                                 </Label>
                             </div>
                             <Link href="forgot-password" data-ignore-ms-personalization

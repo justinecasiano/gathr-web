@@ -7,9 +7,10 @@ import {useRouter} from "next/navigation";
 import {cn} from "@/lib/utils";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {useState} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {z} from "zod";
 import {supabase} from "@/lib/supabase/supabase";
+import {NotificationToast} from "@/components/ui/notification-toast";
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
@@ -17,8 +18,25 @@ export default function ForgotPasswordPage() {
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [email, setEmail] = useState("");
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+    const [countdown, setCountdown] = useState(0);
 
     const emailSchema = z.string().email("Invalid email format");
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countdown]);
+
+    const handleCloseToast = useCallback(() => {
+        setShowSuccessToast(false);
+    }, []);
 
     const handleReset = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,6 +97,8 @@ export default function ForgotPasswordPage() {
             }
 
             setIsLoading(false);
+            setShowSuccessToast(true);
+            setCountdown(60);
 
         } catch (error: unknown) {
             setIsLoading(false);
@@ -91,8 +111,18 @@ export default function ForgotPasswordPage() {
             }
         }
     };
+
     return (
         <main className="flex flex-col min-h-screen w-full bg-brand-dark">
+            <NotificationToast
+                isOpen={showSuccessToast}
+                onClose={handleCloseToast}
+                variant="success"
+                title="Password Reset Link Sent"
+                description="Please check your email for password reset link."
+                duration={5000}
+            />
+
             <div className="flex items-center  mt-5 ml-6">
                 <div className="relative h-16 w-16">
                     <Image
@@ -165,7 +195,7 @@ export default function ForgotPasswordPage() {
                                 type="submit"
                                 variant={"elevated"}
                                 onClick={handleReset}
-                                disabled={isLoading || !email.trim()}
+                                disabled={isLoading || !email.trim() || countdown > 0}
                                 className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all"
                             >
                                 {isLoading ? (
@@ -173,6 +203,8 @@ export default function ForgotPasswordPage() {
                                         <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
                                         Please Wait
                                     </>
+                                ) : countdown > 0 ? (
+                                    `Retry in ${countdown}s`
                                 ) : (
                                     "CONFIRM"
                                 )}
@@ -228,6 +260,5 @@ export default function ForgotPasswordPage() {
                 />
             </div>
         </main>
-    )
-        ;
+    );
 }

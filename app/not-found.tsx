@@ -21,8 +21,8 @@ export default function NotFound() {
                     />
                 </div>
                 <div className="relative z-10 flex flex-col justify-center items-center text-center">
-                    <h1 className="text-9xl mb-4 font-black text-brand-accent select-none pointer-events-none">
-                        404
+                    <h1 className="text-9xl mb-2 font-black text-brand-accent select-none pointer-events-none">
+                       404
                     </h1>
 
                     <h2 className="relative text-4xl font-display text-white font-black uppercase mb-2">

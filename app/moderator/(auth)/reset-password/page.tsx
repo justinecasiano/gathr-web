@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/supabase";
+import {NotificationToast} from "@/components/ui/notification-toast";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function ResetPasswordPage() {
     const [shouldShowConfirmPassword, setShouldShowConfirmPassword] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [userEmail, setUserEmail] = useState("");
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     const [formData, setFormData] = useState({
         password: "",
@@ -107,7 +109,10 @@ export default function ResetPasswordPage() {
             }
 
             await supabase.auth.signOut();
-            router.push("sign-in?success=true");
+            setShowSuccessToast(true);
+            setTimeout(() => {
+                router.push("sign-in");
+            }, 3000);
 
         } catch (error: unknown) {
             setIsLoading(false);
@@ -126,6 +131,15 @@ export default function ResetPasswordPage() {
 
     return (
         <main className="flex flex-col min-h-screen w-full bg-brand-dark">
+            <NotificationToast
+                isOpen={showSuccessToast}
+                onClose={() => setShowSuccessToast(false)}
+                variant="success"
+                title="Password Changed"
+                description="Your password has been updated successfully. Redirecting to sign in..."
+                duration={3000}
+            />
+
             <div className="absolute flex items-center mt-5 ml-6">
                 <div className="relative h-16 w-16">
                     <Image

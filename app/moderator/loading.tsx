@@ -5,7 +5,6 @@ export default function LoadingPage() {
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
             <div className="absolute inset-0 z-20 overflow-hidden">
-
                 <motion.div
                     className="absolute top-1/2 left-1/2 h-35 w-35"
                     initial={{x: "-50%", y: "-50%", scale: 1, opacity: 0.8}}
