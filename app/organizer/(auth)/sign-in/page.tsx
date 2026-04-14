@@ -1,7 +1,7 @@
 "use client";
 
 import {useState} from "react";
-import {useRouter} from "next/navigation"; // Added for redirection
+import {useRouter} from "next/navigation";
 import Link from "next/link";
 import {Eye, EyeOff, Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -13,15 +13,29 @@ import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
 
-export default function LoginPage() {
+export default function SignInPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(""); // Track specific error text
+    const [errorMessage, setErrorMessage] = useState("");
     const [shouldShowPassword, setShouldShowPassword] = useState(false);
 
+    const [rememberMe, setRememberMe] = useState(() => {
+        if (typeof window !== "undefined") {
+            return !!localStorage.getItem("remembered_organizer_email");
+        }
+        return false;
+    });
+
+    const getInitialEmail = () => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("remembered_organizer_email") || "";
+        }
+        return "";
+    };
+
     const [formData, setFormData] = useState({
-        email: "",
+        email: getInitialEmail(),
         password: "",
     });
 
@@ -66,6 +80,12 @@ export default function LoginPage() {
             return;
         }
 
+        if (rememberMe) {
+            localStorage.setItem("remembered_organizer_email", formData.email);
+        } else {
+            localStorage.removeItem("remembered_organizer_email");
+        }
+
         try {
             const {data: authCheck, error: authError} = await supabase.auth.signInWithPassword({
                 email: formData.email,
@@ -106,8 +126,9 @@ export default function LoginPage() {
                 setHasError(true);
                 setIsLoading(false);
                 setErrorMessage(otpError.message);
-            } else
+            } else {
                 router.push(`sign-in/verify?email=${encodeURIComponent(formData.email)}`);
+            }
 
         } catch (error: unknown) {
             setHasError(true);
@@ -124,21 +145,22 @@ export default function LoginPage() {
     return (
         <main className="flex min-h-screen w-full bg-[#F7F0FF]">
             <WelcomeSide/>
-            <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
+
+            <div className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-12 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-10">
-                        <h1 className="text-4xl font-display font-black tracking-tight text-[#4C3668] uppercase">
+                        <h1 className="text-3xl lg:text-4xl font-display font-black tracking-tight text-[#4C3668] uppercase">
                             Sign In
                         </h1>
                         <p className="mt-4 text-sm text-[#888888]">
                             Please log in to access the{" "}
-                            <span className="font-bold text-[#888888]">organizer</span> account.
+                            <span className="font-semibold">organizer</span> account.
                         </p>
                     </div>
 
                     <form className="space-y-6" onSubmit={handleLogin}>
                         <div className="space-y-2">
-                            <Label className="text-base font-heading font-semibold text-brand-dark" htmlFor="email">
+                            <Label className="text-base font-heading font-semibold text-[#261A36]" htmlFor="email">
                                 Email Address
                             </Label>
                             <Input
@@ -147,14 +169,14 @@ export default function LoginPage() {
                                 onChange={handleChange}
                                 placeholder="Enter email address here"
                                 className={cn(
-                                    "h-14 mt-2 rounded-xl border-3 bg-white px-4 text-brand-dark placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
+                                    "h-14 mt-2 rounded-xl border-3 bg-white px-4 text-[#302F35] placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
                                     hasError ? "border-[#C44E52]" : "border-[#574272]"
                                 )}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-base font-heading font-semibold text-brand-dark" htmlFor="password">
+                            <Label className="text-base font-heading font-semibold text-[#261A36]" htmlFor="password">
                                 Password
                             </Label>
                             <div className="relative">
@@ -165,7 +187,7 @@ export default function LoginPage() {
                                     type={shouldShowPassword ? "text" : "password"}
                                     placeholder="Enter password here"
                                     className={cn(
-                                        "h-14 mt-2 rounded-xl border-3 bg-white px-4 text-brand-dark placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
+                                        "h-14 mt-2 rounded-xl border-3 bg-white px-4 text-[#302F35] placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
                                         hasError ? "border-[#C44E52]" : "border-[#574272]"
                                     )}
                                 />
@@ -173,14 +195,14 @@ export default function LoginPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                        className="absolute right-4 top-9 -translate-y-1/2"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
                                             <Eye
-                                                className="h-6 w-6 text-brand-accent hover:brightness-90 transition-colors"/>
+                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
                                             <EyeOff
-                                                className="h-6 w-6 text-brand-accent hover:brightness-90 transition-colors"/>
+                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}
@@ -193,15 +215,20 @@ export default function LoginPage() {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="mt-4 flex items-center space-x-2">
-                                <Checkbox id="terms"
-                                          className="h-6 w-6 bg-[#574272] data-[state=checked]:bg-[#574272]"/>
-                                <Label htmlFor="terms" className="text-sm font-medium text-[#5C5C5C]">
-                                    Keep me logged in
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="remember"
+                                    checked={rememberMe}
+                                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                                    className="h-6 w-6 bg-[#574272] border-none data-[state=checked]:bg-[#574272] data-[state=checked]:text-white"
+                                />
+                                <Label htmlFor="remember" className="text-sm font-medium text-[#5C5C5C] cursor-pointer">
+                                    Remember me
                                 </Label>
                             </div>
-                            <Link href="forgot-password" className="text-sm font-bold text-[#E05723] hover:underline">
+                            <Link href="forgot-password"
+                                  className="text-sm font-bold text-[#E05723] hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
@@ -210,7 +237,7 @@ export default function LoginPage() {
                             type="submit"
                             variant={"elevated"}
                             disabled={isLoading || (!formData.email.trim() || !formData.password.trim())}
-                            className="mt-4 h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
+                            className="h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
                         >
                             {isLoading ? (
                                 <>

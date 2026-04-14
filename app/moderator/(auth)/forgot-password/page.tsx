@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
                                     )}
                                 />
                                 {hasError && (
-                                    <p className="text-[#C44E52] text-xs font-medium pt-1 animate-in fade-in slide-in-from-top-1">
+                                    <p className="text-[#C44E52] text-sm font-medium pt-1 animate-in fade-in slide-in-from-top-1">
                                         {errorMessage}
                                     </p>
                                 )}
@@ -183,7 +183,7 @@ export default function ForgotPasswordPage() {
                 </div>
             </div>
 
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-10 opacity-50">
+            <div className="hidden lg:block absolute inset-0 overflow-hidden pointer-events-none z-50 opacity-50">
                 <motion.div
                     className="absolute -top-25 left-1/2 h-40 w-40 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}

@@ -6,6 +6,7 @@ import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import WelcomeSide from "@/components/ui/welcome-side";
+import {NotificationToast} from "@/components/ui/notification-toast";
 import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
@@ -13,33 +14,38 @@ import {z} from "zod";
 export default function VerifyPage() {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
-
     const router = useRouter();
+
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [otp, setOtp] = useState("")
+    const [otp, setOtp] = useState("");
     const [countdown, setCountdown] = useState(0);
     const [isResending, setIsResending] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
-    const otpSchema = z.string().length(6,"OTP must be exactly 6 digits");
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+    const otpSchema = z.string().length(6, "OTP must be exactly 6 digits");
+
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            if (!email) {
+                router.replace("/organizer/sign-in");
+            } else {
+                setIsAuthorized(true);
+            }
+        };
+        fetchUserEmail();
+    }, [email, router]);
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setIsLoading(true);
         setHasError(false);
-        setErrorMessage("");
 
         if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
-        }
-
-        if (!otp.trim()) {
-            setIsLoading(false);
-            setHasError(true);
-            setErrorMessage("This field is required.");
-            return;
         }
 
         const result = otpSchema.safeParse(otp);
@@ -50,16 +56,9 @@ export default function VerifyPage() {
             return;
         }
 
-        if (!email) {
-            setIsLoading(false);
-            setHasError(true);
-            setErrorMessage("Email is missing");
-            return;
-        }
-
         try {
-            const { data, error: verifyError } = await supabase.auth.verifyOtp({
-                email: email,
+            const {error: verifyError} = await supabase.auth.verifyOtp({
+                email: email!,
                 token: otp,
                 type: 'email',
             });
@@ -71,30 +70,23 @@ export default function VerifyPage() {
                 return;
             }
 
-            router.push("../dashboard");
+            setShowSuccessToast(true);
+
+            setTimeout(() => {
+                router.push("../dashboard");
+            }, 3000);
 
         } catch (error: unknown) {
             setIsLoading(false);
             setHasError(true);
-
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-            } else {
-                setErrorMessage("Failed to verify code. Please try again.");
-            }
+            setErrorMessage(error instanceof Error ? error.message : "Verification failed");
         }
     };
 
     const handleResendEmail = async () => {
-        if (!email) {
-            setHasError(true);
-            setErrorMessage("Email is missing.");
-            return;
-        }
-
+        if (!email) return;
         setIsResending(true);
-        const {error: error} = await supabase.auth.signInWithOtp({email: email,});
-
+        const {error} = await supabase.auth.signInWithOtp({email});
         if (error) {
             setHasError(true);
             setErrorMessage(error.message);
@@ -106,72 +98,90 @@ export default function VerifyPage() {
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
-
         if (countdown > 0) {
-            timer = setInterval(() => {
-                setCountdown((prev) => prev - 1);
-            }, 1000);
+            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
         }
-
         return () => clearInterval(timer);
     }, [countdown]);
 
+    if (!isAuthorized) {
+        return (
+            <div className="flex min-h-screen w-full items-center justify-center bg-[#F7F0FF]">
+                <Loader2 className="h-12 w-12 animate-spin text-brand-dark" />
+            </div>
+        );
+    }
+
     return (
         <main className="flex min-h-screen w-full bg-[#F7F0FF]">
+            <NotificationToast
+                isOpen={showSuccessToast}
+                onClose={() => setShowSuccessToast(false)}
+                variant="success"
+                title="Login Successful"
+                description="Please wait for the website to load your account."
+                duration={3000}
+            />
+
             <WelcomeSide/>
-            <div className="w-[65%] h-screen flex items-center justify-center py-20 px-20">
+
+            <div
+                className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-16 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-7">
-                        <h1 className="text-4xl font-display font-black tracking-tight text-[#4C3668] uppercase">
+                        <h1 className="text-3xl lg:text-4xl font-display font-black tracking-tight text-[#4C3668] uppercase">
                             Verify Login
                         </h1>
-                        <p className="mt-4 text-sm text-[#888888]">
-                            A 6-digit code has been sent to your email {email || ''}
+                        <p className="mt-4 text-sm text-[#888888] break-words leading-relaxed">
+                            Please check email <span className="text-[#888888] font-medium">{email}</span> to see your OTP
+                            code.
                         </p>
                     </div>
 
-                    <form>
+                    <form onSubmit={handleVerify} className="space-y-4">
                         <Input
                             id="otp"
                             value={otp}
                             onChange={e => setOtp(e.target.value)}
                             placeholder="Enter OTP code here"
                             className={cn(
-                                "h-14 mt-2 rounded-xl border-3 bg-white px-4 text-brand-dark placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
+                                "h-14 rounded-xl border-3 bg-white px-4 text-[#302F35] placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
                                 hasError ? "border-[#C44E52]" : "border-[#574272]"
                             )}
                         />
-                        <div className="mt-4 flex justify-between">
-                            {hasError && (
-                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1">
-                                    {errorMessage}
-                                </p>
-                            )}
 
+                        <div className="flex flex-col sm:flex-row justify-between gap-2">
+                            <div className="min-h-[20px]">
+                                {hasError && (
+                                    <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1 font-medium">
+                                        {errorMessage}
+                                    </p>
+                                )}
+                            </div>
                             <button
                                 type="button"
-                                disabled={isResending}
+                                disabled={isResending || countdown > 0}
                                 onClick={handleResendEmail}
-                                className="cursor-pointer ml-auto text-[#820006] text-sm font-semibold transition-colors hover:brightness-150 active:opacity-70 focus:outline-none"
+                                className="text-[#820006] text-sm font-semibold hover:brightness-90 disabled:opacity-50 text-right"
                             >
                                 Resend Again {countdown > 0 ? `in ${countdown}s` : ""}
                             </button>
                         </div>
 
-                        <div className="mt-6 w-full flex items-center justify-between">
+                        <div className="mt-8 w-full flex items-center justify-between gap-4">
                             <Button
                                 type="button"
                                 onClick={() => router.back()}
-                                variant={"elevated"}
-                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg transition-all "
-                            >BACK
+                                variant="elevated"
+                                className="h-16 w-[35%] rounded-3xl bg-brand border-[#4C2576] font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
+                            >
+                                BACK
                             </Button>
                             <Button
                                 type="submit"
-                                variant={"elevated"}
-                                onClick={handleVerify}
+                                variant="elevated"
                                 disabled={isLoading || !otp.trim()}
-                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all"
+                                className="h-16 w-[62%] rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                             >
                                 {isLoading ? (
                                     <>

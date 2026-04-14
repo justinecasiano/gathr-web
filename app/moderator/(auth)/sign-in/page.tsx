@@ -13,7 +13,7 @@ import {cn} from "@/lib/utils";
 import {supabase} from "@/lib/supabase/supabase";
 import {z} from "zod";
 
-export default function LoginPage() {
+export default function SignInPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);

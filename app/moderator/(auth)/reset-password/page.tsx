@@ -136,7 +136,7 @@ export default function ResetPasswordPage() {
                 onClose={() => setShowSuccessToast(false)}
                 variant="success"
                 title="Password Changed"
-                description="Your password has been updated successfully. Redirecting to sign in..."
+                description="Your password has been updated successfully. Redirecting to sign in."
                 duration={3000}
             />
 
@@ -271,7 +271,7 @@ export default function ResetPasswordPage() {
                 </div>
             </div>
 
-            <div className="hidden lg:block absolute inset-0 overflow-hidden z-10 pointer-events-none opacity-100">
+            <div className="hidden lg:block absolute inset-0 overflow-hidden z-50 pointer-events-none opacity-100">
                 <motion.div
                     className="absolute -top-20 -right-55 h-80 w-80 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
