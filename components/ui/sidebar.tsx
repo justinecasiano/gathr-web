@@ -141,7 +141,6 @@ export function Sidebar() {
                     "left-0 top-0 bottom-0"
                 )}
             >
-                {/* --- HEADER --- */}
                 <div className={`flex h-[85px] items-center p-5 border-b-2 ${colors.innerBorderColor} shrink-0 overflow-hidden`}>
                     <div className="relative flex flex-1 items-center h-full">
                         <div className={cn(
@@ -198,7 +197,7 @@ export function Sidebar() {
                                             <Icon name={item.icon} size={25} className={colors.text} />
                                         </div>
                                         <span className={cn(
-                                            "text-lg font-bold font-heading transition-all duration-300 ease-in-out",
+                                            `text-lg font-bold font-heading transition-all duration-300 ease-in-out ${colors.text}`,
                                             isOpen ? "max-w-[200px] opacity-100 ml-4" : "max-w-0 opacity-0 ml-0 overflow-hidden"
                                         )}>
                                             {item.label}
