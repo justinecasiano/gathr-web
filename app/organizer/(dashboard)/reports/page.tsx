@@ -67,7 +67,7 @@ export default function ReportsPage() {
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-white">
-            <Header name={"Angela Mae Cabrera"} email={"angelamaecabrera@gmail.com"}/>
+            <Header/>
             <div className="flex min-h-screen w-full flex-col bg-[#F9F7FD] px-10 py-6 space-y-8">
                 <div className="flex items-end justify-between">
                     <div>

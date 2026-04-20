@@ -50,7 +50,7 @@ export default function PopupModal({
                 <DialogContent
                     className={cn(
                         "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-                        "w-[92%] sm:w-full sm:max-w-sm overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-4 sm:border-6 p-0 shadow-2xl",
+                        "w-[92%] sm:w-full sm:max-w-md overflow-hidden rounded-[2.5rem] border-4 sm:border-6 p-0 shadow-2xl",
                         "hide-close-button [&>button]:hidden",
                         colors.bg,
                         colors.border
@@ -64,38 +64,40 @@ export default function PopupModal({
                             <div className={cn("absolute bottom-3 left-11 h-36 w-36 rounded-full", colors.circle)} />
                         </div>
 
-                        <div className="relative z-10 flex items-center justify-center w-18 h-18 sm:w-20 sm:h-20 rounded-full mb-4 sm:mb-6">
+                        <div className="relative z-10 flex items-center justify-center w-20 h-20 rounded-full mb-6">
                             <Image
                                 src="/svgs/neutral-icon-toast.svg"
                                 alt="Toast Icon"
-                                className="object-contain p-3"
+                                className="object-contain p-2"
                                 priority
                                 fill
                             />
                         </div>
 
-                        <DialogHeader className="relative z-10 mb-6 sm:mb-8">
-                            <DialogTitle className="text-xl sm:text-2xl font-display font-bold text-[#453A5F] text-center leading-tight">
+                        <DialogHeader className="relative z-10 mb-5">
+                            <DialogTitle className="text-xl sm:text-2xl font-display font-bold text-[#453A5F] text-center leading-tight px-4">
                                 {title}
                             </DialogTitle>
                         </DialogHeader>
 
-                        <div className="relative z-10 flex flex-col xs:flex-row w-full gap-3 sm:gap-4 px-0 xs:px-2">
+                        <div className="relative z-10 flex flex-col sm:flex-row w-full gap-3 sm:gap-4 px-2">
                             <Button
                                 onClick={onClose}
-                                variant={"elevated"}
-                                className="h-12 sm:h-14 flex-1 rounded-xl sm:rounded-2xl bg-brand border-[#4C2576] font-display text-lg sm:text-xl font-black text-white shadow-lg transition-all"
+                                className="h-12 w-full sm:flex-1 rounded-2xl bg-brand border-[#4C2576] font-display text-lg font-bold text-white shadow-lg transition-all hover:bg-brand/80 active:scale-95"
                             >
                                 {cancelText}
                             </Button>
 
                             <Button
                                 onClick={onConfirm}
-                                variant={"elevated"}
                                 disabled={isLoading}
-                                className="h-12 sm:h-14 flex-1 rounded-xl sm:rounded-2xl bg-brand-accent font-display text-lg sm:text-xl font-black text-white shadow-lg transition-all"
+                                className="h-12 w-full sm:flex-1 rounded-2xl bg-brand-accent font-display text-lg sm:text-xl font-bold text-white shadow-lg transition-all duration-200 hover:bg-brand-accent/80 active:scale-95 disabled:opacity-70"
                             >
-                                {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : confirmText}
+                                {isLoading ? (
+                                    <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 animate-spin" />
+                                ) : (
+                                    confirmText
+                                )}
                             </Button>
                         </div>
                     </div>

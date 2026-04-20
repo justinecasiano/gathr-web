@@ -4,13 +4,12 @@ import * as React from "react"
 import Image from "next/image"
 import {
     ChevronDown, MapPin, ClipboardList, Users, BarChart2,
-    Eye, Edit3, Plus, Search, Calendar, CheckCircle2
+    Eye, Edit3, Plus, CheckCircle2
 } from "lucide-react"
 import {cn} from "@/lib/utils"
 import {Badge} from "@/components/ui/badge"
 import {Button} from "@/components/ui/button"
 import {Header} from "@/components/ui/header";
-import {Progress} from "@/components/ui/progress"
 import {Switch} from "@/components/ui/switch"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 
@@ -44,7 +43,7 @@ export default function FeedbackFormsPage() {
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-white">
-            <Header name={"Angela Mae Cabrera"} email={"angelamaecabrera@gmail.com"}/>
+            <Header/>
             <div className="flex min-h-screen w-full flex-col bg-[#F9F7FD] px-10 py-6 space-y-8">
                 <div className="flex justify-between items-start">
                     <div>

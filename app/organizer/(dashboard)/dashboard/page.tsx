@@ -5,7 +5,7 @@ import {
     TrendingUp,
     CheckCircle2,
     Clock,
-    AlertCircle,
+    AlertCircle, Circle,
 } from "lucide-react"
 import {
     Area,
@@ -35,12 +35,14 @@ import {cn} from '@/lib/utils'
 import {useEffect} from "react";
 import {Header} from "@/components/ui/header";
 import {Stats} from "@/components/ui/stats";
+import Image from "next/image";
+import {useUser} from "@/hooks/use-user";
 
 const dashboardStats = [
-    { value: "12", trend: "+12%", trendUp: true },
-    { value: "2,412", trend: "-3%", trendUp: false },
-    { value: "67.21%", trend: "-3%", trendUp: false },
-    { value: "1,521", trend: "+12%", trendUp: true },
+    {value: "12", trend: "+12%", trendUp: true},
+    {value: "2,412", trend: "-3%", trendUp: false},
+    {value: "67.21%", trend: "-3%", trendUp: false},
+    {value: "1,521", trend: "+12%", trendUp: true},
 ];
 
 const eventAttendeeData = [
@@ -54,9 +56,9 @@ const eventAttendeeData = [
 ]
 
 const eventStatusData = [
-    {name: 'Approved', value: 35, percentage: '+5.5%', icon: CheckCircle2, color: '#A3D9B1'},
-    {name: 'Pending', value: 45, percentage: '+5.5%', icon: Clock, color: '#F8B195'},
-    {name: 'Rejected', value: 20, percentage: '-5.5%', icon: AlertCircle, color: '#E84A5F'},
+    {name: 'Approved', value: 35, percentage: '+5.5%', icon: CheckCircle2, color: '#94B983'},
+    {name: 'Pending', value: 45, percentage: '+5.5%', icon: Clock, color: '#F6835E'},
+    {name: 'Rejected', value: 20, percentage: '-5.5%', icon: AlertCircle, color: '#CD4249'},
 ]
 
 const feedbackTrendData = [
@@ -70,6 +72,7 @@ const feedbackTrendData = [
 ]
 
 export default function DashboardPage() {
+    const { data: user, isLoading } = useUser();
     const [mounted, setMounted] = React.useState(false)
     useEffect(() => setMounted(true), [])
 
@@ -77,7 +80,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-white">
-            <Header name={"Angela Mae Cabrera"} email={"angelamaecabrera@gmail.com"}/>
+            <Header/>
             <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full">
                 <div className="flex items-end justify-between">
                     <div>
@@ -99,16 +102,21 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <Stats data={dashboardStats} />
+                <Stats data={dashboardStats}/>
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <Card className="lg:col-span-2 border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
+                    <Card
+                        className="lg:col-span-2 border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
                         <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                            <TrendingUp className="text-orange-500 h-6 w-6"/>
-                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">Monthly Events and
-                                Attendees</CardTitle>
+                            <Image
+                                src="/svgs/monthly-event-icon.svg"
+                                width="25"
+                                height="25"
+                                alt="Icon"
+                            />
+                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">Monthly Events and Attendees</CardTitle>
                         </CardHeader>
-                        <div className="h-[300px] w-full mt-4">
+                        <div className="h-[300px] w-full mt-8">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={eventAttendeeData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0"/>
@@ -129,10 +137,16 @@ export default function DashboardPage() {
                         </div>
                     </Card>
 
-                    <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
+                    <Card
+                        className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
                         <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                            <Clock className="text-orange-500 h-6 w-6"/>
-                            <CardTitle className="text-lg font-black text-purple-900 uppercase">Event Status</CardTitle>
+                            <Image
+                                src="/svgs/event-status-icon.svg"
+                                width="25"
+                                height="25"
+                                alt="Icon"
+                            />
+                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">Event Status</CardTitle>
                         </CardHeader>
                         <div className="h-[200px] mt-4">
                             <ResponsiveContainer width="100%" height="100%">
@@ -152,17 +166,16 @@ export default function DashboardPage() {
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="space-y-3 mt-4">
+                        <div className="space-y-3">
                             {eventStatusData.map((status) => (
-                                <div key={status.name} className="flex items-center justify-between">
+                                <div key={status.name} className="flex items-center justify-between mx-auto w-[70%]">
                                     <div className="flex items-center gap-2">
-                                        <status.icon className="h-4 w-4" style={{color: status.color}}/>
-                                        <span className="text-sm font-bold text-purple-900/60">{status.name}</span>
+                                        <Circle className="h-4 w-4" fill={status.color}></Circle>
+                                        <span className="text-base font-normal font-display text-black">{status.name}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-sm font-black text-purple-900">{status.value}%</span>
                                         <span
-                                            className={cn("text-[10px] font-black", status.percentage.startsWith('+') ? "text-emerald-500" : "text-rose-500")}>
+                                            className={cn("text-base font-black", status.percentage.startsWith('+') ? "text-[#94B983]" : "text-[#820006]")}>
                                 {status.percentage} {status.percentage.startsWith('+') ? '↑' : '↓'}
                             </span>
                                     </div>
@@ -172,25 +185,23 @@ export default function DashboardPage() {
                     </Card>
                 </div>
 
-                <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
+                <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6 mb-5">
                     <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                        <TrendingUp className="text-orange-500 h-6 w-6"/>
-                        <CardTitle className="text-lg font-black text-purple-900 uppercase">Average Feedback Rating
-                            Trend</CardTitle>
+                        <Image
+                            src="/svgs/average-feedback-icon.svg"
+                            width="25"
+                            height="25"
+                            alt="Icon"
+                        />
+                        <CardTitle className="text-xl font-bold font-display text-[#261A36]">Average Feedback Rating Trend</CardTitle>
                     </CardHeader>
                     <div className="h-[300px] w-full mt-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={feedbackTrendData}>
-                                <defs>
-                                    <linearGradient id="colorRating" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#38B2AC" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#38B2AC" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0"/>
-                                <XAxis dataKey="name" axisLine={false} tickLine={false}
+                                <XAxis dataKey="name" axisLine={true} tickLine={true}
                                        tick={{fill: '#261A36', fontWeight: 700}}/>
-                                <YAxis domain={[0, 5]} axisLine={false} tickLine={false}
+                                <YAxis domain={[0, 5]} axisLine={true} tickLine={true}
                                        tick={{fill: '#261A36', fontWeight: 700}}/>
                                 <Tooltip/>
                                 <Area type="monotone" dataKey="rating" stroke="#38B2AC" strokeWidth={4} fillOpacity={1}

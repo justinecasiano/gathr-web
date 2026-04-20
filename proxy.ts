@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
     const {pathname} = request.nextUrl
     const isModeratorPath = pathname.startsWith('/moderator')
     const isOrganizerPath = pathname.startsWith('/organizer')
-    const authRoutes = ['/sign-in', '/sign-in/verify', '/forgot-password', '/reset-password']
+    const authRoutes = ['/sign-in', '/sign-in/verify', '/forgot-password']
     const isTryingAuth = authRoutes.some(route => pathname.endsWith(route))
 
     if (user) {

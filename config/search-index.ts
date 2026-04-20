@@ -15,24 +15,66 @@ export const searchIndex: SearchResult[] = [
         category: 'page'
     },
     {
+        title: "Monthly Events and Attendees",
+        description: "View your monthly events and attendees",
+        href: "dashboard",
+        user: 'organizer',
+        category: 'page'
+    },
+    {
+        title: "Event Status",
+        description: "View your event status",
+        href: "dashboard",
+        user: 'organizer',
+        category: 'page'
+    },
+    {
+        title: "Average Feedback Rating Trend",
+        description: "View your average feedback rating trend",
+        href: "dashboard",
+        user: 'organizer',
+        category: 'page'
+    },
+    {
         title: "My Events",
-        description: "List of all organized events",
+        description: "Create and manage your events",
         href: "events",
         user: 'organizer',
         category: 'page'
     },
     {
+        title: "Feedback Forms",
+        description: "Create and manage your feedback and responses",
+        href: "feedback",
+        user: 'organizer',
+        category: 'page'
+    },
+    {
         title: "Reports",
-        description: "View event analytics and feedback",
+        description: "Oversee reports on events, feedback and attendee summary",
         href: "reports",
         user: 'organizer',
         category: 'page'
     },
     {
-        title: "Account Settings",
-        description: "Update your profile",
+        title: "Settings",
+        description: "Configure your account and system preferences",
         href: "settings",
         user: 'organizer',
-        category: 'setting'
+        category: 'page'
+    },
+    {
+        title: "Update Profile",
+        description: "Change your name, username and profile picture",
+        href: "settings",
+        user: 'organizer',
+        category: 'page'
+    },
+    {
+        title: "Reset Password",
+        description: "Send a password reset link to update your password",
+        href: "settings",
+        user: 'organizer',
+        category: 'page'
     },
 ];

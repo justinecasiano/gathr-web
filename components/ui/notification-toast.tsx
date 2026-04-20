@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-type ToastVariant = "success" | "error" | "warning" | "info" | "neutral";
+export type ToastVariant = "success" | "error" | "warning" | "info" | "neutral";
 
 interface NotificationToastProps {
     isOpen: boolean;
@@ -89,15 +89,15 @@ export function NotificationToast({
     };
 
     React.useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (isOpen && duration > 0) {
-            timer = setTimeout(() => {
-                onClose();
-            }, duration);
-        }
-        return () => {
-            if (timer) clearTimeout(timer);
-        };
+        if (!isOpen) return;
+
+        if (duration <= 0) return;
+
+        const timer = setTimeout(() => {
+            onClose();
+        }, duration);
+
+        return () => clearTimeout(timer);
     }, [isOpen, duration, onClose]);
 
     const positionClasses = position === "top" ? "top-4 md:top-10" : "bottom-4 md:bottom-10";
@@ -107,7 +107,8 @@ export function NotificationToast({
         <AnimatePresence mode="wait">
             {isOpen && (
                 <motion.div
-                    key={`${title}-${description}`}
+                    // key={`${title}-${description}`}
+                    key="constant-toast-key"
                     initial={{ opacity: 0, y: initialY, x: "-50%", scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}

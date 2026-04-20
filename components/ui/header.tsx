@@ -5,11 +5,7 @@ import { GlobalSearch } from "@/components/ui/global-search";
 import { Icon, IconName } from "@/components/icons";
 import Image from "next/image";
 import * as React from "react";
-
-interface HeaderProps {
-    name: string;
-    email: string;
-}
+import {useUser} from "@/hooks/use-user";
 
 const PATH_TO_ICON: Record<string, IconName> = {
     '/dashboard': 'dashboard',
@@ -19,7 +15,8 @@ const PATH_TO_ICON: Record<string, IconName> = {
     '/settings': 'settings',
 };
 
-export function Header({ name, email }: HeaderProps) {
+export function Header() {
+    const {data: user, isLoading} = useUser();
     const pathname = usePathname();
 
     const activeIconName = React.useMemo(() => {
@@ -52,10 +49,10 @@ export function Header({ name, email }: HeaderProps) {
                 </div>
                 <div className="flex flex-col min-w-0">
                     <p className="text-lg font-bold font-display text-[#261A36] leading-none truncate max-w-[150px]">
-                        {name}
+                        {user ? `${user.first_name} ${user.last_name}` : "Loading..."}
                     </p>
                     <p className="text-sm font-medium font-heading text-[#111111] truncate max-w-[150px]">
-                        {email}
+                        {user ? `${user.email}` : "Loading..."}
                     </p>
                 </div>
             </div>

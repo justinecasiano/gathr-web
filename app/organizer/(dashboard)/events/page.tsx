@@ -27,7 +27,7 @@ const MOCK_EVENTS = [
 export default function EventsPage() {
     return (
         <div className="flex min-h-screen w-full flex-col bg-white">
-            <Header name={"Angela Mae Cabrera"} email={"angelamaecabrera@gmail.com"}/>
+            <Header/>
             <main className="flex min-h-screen w-full flex-col bg-white px-10 py-6 space-y-8">
                 <div className="flex items-end justify-between">
                     <div>

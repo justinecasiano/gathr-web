@@ -1,16 +1,18 @@
 'use client';
 
 import * as React from "react";
-import { usePathname } from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import Link from 'next/link';
-import { motion, Variants, AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import {motion, Variants, AnimatePresence} from "motion/react";
+import {cn} from "@/lib/utils";
+import {Button} from "@/components/ui/button";
 import Image from "next/image";
-import { Loader2, Menu, X } from "lucide-react";
-import { Icon, IconName } from "@/components/icons";
-import { signOut } from '@/app/actions'
-import { useState, useEffect } from "react";
+import {Loader2, Menu, X} from "lucide-react";
+import {Icon, IconName} from "@/components/icons";
+import {signOut} from '@/app/actions'
+import {useState, useEffect} from "react";
+import PopupModal from "@/components/ui/popup-modal";
+import {useUser} from "@/hooks/use-user";
 
 interface SidebarItem {
     href: string;
@@ -20,16 +22,16 @@ interface SidebarItem {
 
 const navigationConfig: Record<'moderator' | 'organizer', SidebarItem[]> = {
     moderator: [
-        { href: 'dashboard', label: 'Dashboard', icon: "dashboard" },
-        { href: 'reports', label: 'Reports', icon: "reports" },
-        { href: 'settings', label: 'Settings', icon: "settings" },
+        {href: 'dashboard', label: 'Dashboard', icon: "dashboard"},
+        {href: 'reports', label: 'Reports', icon: "reports"},
+        {href: 'settings', label: 'Settings', icon: "settings"},
     ],
     organizer: [
-        { href: 'dashboard', label: 'Dashboard', icon: "dashboard" },
-        { href: 'events', label: 'My Events', icon: "events" },
-        { href: 'feedback', label: 'Feedback Forms', icon: "feedback" },
-        { href: 'reports', label: 'Reports', icon: "reports" },
-        { href: 'settings', label: 'Settings', icon: "settings" },
+        {href: 'dashboard', label: 'Dashboard', icon: "dashboard"},
+        {href: 'events', label: 'My Events', icon: "events"},
+        {href: 'feedback', label: 'Feedback Forms', icon: "feedback"},
+        {href: 'reports', label: 'Reports', icon: "reports"},
+        {href: 'settings', label: 'Settings', icon: "settings"},
     ]
 };
 
@@ -82,11 +84,13 @@ const sidebarVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-    open: { opacity: 1, y: 0 },
-    closed: { opacity: 1, y: 0 }
+    open: {opacity: 1, y: 0},
+    closed: {opacity: 1, y: 0}
 };
 
 export function Sidebar() {
+    const {data: user, isLoading} = useUser();
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const pathname = usePathname();
@@ -100,14 +104,28 @@ export function Sidebar() {
     const items = navigationConfig[currentRole];
     const colors = ThemeConfig[currentRole];
 
-    const handleLogout = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleConfirmLogout = async () => {
         setIsLoggingOut(true);
-        try { await signOut(); } catch (error) { setIsLoggingOut(false); }
+        try {
+            await signOut();
+        } catch (error) {
+            setIsLoggingOut(false);
+            setIsModalOpen(false);
+        }
     };
 
     return (
         <>
+            <PopupModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+                title="Logout Account?"
+                confirmText="Logout"
+                cancelText="Cancel"
+                isLoading={isLoggingOut}
+            />
+
             <button
                 onClick={() => setIsOpen(true)}
                 className={cn(
@@ -117,16 +135,18 @@ export function Sidebar() {
                     isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
                 )}
             >
-                <Menu className={colors.text} size={24} />
+                <Menu className={colors.text} size={24}/>
             </button>
 
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => { if (window.innerWidth < 1024) setIsOpen(false); }}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
+                        onClick={() => {
+                            if (window.innerWidth < 1024) setIsOpen(false);
+                        }}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden"
                     />
                 )}
@@ -141,13 +161,15 @@ export function Sidebar() {
                     "left-0 top-0 bottom-0"
                 )}
             >
-                <div className={`flex h-[85px] items-center p-5 border-b-2 ${colors.innerBorderColor} shrink-0 overflow-hidden`}>
+                <div
+                    className={`flex h-[85px] items-center p-5 border-b-2 ${colors.innerBorderColor} shrink-0 overflow-hidden`}>
                     <div className="relative flex flex-1 items-center h-full">
                         <div className={cn(
                             "absolute left-0 flex items-end transition-all duration-300",
                             isOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"
                         )}>
-                            <Image src='/svgs/gathr-logo-sidebar.svg' alt='Logo' width={120} height={40} className="shrink-0" />
+                            <Image src='/svgs/gathr-logo-sidebar.svg' alt='Logo' width={120} height={40}
+                                   className="shrink-0"/>
                             {currentRole === 'moderator' && (
                                 <span className="ml-2 mb-0.5 font-heading font-bold text-xl text-white">Mod.</span>
                             )}
@@ -160,11 +182,12 @@ export function Sidebar() {
                                 !isOpen ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
                             )}
                         >
-                            <Image src='/svgs/gathr-logo-initial.svg' alt='Open' width={45} height={45} />
+                            <Image src='/svgs/gathr-logo-initial.svg' alt='Open' width={45} height={45}/>
                         </button>
                     </div>
 
-                    <div className={cn("transition-all duration-300 shrink-0", isOpen ? "opacity-100" : "opacity-0 pointer-events-none")}>
+                    <div
+                        className={cn("transition-all duration-300 shrink-0", isOpen ? "opacity-100" : "opacity-0 pointer-events-none")}>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -175,8 +198,8 @@ export function Sidebar() {
                                 colors.text
                             )}
                         >
-                            <div className="lg:hidden"><X size={25} /></div>
-                            <div className="hidden lg:block"><Icon name="arrow" size={25} /></div>
+                            <div className="lg:hidden"><X size={25}/></div>
+                            <div className="hidden lg:block"><Icon name="arrow" size={25}/></div>
                         </Button>
                     </div>
                 </div>
@@ -194,7 +217,7 @@ export function Sidebar() {
                                             : `${colors.hoverColor} ${colors.text}`
                                     )}>
                                         <div className="shrink-0 min-w-[25px] flex items-center justify-center">
-                                            <Icon name={item.icon} size={25} className={colors.text} />
+                                            <Icon name={item.icon} size={25} className={colors.text}/>
                                         </div>
                                         <span className={cn(
                                             `text-lg font-bold font-heading transition-all duration-300 ease-in-out ${colors.text}`,
@@ -216,7 +239,8 @@ export function Sidebar() {
                         marginBottom: 'env(safe-area-inset-bottom)'
                     }}
                 >
-                    <motion.div variants={itemVariants} className="flex items-center px-2 py-3 overflow-hidden whitespace-nowrap mb-2">
+                    <motion.div variants={itemVariants}
+                                className="flex items-center px-2 py-3 overflow-hidden whitespace-nowrap mb-2">
                         <div className="shrink-0 min-w-[40px] flex items-center justify-center">
                             <Image src="/svgs/moderator-profile-icon.svg" alt="Profile" width={40} height={40}/>
                         </div>
@@ -224,7 +248,7 @@ export function Sidebar() {
                             "transition-all duration-300 ease-in-out flex flex-col justify-center",
                             isOpen ? "max-w-[150px] opacity-100 ml-3" : "max-w-0 opacity-0 ml-0 overflow-hidden"
                         )}>
-                            <p className={cn("text-sm font-display font-medium truncate", colors.text)}> Angela Mae Z. Cabrera </p>
+                            <p className={cn("text-sm text-center font-display font-medium truncate", colors.text)}>{user ? `${user.first_name} ${user.last_name}` : "Loading..."}</p>
                             <span className={cn(
                                 "text-[11px] border px-3 py-0.5 rounded-xl font-display font-bold w-fit mt-0.5",
                                 currentRole === "moderator" ? "text-white border-white" : "text-[#261A36] border-[#261A36]"
@@ -234,9 +258,10 @@ export function Sidebar() {
                         </div>
                     </motion.div>
 
-                    <motion.form onSubmit={handleLogout} className="w-full" variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="w-full">
                         <button
-                            type="submit"
+                            type="button"
+                            onClick={() => setIsModalOpen(true)}
                             disabled={isLoggingOut}
                             className={cn(
                                 "flex w-full items-center rounded-xl px-3 py-3 transition-colors whitespace-nowrap text-left cursor-pointer",
@@ -245,7 +270,8 @@ export function Sidebar() {
                             )}
                         >
                             <div className="shrink-0 min-w-[25px] flex items-center justify-center">
-                                {isLoggingOut ? <Loader2 size={25} className="animate-spin text-red-500" /> : <Icon name="logout" size={25} />}
+                                {isLoggingOut ? <Loader2 size={25} className="animate-spin text-red-500"/> :
+                                    <Icon name="logout" size={25}/>}
                             </div>
                             <span className={cn(
                                 "text-lg font-bold font-heading transition-all duration-300 ease-in-out",
@@ -254,7 +280,7 @@ export function Sidebar() {
                                 {isLoggingOut ? "Logging out..." : "Log Out"}
                             </span>
                         </button>
-                    </motion.form>
+                    </motion.div>
                 </div>
             </motion.aside>
         </>
