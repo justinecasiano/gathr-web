@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
     const {pathname} = request.nextUrl
     const isModeratorPath = pathname.startsWith('/moderator')
     const isOrganizerPath = pathname.startsWith('/organizer')
-    const authRoutes = ['/sign-in', '/sign-in/verify', '/forgot-password']
+    const authRoutes = ['/sign-in', '/sign-in/verify', '/forgot-password', '/reset-password']
     const isTryingAuth = authRoutes.some(route => pathname.endsWith(route))
 
     if (user) {
@@ -30,7 +30,8 @@ export async function proxy(request: NextRequest) {
         role = role === 'PARTICIPANT' ? 'organizer' : 'moderator';
 
         if (isTryingAuth && role) {
-            return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url))
+            if (pathname.endsWith('/reset-password')) return NextResponse.next()
+            else return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url))
         }
 
         if (role === 'organizer' && isModeratorPath) {

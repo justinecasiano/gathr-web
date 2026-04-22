@@ -4,7 +4,7 @@ import {motion} from "motion/react";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {useRouter} from "next/navigation";
-import {cn} from "@/lib/utils";
+import {cn, getURL} from "@/lib/utils";
 import {Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useState, useEffect, useCallback} from "react";
@@ -76,8 +76,12 @@ export default function ForgotPasswordPage() {
                 return;
             }
 
-            const {error: resetError} = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/organizer/reset-password`,
+            const handshakeKey = crypto.randomUUID();
+
+            localStorage.setItem('reset_handshake_key', handshakeKey);
+            const siteUrl = getURL();
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${siteUrl}/organizer/reset-password?key=${handshakeKey}`,
             });
 
             if (resetError) {

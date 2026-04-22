@@ -195,14 +195,14 @@ export default function SignInPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        className="absolute right-4 mt-1 top-1/2 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
                                             <Eye
-                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
                                             <EyeOff
-                                                className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}

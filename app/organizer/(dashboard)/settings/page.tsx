@@ -1,18 +1,19 @@
 'use client'
 
 import * as React from "react"
-import {Loader2} from 'lucide-react'
-import {Input} from "@/components/ui/input"
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
-import {Header} from "@/components/ui/header";
+import { Loader2 } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "@/components/ui/header";
 import Image from "next/image";
-import {useEffect, useState} from "react";
-import {cn} from "@/lib/utils";
-import {NotificationToast, ToastVariant} from "@/components/ui/notification-toast";
-import {useUser} from "@/hooks/use-user";
-import {supabase} from "@/lib/supabase/supabase";
-import {z} from "zod";
+import { useEffect, useState } from "react";
+import { NotificationToast, ToastVariant } from "@/components/ui/notification-toast";
+import { useUser } from "@/hooks/use-user";
+import { supabase } from "@/lib/supabase/supabase";
+import { z } from "zod";
+import {motion} from "motion/react";
+import {getURL} from "@/lib/utils";
 
 interface ToastState {
     title: string;
@@ -21,13 +22,24 @@ interface ToastState {
 }
 
 export default function SettingsPage() {
-    const {data: user, isLoading: isUserLoading} = useUser();
+    const { data: user, isLoading: isUserLoading } = useUser();
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingReset, setIsLoadingReset] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
     const [shouldShowToast, setShouldShowToast] = useState(false);
     const [countdown, setCountdown] = useState(0);
+
+    const [lastSavedData, setLastSavedData] = useState({ fullName: "", username: "" });
+
+    const [formData, setFormData] = useState({
+        fullName: "",
+        username: "",
+    });
+
+    const [toastData, setToastData] = useState<ToastState>({
+        title: "",
+        description: "",
+        variant: "success"
+    });
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -39,23 +51,14 @@ export default function SettingsPage() {
         return () => clearInterval(timer);
     }, [countdown]);
 
-    const [toastData, setToastData] = useState<ToastState>({
-        title: "",
-        description: "",
-        variant: "success"
-    });
-
-    const [formData, setFormData] = useState({
-        fullName: "",
-        username: "",
-    });
-
     useEffect(() => {
         if (user) {
-            setFormData({
+            const initialData = {
                 fullName: `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim(),
                 username: user.display_name ?? "",
-            });
+            };
+            setFormData(initialData);
+            setLastSavedData(initialData);
         }
     }, [user]);
 
@@ -72,16 +75,33 @@ export default function SettingsPage() {
             .max(20, "Username is too long.")
             .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores."),
     });
+
+    const handleCloseToast = React.useCallback(() => {
+        setShouldShowToast(false);
+    }, []);
+
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (
+            formData.fullName === lastSavedData.fullName &&
+            formData.username === lastSavedData.username
+        ) {
+            setToastData({
+                title: "No Changes Detected",
+                description: "You haven't modified your name or username.",
+                variant: "error",
+            });
+            setShouldShowToast(true);
+            return;
+        }
+
         setIsLoading(true);
-        setErrorMessage("");
 
         const result = updateProfileSchema.safeParse(formData);
 
         if (!result.success) {
             const firstError = result.error.issues[0].message;
-            setErrorMessage(firstError);
             setToastData({
                 title: "Validation Error",
                 description: firstError,
@@ -132,6 +152,11 @@ export default function SettingsPage() {
 
             if (updateError) throw updateError;
 
+            setLastSavedData({
+                fullName: formData.fullName,
+                username: formData.username
+            });
+
             setToastData({
                 title: "Profile Updated",
                 description: "Your profile has been updated successfully.",
@@ -152,12 +177,11 @@ export default function SettingsPage() {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = e.target;
+        const { id, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [id]: value,
         }));
-        if (hasError) setHasError(false);
     };
 
     const handleReset = async (e: React.FormEvent) => {
@@ -176,8 +200,13 @@ export default function SettingsPage() {
         }
 
         try {
+            const handshakeKey = crypto.randomUUID();
+
+            localStorage.setItem('reset_handshake_key', handshakeKey);
+
+            const siteUrl = getURL();
             const { error: resetError } = await supabase.auth.resetPasswordForEmail(user.email, {
-                redirectTo: `${window.location.origin}/organizer/reset-password`,
+                redirectTo: `${siteUrl}/organizer/reset-password?key=${handshakeKey}`,
             });
 
             if (resetError) {
@@ -186,7 +215,6 @@ export default function SettingsPage() {
                     description: resetError.message,
                     variant: "error"
                 });
-                setErrorMessage(resetError.message);
             } else {
                 setToastData({
                     title: "Password Reset Link Sent",
@@ -202,7 +230,6 @@ export default function SettingsPage() {
                 description: message,
                 variant: "error"
             });
-            setErrorMessage(message);
         } finally {
             setIsLoadingReset(false);
             setShouldShowToast(true);
@@ -210,18 +237,18 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-white">
+        <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
             <NotificationToast
                 isOpen={shouldShowToast}
-                onClose={() => setShouldShowToast(false)}
+                onClose={handleCloseToast}
                 variant={toastData.variant}
                 title={toastData.title}
                 description={toastData.description}
                 duration={3000}
             />
 
-            <Header/>
-            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full">
+            <Header />
+            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-10 relative">
                 <div className="flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-6">
@@ -233,17 +260,10 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start mb-5">
-                    <Card
-                        className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
+                    <Card className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
                         <CardHeader className="flex flex-row items-center gap-3 p-0">
-                            <Image
-                                src="/svgs/user-profile-icon.svg"
-                                width="30"
-                                height="30"
-                                alt="Icon"
-                            />
-                            <CardTitle
-                                className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Profile</CardTitle>
+                            <Image src="/svgs/user-profile-icon.svg" width="30" height="30" alt="Icon" />
+                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Profile</CardTitle>
                         </CardHeader>
 
                         <CardContent className="py-5 flex flex-col items-center gap-8">
@@ -255,15 +275,8 @@ export default function SettingsPage() {
                                     height={196}
                                     className="transition-all duration-300 group-hover:brightness-50"
                                 />
-
-                                <div
-                                    className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                                    <Image
-                                        src="/svgs/camera-icon.svg"
-                                        alt="Camera"
-                                        width={27}
-                                        height={27}
-                                    />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                    <Image src="/svgs/camera-icon.svg" alt="Camera" width={27} height={27} />
                                 </div>
                             </div>
 
@@ -273,40 +286,25 @@ export default function SettingsPage() {
                                     value={formData.fullName}
                                     onChange={handleChange}
                                     placeholder="Angela Mae Cabrera"
-                                    className={cn(
-                                        "h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black placeholder:text-[#252E49]/50 focus-visible:ring-offset-0 transition-colors",
-                                        hasError ? "border-[#C44E52]" : "border-[#312245]"
-                                    )}
+                                    className="h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black border-[#312245]"
                                 />
                                 <Input
                                     value={user ? user.email : "Loading..."}
                                     disabled={true}
-                                    className={cn(
-                                        "h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black  placeholder:text-[#252E49]/50 focus-visible:ring-offset-0 transition-colors border-[#312245]"
-                                    )}
+                                    className="h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black border-[#312245]"
                                 />
                                 <Input
                                     value="Event Organizer"
                                     disabled={true}
-                                    className={cn(
-                                        "h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black  placeholder:text-[#252E49]/50 focus-visible:ring-offset-0 transition-colors border-[#312245]"
-                                    )}
+                                    className="h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black border-[#312245]"
                                 />
                                 <Input
                                     id="username"
                                     value={formData.username}
                                     onChange={handleChange}
                                     placeholder="a.cabrera67"
-                                    className={cn(
-                                        "h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black  placeholder:text-[#252E49]/50 focus-visible:ring-offset-0 transition-colors",
-                                        hasError ? "border-[#C44E52]" : "border-[#312245]"
-                                    )}
+                                    className="h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black border-[#312245]"
                                 />
-                                {hasError && (
-                                    <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1">
-                                        {errorMessage}
-                                    </p>
-                                )}
                             </div>
 
                             <Button
@@ -318,54 +316,72 @@ export default function SettingsPage() {
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
+                                        <Loader2 className="mr-2 h-10 w-10 animate-spin" />
                                         Please Wait
                                     </>
-                                ) : (
-                                    "UPDATE PROFILE"
-                                )}
+                                ) : "UPDATE PROFILE"}
                             </Button>
                         </CardContent>
                     </Card>
 
-                    <Card
-                        className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
+                    <Card className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
                         <CardHeader className="flex flex-row items-center gap-3 p-0">
-                            <Image
-                                src="/svgs/security-icon.svg"
-                                width="30"
-                                height="30"
-                                alt="Icon"
-                            />
-                            <CardTitle
-                                className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Security</CardTitle>
+                            <Image src="/svgs/security-icon.svg" width="30" height="30" alt="Icon" />
+                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Security</CardTitle>
                         </CardHeader>
 
-                        <CardContent className="p-0 space-y-8">
+                        <CardContent className="py-5 space-y-8">
                             <div className="space-y-4">
                                 <Input
                                     value="· · · · · · · · · · · · · · · · · · · · · · · · "
                                     disabled={true}
-                                    className={cn(
-                                        "h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black  placeholder:text-[#252E49]/50 focus-visible:ring-offset-0 transition-colors border-[#312245]"
-                                    )}
+                                    className="h-14 mt-2 rounded-[13px] border-2 bg-white px-4 font-bold !text-base font-display text-black border-[#312245]"
                                 />
                             </div>
 
                             <Button
                                 onClick={handleReset}
-                                type="submit"
                                 variant="elevated"
                                 disabled={isLoadingReset}
                                 className="h-16 w-full rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                             >
-
-                                {isLoadingReset ? <Loader2 className="h-8 w-8 animate-spin"/> : countdown > 0 ? `Retry in ${countdown}s` : "RESET PASSWORD"}
+                                {isLoadingReset ? <Loader2 className="h-10 w-10 animate-spin" /> : countdown > 0 ? `Retry in ${countdown}s` : "RESET PASSWORD"}
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
             </main>
+
+            {/* Background elements - fixed inset logic to cover scrollable height */}
+            <div className="hidden lg:block absolute inset-0 pointer-events-none h-full">
+                <motion.div
+                    className="absolute -top-5 -right-55 h-90 w-90 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
+                    initial={{ x: 0, y: 0 }}
+                    whileHover={{ x: 50 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                />
+
+                <motion.div
+                    className="absolute -top-22 left-90 h-40 w-40 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
+                    initial={{ x: 0, y: 0 }}
+                    whileHover={{ y: -40, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                />
+
+                <motion.div
+                    className="absolute top-35 left-10 h-130 w-130 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
+                    initial={{ x: 0, y: 0 }}
+                    whileHover={{ x: -60, scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                />
+
+                <motion.div
+                    className="absolute -bottom-35 -right-10 h-160 w-160 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
+                    initial={{ x: 0, y: 0 }}
+                    whileHover={{ x: -60, scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                />
+            </div>
         </div>
     )
 }

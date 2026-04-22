@@ -1,16 +1,16 @@
 "use client";
 import Image from "next/image";
-import { motion } from "motion/react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { z } from "zod";
-import { supabase } from "@/lib/supabase/supabase";
-import { NotificationToast } from "@/components/ui/notification-toast";
+import {motion} from "motion/react";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import {usePathname, useRouter} from "next/navigation";
+import {cn} from "@/lib/utils";
+import {Eye, EyeOff, Loader2} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {useState, useEffect} from "react";
+import {z} from "zod";
+import {supabase} from "@/lib/supabase/supabase";
+import {NotificationToast} from "@/components/ui/notification-toast";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -29,23 +29,41 @@ export default function ResetPasswordPage() {
         confirmPassword: "",
     });
 
+    const pathname = usePathname();
+    const currentUserRole = pathname.includes("/moderator")
+        ? "moderator"
+        : "organizer";
+
     useEffect(() => {
         const validateSession = async () => {
-            const { data: { user }, error } = await supabase.auth.getUser();
+            const params = new URLSearchParams(window.location.search);
+            const urlKey = params.get('key');
+            const storedKey = localStorage.getItem('reset_handshake_key');
 
-            if (error || !user) {
-                router.replace("sign-in");
+            if (!urlKey || urlKey !== storedKey) {
+                localStorage.removeItem('reset_handshake_key');
+                router.replace(`/${currentUserRole}/sign-in`);
                 return;
             }
 
-            const { data: userData, error: roleError } = await supabase
+            window.history.replaceState({}, '', window.location.pathname);
+            localStorage.removeItem('reset_handshake_key');
+
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (error || !user) {
+                router.replace(`/${currentUserRole}/sign-in`);
+                return;
+            }
+
+            const {data: userData, error: roleError} = await supabase
                 .from('users')
                 .select('role')
                 .eq('id', user.id)
                 .single();
 
             if (roleError || !userData || userData.role !== 'MODERATOR') {
-                router.replace("sign-in");
+                router.replace(`/${currentUserRole}/sign-in`);
                 return;
             }
 
@@ -54,10 +72,10 @@ export default function ResetPasswordPage() {
         };
 
         validateSession();
-    }, [router]);
+    }, [router, currentUserRole]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
+        const {id, value} = e.target;
         setFormData((prev) => ({
             ...prev,
             [id]: value,
@@ -97,7 +115,7 @@ export default function ResetPasswordPage() {
         }
 
         try {
-            const { error } = await supabase.auth.updateUser({
+            const {error} = await supabase.auth.updateUser({
                 password: result.data.password,
             });
 
@@ -124,7 +142,7 @@ export default function ResetPasswordPage() {
     if (!isAuthorized) {
         return (
             <div className="flex min-h-screen w-full items-center justify-center bg-brand-dark">
-                <Loader2 className="h-12 w-12 animate-spin text-white" />
+                <Loader2 className="h-12 w-12 animate-spin text-white"/>
             </div>
         );
     }
@@ -160,7 +178,8 @@ export default function ResetPasswordPage() {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col lg:flex-row items-center justify-start lg:justify-end w-full px-6 pt-32 lg:pt-0 lg:px-20 z-20">
+            <div
+                className="flex-1 flex flex-col lg:flex-row items-center justify-start lg:justify-end w-full px-6 pt-32 lg:pt-0 lg:px-20 z-20">
 
                 <div className="max-w-lg w-full text-white order-2 lg:order-1">
                     <div className="mb-8">
@@ -193,12 +212,14 @@ export default function ResetPasswordPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        className="absolute right-4 top-1/2 mt-1 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
-                                            <Eye className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <Eye
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
-                                            <EyeOff className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <EyeOff
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}
@@ -206,7 +227,8 @@ export default function ResetPasswordPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-base font-heading font-semibold text-white" htmlFor="confirmPassword">
+                            <Label className="text-base font-heading font-semibold text-white"
+                                   htmlFor="confirmPassword">
                                 Confirm New Password
                             </Label>
                             <div className="relative">
@@ -225,12 +247,14 @@ export default function ResetPasswordPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowConfirmPassword(!shouldShowConfirmPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        className="absolute right-4 top-1/2 mt-1 -translate-y-1/2"
                                     >
                                         {shouldShowConfirmPassword ? (
-                                            <Eye className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <Eye
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
-                                            <EyeOff className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <EyeOff
+                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}
@@ -276,28 +300,28 @@ export default function ResetPasswordPage() {
                     className="absolute -top-20 -right-55 h-80 w-80 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
                     whileHover={{x: 50}}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    transition={{type: "spring", stiffness: 200, damping: 15}}
                 />
 
                 <motion.div
                     className="absolute -top-25 left-1/2 h-40 w-40 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
                     whileHover={{y: -40, scale: 1.1}}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    transition={{type: "spring", stiffness: 200, damping: 15}}
                 />
 
                 <motion.div
                     className="absolute top-55 -left-55 h-110 w-110 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
                     whileHover={{x: -60, scale: 1.05}}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    transition={{type: "spring", stiffness: 200, damping: 20}}
                 />
 
                 <motion.div
                     className="absolute -bottom-55 right-120 h-100 w-100 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
                     initial={{x: 0, y: 0}}
                     whileHover={{y: 50, scale: 1.05}}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    transition={{type: "spring", stiffness: 200, damping: 20}}
                 />
             </div>
         </main>

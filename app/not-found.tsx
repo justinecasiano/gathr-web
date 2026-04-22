@@ -3,10 +3,12 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 
 export default function NotFound() {
     const router = useRouter();
+    const pathname = usePathname();
+    const currentUserType = pathname.includes('moderator') ? 'moderator' : 'organizer';
 
     return (
         <main className="relative flex min-h-screen items-center justify-center w-full bg-brand-dark p-6 overflow-hidden">
@@ -36,7 +38,7 @@ export default function NotFound() {
 
                     <Button
                         type="button"
-                        onClick={() => router.push("dashboard")}
+                        onClick={() => router.push(`/${currentUserType}/dashboard`)}
                         variant="elevated"
                         className="h-14 md:h-16 w-full sm:w-[75%] md:w-[75%] rounded-3xl bg-brand border-[#4C2576] font-display text-lg md:text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                     >

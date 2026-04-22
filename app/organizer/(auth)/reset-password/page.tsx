@@ -3,7 +3,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,30 @@ export default function ResetPasswordPage() {
         confirmPassword: "",
     });
 
+    const pathname = usePathname();
+    const currentUserRole = pathname.includes("/moderator")
+        ? "moderator"
+        : "organizer";
+
     useEffect(() => {
         const validateSession = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const urlKey = params.get('key');
+            const storedKey = localStorage.getItem('reset_handshake_key');
+
+            if (!urlKey || urlKey !== storedKey) {
+                localStorage.removeItem('reset_handshake_key');
+                router.replace(`/${currentUserRole}/sign-in`);
+                return;
+            }
+
+            window.history.replaceState({}, '', window.location.pathname);
+            localStorage.removeItem('reset_handshake_key');
+
             const { data: { user }, error } = await supabase.auth.getUser();
 
             if (error || !user) {
-                router.replace("sign-in");
+                router.replace(`/${currentUserRole}/sign-in`);
                 return;
             }
 
@@ -45,7 +63,7 @@ export default function ResetPasswordPage() {
                 .single();
 
             if (roleError || !userData || userData.role !== 'PARTICIPANT') {
-                router.replace("sign-in");
+                router.replace(`/${currentUserRole}/sign-in`);
                 return;
             }
 
@@ -193,12 +211,12 @@ export default function ResetPasswordPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowPassword(!shouldShowPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        className="absolute right-4 top-1/2 mt-1 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
-                                            <Eye className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <Eye className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
-                                            <EyeOff className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <EyeOff className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}
@@ -225,12 +243,12 @@ export default function ResetPasswordPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShouldShowConfirmPassword(!shouldShowConfirmPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        className="absolute right-4 mt-1 top-1/2 -translate-y-1/2"
                                     >
                                         {shouldShowConfirmPassword ? (
-                                            <Eye className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <Eye className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         ) : (
-                                            <EyeOff className="h-6 w-6 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <EyeOff className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
                                         )}
                                     </button>
                                 )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { searchIndex, SearchResult } from '@/config/search-index';
@@ -11,7 +11,10 @@ export function GlobalSearch() {
     const [results, setResults] = useState<SearchResult[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
+    const pathname = usePathname(); // Get the current URL path
     const searchRef = useRef<HTMLDivElement>(null);
+
+    const currentUserType = pathname.includes('moderator') ? 'moderator' : 'organizer';
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -26,10 +29,15 @@ export function GlobalSearch() {
     const handleSearch = (val: string) => {
         setQuery(val);
         if (val.length > 1) {
-            const filtered = searchIndex.filter(item =>
-                item.title.toLowerCase().includes(val.toLowerCase()) ||
-                item.description.toLowerCase().includes(val.toLowerCase())
-            );
+            const filtered = searchIndex.filter(item => {
+                const matchesUserType = item.user === currentUserType;
+
+                const matchesQuery =
+                    item.title.toLowerCase().includes(val.toLowerCase()) ||
+                    item.description.toLowerCase().includes(val.toLowerCase());
+
+                return matchesUserType && matchesQuery;
+            });
             setResults(filtered);
             setIsOpen(true);
         } else {
@@ -39,7 +47,7 @@ export function GlobalSearch() {
     };
 
     const navigateTo = (href: string) => {
-        router.push(href);
+        router.push(`/${currentUserType}/${href}`);
         setIsOpen(false);
         setQuery('');
     };
@@ -48,7 +56,7 @@ export function GlobalSearch() {
         <div className="relative w-full px-5" ref={searchRef}>
             <Search className="absolute right-10 top-1/2 h-6 w-6 -translate-y-1/2 text-[#312245] z-10" />
             <Input
-                placeholder="Search anything..."
+                placeholder={`Search anything...`}
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
                 onFocus={() => query.length > 1 && setIsOpen(true)}
@@ -56,7 +64,10 @@ export function GlobalSearch() {
             />
 
             {isOpen && results.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-4 bg-white border-2 border-[#5C5C5C] rounded-xl shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] z-50 overflow-hidden">
+                <div
+                    // Changed: Added right-5 and updated left to 5 to match the parent's px-5
+                    className="absolute top-full left-5 right-5 mt-4 bg-white border-2 border-[#5C5C5C] rounded-xl shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] z-50 overflow-hidden"
+                >
                     <ul className="max-h-60 overflow-y-auto">
                         {results.map((result, index) => (
                             <li
@@ -70,8 +81,8 @@ export function GlobalSearch() {
                                         <p className="text-sm text-[#574272]">{result.description}</p>
                                     </div>
                                     <span className="text-[10px] uppercase font-black px-2 py-1 bg-purple-100 text-purple-900 rounded-md">
-                    {result.category}
-                  </span>
+                                {result.category}
+                            </span>
                                 </div>
                             </li>
                         ))}

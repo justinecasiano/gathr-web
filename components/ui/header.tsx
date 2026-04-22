@@ -25,9 +25,9 @@ export function Header() {
     }, [pathname]);
 
     return (
-        <header className="sticky top-0 z-30 flex h-21 items-center justify-between border-b border-[#5C5C5C] bg-white/80 backdrop-blur-md px-10">
+        <header className="sticky top-0 z-60 flex h-21 items-center justify-between px-10 pt-3">
             <div className="flex items-center gap-6">
-                <div className="rounded-full border-2 border-[#5C5C5C] bg-white p-2.5 text-[#261A36] shadow-[0px_4px_0px_0px_rgba(87,66,114,1)] cursor-pointer transition-colors hover:!bg-[#261A36]/20">
+                <div className="rounded-full border-2 border-[#5C5C5C] bg-white p-2.5 text-[#261A36] shadow-[0px_4px_0px_0px_rgba(87,66,114,1)] transition-colors hover:!brightness-80">
                     <Icon
                         name={activeIconName}
                         size={26}
@@ -38,7 +38,7 @@ export function Header() {
 
             <GlobalSearch />
 
-            <div className="flex max-w-[22%] items-center justify-center gap-2 rounded-2xl border-2 border-[#5C5C5C] bg-white p-1.5 shadow-[4px_4px_0px_0px_rgba(87,66,114,1)] cursor-pointer transition-all hover:!bg-[#261A36]/20">
+            <div className="flex max-w-[22%] items-center justify-center gap-2 rounded-2xl border-2 border-[#5C5C5C] bg-white p-1.5 shadow-[4px_4px_0px_0px_rgba(87,66,114,1)] transition-all hover:!brightness-80">
                 <div className="h-10 w-10 rounded-xl bg-purple-200 overflow-hidden shrink-0">
                     <Image
                         src="/svgs/organizer-profile-icon.svg"
