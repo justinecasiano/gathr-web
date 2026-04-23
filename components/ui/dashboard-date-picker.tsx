@@ -59,7 +59,7 @@ export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: Da
                         id="date"
                         variant={"outline"}
                         className={cn(
-                            "w-fit h-12 justify-between text-left font-display font-bold text-lg border-2 border-black rounded-sm bg-white hover:bg-white text-black px-4 gap-3",
+                            "cursor-pointer w-fit h-12 justify-between text-left font-display font-bold text-lg border-2 border-black rounded-sm bg-white hover:bg-white text-black px-4 gap-3",
                             !date && "text-muted-foreground"
                         )}
                     >

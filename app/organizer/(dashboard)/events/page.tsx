@@ -48,7 +48,6 @@ export default function EventsPage() {
     return (
         <div className="flex relative h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
             <Header />
-
             <main className="relative flex-1 flex flex-col px-10 pt-6 max-w-[1600px] mx-auto w-full z-50 overflow-hidden">
                 <div className="flex items-end justify-between">
                     <div>
@@ -70,7 +69,7 @@ export default function EventsPage() {
             </main>
 
             {MOCK_EVENTS.length > itemsPerPage && (
-                <div className="bg-white border-t-2 border-[#5C5C5C] px-5 py-3 shrink-0">
+                <div className="bg-white border-t-2 border-[#5C5C5C] px-6 py-3 shrink-0">
                     <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p className="font-display text-base font-normal text-[#676767]">
                             Showing {((currentPage - 1) * itemsPerPage) + 1}-
