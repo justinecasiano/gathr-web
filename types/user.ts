@@ -14,6 +14,7 @@ export interface UserTableData {
     is_alumni: boolean;
     fcm_token: string | null;
     created_at: string;
+    avatar_url: string | null;
     email: string | null;
 }
 

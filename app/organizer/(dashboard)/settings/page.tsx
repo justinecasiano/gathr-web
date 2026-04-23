@@ -14,6 +14,8 @@ import { supabase } from "@/lib/supabase/supabase";
 import { z } from "zod";
 import {motion} from "motion/react";
 import {getURL} from "@/lib/utils";
+import { useRef } from "react";
+import PopupModal from "@/components/ui/popup-modal";
 
 interface ToastState {
     title: string;
@@ -22,7 +24,10 @@ interface ToastState {
 }
 
 export default function SettingsPage() {
-    const { data: user, isLoading: isUserLoading } = useUser();
+    const { data: user, isLoading: isUserLoading, refetch } = useUser(); // Ensure refetch is destructured
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingReset, setIsLoadingReset] = useState(false);
     const [shouldShowToast, setShouldShowToast] = useState(false);
@@ -79,6 +84,62 @@ export default function SettingsPage() {
     const handleCloseToast = React.useCallback(() => {
         setShouldShowToast(false);
     }, []);
+
+    const handleProfileClick = () => setIsModalOpen(true);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user?.id) return;
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (file.size > MAX_FILE_SIZE) {
+            setToastData({
+                title: "File Too Large",
+                description: "Image must be less than 5MB.",
+                variant: "error"
+            });
+            setShouldShowToast(true);
+            return;
+        }
+
+        setIsUploading(true);
+
+        try {
+            const filePath = `${user.id}/profile`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file, {
+                    upsert: true,
+                    contentType: file.type
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+
+            const { error: dbError } = await supabase
+                .from('users')
+                .update({ avatar_url: urlWithCacheBuster })
+                .eq('id', user.id);
+
+            if (dbError) throw dbError;
+
+            await refetch();
+
+            setToastData({ title: "Success Updating Picture", description: "Profile picture updated!", variant: "success" });
+        } catch (error: any) {
+            setToastData({ title: "Upload Failed", description: error.message, variant: "error" });
+        } finally {
+            setIsUploading(false);
+            setShouldShowToast(true);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -238,6 +299,17 @@ export default function SettingsPage() {
 
     return (
         <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+
+            <PopupModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={() => { setIsModalOpen(false); fileInputRef.current?.click(); }}
+                title="Update Profile Picture?"
+                confirmText="Upload New"
+                cancelText="Cancel"
+            />
+
             <NotificationToast
                 isOpen={shouldShowToast}
                 onClose={handleCloseToast}
@@ -267,16 +339,23 @@ export default function SettingsPage() {
                         </CardHeader>
 
                         <CardContent className="py-5 flex flex-col items-center gap-8">
-                            <div className="relative group cursor-pointer w-fit overflow-hidden rounded-full">
+                            <div
+                                onClick={handleProfileClick}
+                                className="relative group cursor-pointer w-[196px] h-[196px] overflow-hidden rounded-full"
+                            >
                                 <Image
-                                    src="/svgs/profile-icon.svg"
+                                    src={user?.avatar_url || "/svgs/profile-icon.svg"}
                                     alt="Avatar"
                                     width={196}
                                     height={196}
-                                    className="transition-all duration-300 group-hover:brightness-50"
+                                    className="aspect-square object-cover transition-all duration-300 group-hover:brightness-80"
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                                    <Image src="/svgs/camera-icon.svg" alt="Camera" width={27} height={27} />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-100 transition-opacity duration-300">
+                                    {isUploading ? (
+                                        <Loader2 className="h-10 w-10 animate-spin text-white" />
+                                    ) : (
+                                        <Image src="/svgs/camera-icon.svg" alt="Camera" width={27} height={27} />
+                                    )}
                                 </div>
                             </div>
 
@@ -352,7 +431,6 @@ export default function SettingsPage() {
                 </div>
             </main>
 
-            {/* Background elements - fixed inset logic to cover scrollable height */}
             <div className="hidden lg:block absolute inset-0 pointer-events-none h-full">
                 <motion.div
                     className="absolute -top-5 -right-55 h-90 w-90 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
