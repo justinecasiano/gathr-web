@@ -108,6 +108,7 @@ export function Sidebar() {
         setIsLoggingOut(true);
         try {
             await signOut();
+            window.location.href = "/";
         } catch (error) {
             setIsLoggingOut(false);
             setIsModalOpen(false);
