@@ -22,50 +22,86 @@ import {
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import { Header } from "@/components/ui/header";
 import { Stats } from "@/components/ui/stats";
 import Image from "next/image";
 import { useUser } from "@/hooks/use-user";
 import { DashboardDatePicker } from "@/components/ui/dashboard-date-picker";
 import {motion} from "motion/react";
+import { DateRange } from 'react-day-picker'
+import { addDays } from 'date-fns/addDays'
+import { useDashboard } from '@/hooks/use-dashboard'
 
-const dashboardStats = [
-    { value: "12", trend: "+12%", trendUp: true },
-    { value: "2,412", trend: "-3%", trendUp: false },
-    { value: "67.21%", trend: "-3%", trendUp: false },
-    { value: "1,521", trend: "+12%", trendUp: true },
-];
+// const dashboardStats = [
+//     { value: "12,256", trend: "+12%", trendUp: true },
+//     { value: "1,234", trend: "-3%", trendUp: false },
+//     { value: "67.21%", trend: "-3%", trendUp: false },
+//     { value: "1,234,521", trend: "+12%", trendUp: true },
+// ];
+//
+// const eventAttendeeData = [
+//     { name: 'Mon', Events: 800, Attendees: 700 },
+//     { name: 'Tue', Events: 1000, Attendees: 650 },
+//     { name: 'Wed', Events: 300, Attendees: 1200 },
+//     { name: 'Thu', Events: 900, Attendees: 400 },
+//     { name: 'Fri', Events: 700, Attendees: 600 },
+//     { name: 'Sat', Events: 950, Attendees: 750 },
+//     { name: 'Sun', Events: 1100, Attendees: 600 },
+// ]
+//
+// const eventStatusData = [
+//     { name: 'Approved', value: 35, percentage: '+5.5%', color: '#94B983' },
+//     { name: 'Pending', value: 45, percentage: '+5.5%', color: '#F6835E' },
+//     { name: 'Rejected', value: 20, percentage: '-5.5%', color: '#CD4249' },
+// ]
+//
+// const feedbackTrendData = [
+//     { name: 'Jul', rating: 3.8 },
+//     { name: 'Aug', rating: 4.1 },
+//     { name: 'Sep', rating: 3.9 },
+//     { name: 'Oct', rating: 4.3 },
+//     { name: 'Nov', rating: 4.5 },
+//     { name: 'Dec', rating: 4.2 },
+//     { name: 'Jan', rating: 4.6 },
+// ]
 
-const eventAttendeeData = [
-    { name: 'Mon', Events: 800, Attendees: 700 },
-    { name: 'Tue', Events: 1000, Attendees: 650 },
-    { name: 'Wed', Events: 300, Attendees: 1200 },
-    { name: 'Thu', Events: 900, Attendees: 400 },
-    { name: 'Fri', Events: 700, Attendees: 600 },
-    { name: 'Sat', Events: 950, Attendees: 750 },
-    { name: 'Sun', Events: 1100, Attendees: 600 },
-]
-
-const eventStatusData = [
-    { name: 'Approved', value: 35, percentage: '+5.5%', color: '#94B983' },
-    { name: 'Pending', value: 45, percentage: '+5.5%', color: '#F6835E' },
-    { name: 'Rejected', value: 20, percentage: '-5.5%', color: '#CD4249' },
-]
-
-const feedbackTrendData = [
-    { name: 'Jul', rating: 3.8 },
-    { name: 'Aug', rating: 4.1 },
-    { name: 'Sep', rating: 3.9 },
-    { name: 'Oct', rating: 4.3 },
-    { name: 'Nov', rating: 4.5 },
-    { name: 'Dec', rating: 4.2 },
-    { name: 'Jan', rating: 4.6 },
-]
+const STATUS_COLORS: Record<string, string> = {
+    APPROVED: '#94B983',
+    PENDING: '#F6835E',
+    REJECTED: '#CD4249',
+};
 
 export default function DashboardPage() {
-    const { data: user, isLoading } = useUser();
     const [mounted, setMounted] = useState(false)
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: addDays(new Date(), -29),
+        to: new Date(),
+    });
+
+    const { data: user, isLoading: isUserLoading } = useUser();
+    const { data, isLoading: isDashboardLoading } = useDashboard(dateRange);
+
+    const statsData = data?.stats;
+    const dashboardStats = [
+        { label: "Total Events", ...statsData?.total_events },
+        { label: "Pending Approvals", ...statsData?.pending_events },
+        { label: "Average Rating", ...statsData?.avg_rating },
+        { label: "Total Capacity", ...statsData?.capacity },
+    ].filter(s => s.value !== undefined);
+
+    const eventAttendeeData = data?.trend_data || [];
+
+    const eventStatusData = (data?.status_data || []).map((item: any) => {
+        const key = item.name.toUpperCase();
+        return {
+            ...item,
+            name: key.charAt(0) + key.slice(1).toLowerCase(),
+            color: STATUS_COLORS[key] || '#5E338A',
+        };
+    });
+
+    const feedbackTrendData = data?.feedback_data || [];
 
     useEffect(() => {
         setMounted(true)
@@ -81,7 +117,7 @@ export default function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-6">
                             <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Dashboard</h1>
-                            <DashboardDatePicker/>
+                            <DashboardDatePicker onDateChange={setDateRange}/>
                         </div>
                         <p className="text-[#261A36] text-lg font-display font-bold mt-1">Overview of your events and feedback</p>
                     </div>

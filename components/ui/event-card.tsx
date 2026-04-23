@@ -2,9 +2,9 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { MapPin, Calendar, User, Users, BarChart2, ChevronRight, Share2 } from 'lucide-react'
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import {MapPin, Calendar, User, Users, BarChart2, ChevronRight, Share2} from 'lucide-react'
+import {cn} from "@/lib/utils"
+import {Badge} from "@/components/ui/badge"
 
 interface EventCardProps {
     title: string
@@ -14,69 +14,100 @@ interface EventCardProps {
     attendees: string
     status: 'Approved' | 'Rejected' | 'Pending'
     hasFeedback: boolean
-    image: string
+    image?: string
 }
 
-export function EventCard({ title, location, date, organizer, attendees, status, hasFeedback, image }: EventCardProps) {
+export function EventCard({
+                              title,
+                              location,
+                              date,
+                              organizer,
+                              attendees,
+                              status,
+                              hasFeedback,
+                              image = "/images/placeholder_small.png"
+                          }: EventCardProps) {
     const statusColors = {
-        Approved: "bg-[#D1E9D2] text-[#2F5A30] hover:bg-[#D1E9D2]",
-        Rejected: "bg-[#FAD2D2] text-[#820006] hover:bg-[#FAD2D2]",
-        Pending: "bg-[#FFEB3B] text-[#000000] hover:bg-[#FFEB3B]"
+        Approved: "bg-[#CADDC2] text-[#184D00] hover:bg-[#CADDC2]",
+        Rejected: "bg-[#FFC7B5] text-[#820006] hover:bg-[#FFC7B5]",
+        Pending: "bg-[#FFD600] text-[#4B3F00] hover:bg-[#FFD600]"
     }
 
     return (
-        <div className="group relative flex w-full flex-col sm:flex-row items-center gap-6 rounded-3xl bg-white p-6 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
-            <div className="relative h-32 w-44 shrink-0 overflow-hidden rounded-2xl shadow-md">
-                <Image src={image} alt={title} fill className="object-cover" />
+        <div
+            className="group relative flex w-full flex-col sm:flex-row items-center gap-6 rounded-3xl bg-white p-6 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
+            <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl shadow-md">
+                <Image src={image} alt={title} fill
+                       className={cn("transition-all",
+                           image.includes('placeholder_small') ? "object-contain" : "object-cover")}
+                />
             </div>
 
             <div className="flex flex-1 flex-col gap-2 min-w-0">
                 <div className="flex items-center gap-3 flex-wrap">
-                    <h3 className="text-xl font-bold text-[#261A36] truncate">{title}</h3>
-                    <Badge className={cn("rounded-full font-bold px-4 py-0.5", statusColors[status])}>
-                        {status}
-                    </Badge>
-                    <Badge variant="outline" className={cn(
-                        "rounded-full border-[#5C5C5C]/30 bg-[#F3E8FF] text-[#574272] px-3 font-medium",
-                        !hasFeedback && "bg-white text-[#5C5C5C]"
-                    )}>
-                        {hasFeedback ? 'With Feedback Form' : 'No Feedback Form'}
-                    </Badge>
+                    <h3 className="text-xl font-heading font-bold text-black truncate max-w-[300px] lg:max-w-[500px] shrink-0">{title}</h3>
+                    <div className="flex items-center gap-3 min-w-0 shrink-0">
+                        <Badge
+                            className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap", statusColors[status])}>
+                            {status}
+                        </Badge>
+                        <Badge
+                            className={cn("rounded-full  bg-[#CBBDDE] text-[#312245] px-6 py-1.5 font-bold font-display text-sm  whitespace-nowrap",
+                                !hasFeedback && "bg-white border-1 border-[#676767]"
+                            )}>
+                            {hasFeedback ? 'With Feedback Form' : 'No Feedback Form'}
+                        </Badge>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-y-1.5 text-sm font-medium text-[#5C5C5C]">
-                    <div className="flex items-center gap-2">
-                        <MapPin size={16} className="text-[#FF8C66]" />
-                        <span className="truncate">{location}</span>
+                <div className="grid grid-cols-1 gap-y-3 font-heading font-normal text-black">
+                    <div className="flex items-center gap-3">
+                        <Image src="/svgs/my-events-location.svg" width="15" height="15" alt="Icon"/>
+                        <span className="text-lg truncate max-w-[700px] inline-block align-bottom">{location}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar size={16} className="text-[#FF8C66]" />
-                        <span>{date}</span>
+                    <div className="flex items-center gap-3">
+                        <Image src="/svgs/my-events-date.svg" width="15" height="15" alt="Icon"/>
+                        <span className="text-base truncate max-w-[700px] inline-block align-bottom">{date}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <User size={16} className="text-[#FF8C66]" />
-                        <span>Organized by {organizer}</span>
+                    <div className="flex items-center gap-3">
+                        <Image src="/svgs/my-events-organizer.svg" width="15" height="15" alt="Icon"/>
+                        <span
+                            className="text-base truncate max-w-[700px] inline-block align-bottom">Organized by {organizer}</span>
                     </div>
-                    <div className="flex items-center gap-2 font-bold">
-                        <Users size={16} className="text-[#FF8C66]" />
-                        <span className="text-rose-500">{attendees}</span>
+                    <div className="flex items-center gap-3">
+                        <Image src="/svgs/my-events-attendees.svg" width="15" height="15" alt="Icon"/>
+                        <span
+                            className="font-bold text-[#FC3436] text-base inline-block align-bottom">{attendees}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                {status === 'Rejected' ? (
-                    <button className="p-2 text-[#5C5C5C] hover:bg-gray-100 rounded-full transition-colors">
-                        <Share2 size={24} />
-                    </button>
-                ) : (
-                    <>
-                        <button className="p-1.5 hover:bg-purple-50 rounded-lg transition-colors text-[#261A36]">
-                            <BarChart2 size={24} />
-                        </button>
-                        <ChevronRight size={28} className="text-[#261A36] cursor-pointer" />
-                    </>
-                )}
+            <div className="absolute top-4 right-6">
+                <div className="flex items-center gap-2 min-w-[80px] justify-end">
+                    {status !== 'Rejected' && (
+                        <>
+                            {hasFeedback && (
+                                <button
+                                    type="button"
+                                    aria-label="View Summary"
+                                    className="p-1.5 pl-4 hover:bg-[#261A36]/20 rounded-lg transition-colors text-[#261A36] flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <Image src="/svgs/my-events-summary.svg" width="24" height="24" alt="Icon"/>
+                                    <ChevronRight size={32}/>
+                                </button>
+                            )}
+                            {!hasFeedback && (
+                                <button
+                                    type="button"
+                                    aria-label="Create Feedback Form"
+                                    className="p-1.5 hover:bg-[#261A36]/20 rounded-lg transition-colors text-[#261A36]"
+                                >
+                                    <Image src="/svgs/my-events-create.svg" width="24" height="24" alt="Icon"/>
+                                </button>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     )

@@ -13,19 +13,20 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import {Input} from "@/components/ui/input"
+import {useEffect, useState} from "react";
 
-export function DashboardDatePicker() {
-    const [tempDate, setTempDate] = React.useState<DateRange | undefined>({
-        from: addDays(new Date(), -7),
+export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: DateRange | undefined) => void }) {
+    const [tempDate, setTempDate] = useState<DateRange | undefined>({
+        from: addDays(new Date(), -6),
         to: new Date(),
     })
 
-    const [date, setDate] = React.useState<DateRange | undefined>({
-        from: addDays(new Date(), -7),
+    const [date, setDate] = useState<DateRange | undefined>({
+        from: addDays(new Date(), -6),
         to: new Date(),
     })
 
-    const [isOpen, setIsOpen] = React.useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
     const getLabel = () => {
         if (date?.from && date?.to) {
@@ -45,8 +46,9 @@ export function DashboardDatePicker() {
     };
 
     const handleApply = () => {
-        setDate(tempDate)
-        setIsOpen(false)
+        setDate(tempDate);
+        onDateChange(tempDate);
+        setIsOpen(false);
     }
 
     return (
