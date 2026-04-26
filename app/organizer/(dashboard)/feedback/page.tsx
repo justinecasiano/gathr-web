@@ -11,25 +11,48 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {motion} from "motion/react";
 import {TabButton} from "@/components/ui/tab-button"
 import {useMemo, useState} from "react"
-import {Event, FeedbackEvent, SimpleEvent} from "@/types/event";
+import {FeedbackEvent} from "@/types/base-event";
 import {FeedbackSummaryCard} from "@/components/ui/feedback-summary-card";
 import {useOrganizerEvents} from "@/hooks/use-organizer-events";
 import {usePagination} from "@/hooks/use-pagination";
 import {NotificationToast, ToastVariant} from "@/components/ui/notification-toast"
 import {useUpdateFormStatus} from "@/hooks/use-update-form-status";
+import {useSearchStore} from "@/hooks/use-search-store";
+import _my_feedback from "@/bones/my-feedback.bones.json";
+import {ResponsiveBones} from "boneyard-js";
+import {Skeleton} from "boneyard-js/react";
+import {useSkeleton} from "@/hooks/use-skeleton";
+import FeedbackFormEditor from "@/components/ui/form-editor";
+import {Dialog, DialogContent, DialogDescription, DialogTitle} from "@/components/ui/dialog"
+import {FormEditorValues} from "@/types/feedback";
+import { VisuallyHidden } from "radix-ui"
 
 export default function FeedbackFormsPage() {
     const [activeTab, setActiveTab] = useState<'forms' | 'individual'>('forms')
-    const [expandedEvent, setExpandedEvent] = useState<number | null>(null)
     const [selectedIndividual, setSelectedIndividual] = useState<number | null>(null)
     const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
     const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
 
     const {data: rawEvents, isLoading: isEventsLoading} = useOrganizerEvents();
+
+    const showSkeleton = useSkeleton(isEventsLoading, 500);
+
+    const searchQuery = useSearchStore(state => state.query);
     const events = useMemo(() => {
         if (!rawEvents) return [];
-        return rawEvents.map(event => mapToFeedbackEvent(event));
-    }, [rawEvents]);
+        const allEvents = rawEvents.map(event => mapToFeedbackEvent(event));
+
+        if (searchQuery.trim() !== '') {
+            return allEvents.filter(event =>
+                event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.questionCount.toString().includes(searchQuery) ||
+                event.responseCount.toString().includes(searchQuery)
+            );
+        }
+
+        return allEvents;
+    }, [rawEvents, searchQuery]);
 
     const {
         currentItems,
@@ -52,18 +75,26 @@ export default function FeedbackFormsPage() {
     });
 
     const {mutate: updateStatus, isPending} = useUpdateFormStatus();
+    const [isDelaying, setIsDelaying] = useState<number | null>(null);
+    const isCardUpdating = (eventId: number) => isPending || isDelaying === eventId;
 
-    const handleStatusToggle = (eventId: number, title:string, isActive: boolean) => {
+    const handleStatusToggle = (eventId: number, title: string, isActive: boolean) => {
+        setIsDelaying(eventId);
+
         updateStatus(
             {eventId, isActive},
             {
                 onSuccess: () => {
                     setToastConfig({
                         isOpen: true,
-                        title: "Status Updated",
+                        title: "Form Updated",
                         description: `The feedback form for ${title} is now ${isActive ? 'active' : 'inactive'}.`,
                         variant: "success"
                     });
+
+                    setTimeout(() => {
+                        setIsDelaying(null);
+                    }, 2200);
                 },
                 onError: (error: Error) => {
                     setToastConfig({
@@ -72,13 +103,64 @@ export default function FeedbackFormsPage() {
                         description: error.message,
                         variant: "error"
                     });
+                    setIsDelaying(null);
                 }
             }
         );
     };
 
+    const [editorConfig, setEditorConfig] = useState<{
+        isOpen: boolean;
+        mode: 'new' | 'edit' | 'preview';
+        initialData: FormEditorValues | null;
+        eventId: number | null;
+    }>({
+        isOpen: false,
+        mode: 'preview',
+        initialData: null,
+        eventId: null
+    });
+
+    const handleOpenEditor = (mode: 'new' | 'edit' | 'preview', event?: FeedbackEvent) => {
+        setEditorConfig({
+            isOpen: true,
+            mode,
+            initialData: event?.feedbackForm || null,
+            eventId: event?.id || null
+        });
+    };
+
+    const handleSaveForm = async (data: FormEditorValues) => {
+        console.log("Saving form for Event ID:", editorConfig.eventId, data);
+        setEditorConfig(prev => ({...prev, isOpen: false}));
+    };
+
     return (
         <div className="flex relative h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
+            <Dialog
+                open={editorConfig.isOpen}
+                onOpenChange={(open) => setEditorConfig(prev => ({...prev, isOpen: open}))}
+            >
+                <DialogContent
+                    className="!max-w-[96vw] w-[90vw] !h-[90vh] p-0 overflow-hidden border-none bg-white shadow-2xl z-[100] outline-none">
+                    <VisuallyHidden.Root>
+                        <DialogTitle>
+                            {editorConfig.mode === 'new' ? 'Create New Feedback Form' :
+                                editorConfig.mode === 'edit' ? 'Edit Feedback Form' : 'Preview Feedback Form'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Interface for building and managing event feedback questions.
+                        </DialogDescription>
+                    </VisuallyHidden.Root>
+
+                    <FeedbackFormEditor
+                        initialData={editorConfig.initialData}
+                        readOnly={editorConfig.mode === 'preview'}
+                        onSave={handleSaveForm}
+                    />
+                </DialogContent>
+            </Dialog>
+
             <NotificationToast
                 duration={2000}
                 {...toastConfig}
@@ -142,13 +224,22 @@ export default function FeedbackFormsPage() {
                     {activeTab === 'forms' ? (
                         <>
                             <div className="mt-4"></div>
-                            {currentItems.map((event) => (
-                                <FeedbackSummaryCard key={event.id} {...event}
-                                                     onStatusToggle={handleStatusToggle}
-                                                     isUpdating={isPending}
-                                                     isExpanded={expandedEventId === event.id}
-                                                     onExpand={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}
-                                />
+                            {events.map((event) => (
+                                <Skeleton key={event.id} initialBones={(_my_feedback as unknown) as ResponsiveBones}
+                                          animate="shimmer" name={`my-feedback-item-${event.id}`} loading={showSkeleton}
+                                          className={cn(showSkeleton && "h-[220px] rounded-[14px] bg-white/40 px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all")}
+                                          color="#574272" boneClass="opacity-40"
+                                >
+                                    <FeedbackSummaryCard key={event.id} {...event}
+                                                         onStatusToggle={handleStatusToggle}
+                                                         isUpdating={isCardUpdating(event.id)}
+                                                         isExpanded={expandedEventId === event.id}
+                                                         onExpand={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}
+                                                         onPreview={() => handleOpenEditor('preview', event)}
+                                                         onEdit={() => handleOpenEditor('edit', event)}
+                                                         onNew={() => handleOpenEditor('new', event)}
+                                    />
+                                </Skeleton>
                             ))}
                             <div className="mb-8"></div>
                         </>
