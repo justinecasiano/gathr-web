@@ -5,7 +5,7 @@ import Image from 'next/image'
 import {ChevronDown, Edit3, Eye, Plus} from 'lucide-react'
 import {cn} from "@/lib/utils"
 import {Badge} from "@/components/ui/badge"
-import {FeedbackEvent} from '@/types/event'
+import {FeedbackEvent} from '@/types/base-event'
 import {Button} from './button'
 import {Switch} from "@/components/ui/switch";
 import {FeedbackExpansion} from './feedback-expansion'
@@ -285,9 +285,12 @@ export function FeedbackSummaryCard({
 
     return (
         <div
-            className="rounded-[14px] bg-white p-6 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
+            className="rounded-[14px] bg-white px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
             <div className="flex items-start gap-6">
-                <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-[15px] shadow-md">
+                <div className={cn(
+                    "relative h-40 w-40 shrink-0 overflow-hidden rounded-[15px]",
+                    "shadow-[0_6px_10px_0_rgba(0,0,0,0.25)]"
+                )}>
                     <Image src={image} alt={title} fill
                            className={cn("transition-all",
                                image.includes('placeholder_small') ? "object-contain" : "object-cover")}
@@ -295,53 +298,82 @@ export function FeedbackSummaryCard({
                 </div>
 
                 <div className="flex-1">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3 flex-wrap">
-                            <h3 className="text-xl font-heading font-bold text-black truncate max-w-[300px] lg:max-w-[500px] shrink-0">{title}</h3>
+                    <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-x-5 gap-y-2 flex-wrap">
+                            <h3 className="text-2xl font-heading font-bold text-black truncate max-w-[300px] lg:max-w-[650px] shrink-0">{title}</h3>
                             <div className="flex items-center gap-3 min-w-0 shrink-0">
                                 <Badge
-                                    className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap", formStatusColors[formStatus as keyof typeof formStatusColors])}>
+                                    className={cn(
+                                        "rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap",
+                                        "transition-all duration-300 ease-in-out",
+                                        formStatusColors[formStatus as keyof typeof formStatusColors]
+                                    )}
+                                >
                                     {formStatus}
                                 </Badge>
+
                                 <Badge
-                                    className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap", statusColors[status as keyof typeof statusColors])}>
+                                    className={cn(
+                                        "rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap",
+                                        "transition-all duration-300 ease-in-out",
+                                        statusColors[status as keyof typeof statusColors]
+                                    )}
+                                >
                                     {`Event ${status}`}
                                 </Badge>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            {!hasFeedback &&
-                                <Button variant="outline" size="sm"
-                                        className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer">
-                                    <Plus size={16} className="mr-2"/> New</Button>
-                            }
-                            <Button variant="outline" size="sm"
-                                    className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer">
-                                <Eye size={16} className="mr-2"/>
-                                Preview
-                            </Button>
-                            <Button variant="outline" size="sm"
-                                    className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer">
-                                <Edit3 size={16} className="mr-2"/> Edit</Button>
-                            <Switch
-                                checked={localActive}
-                                onCheckedChange={handleChange}
-                                disabled={isUpdating}
-                                className={cn(
-                                    "cursor-pointer border-1 scale-140 ml-3",
-                                    "data-[state=unchecked]:bg-[#ACACAC] data-[state=unchecked]:border-[#ACACAC]",
-                                    "data-[state=checked]:bg-[#574272] data-[state=checked]:border-[#574272]",
-                                    "transition-colors duration-200"
-                                )}
-                            />
+                            {hasFeedback ? (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer"
+                                    >
+                                        <Eye size={16} className="mr-2"/>
+                                        Preview
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer"
+                                    >
+                                        <Edit3 size={16} className="mr-2"/>
+                                        Edit
+                                    </Button>
+
+                                    <Switch
+                                        checked={localActive}
+                                        onCheckedChange={handleChange}
+                                        disabled={isUpdating}
+                                        className={cn(
+                                            "cursor-pointer border-1 scale-140 ml-3",
+                                            "data-[state=unchecked]:bg-[#ACACAC] data-[state=unchecked]:border-[#ACACAC]",
+                                            "data-[state=checked]:bg-[#574272] data-[state=checked]:border-[#574272]",
+                                            "transition-colors duration-200"
+                                        )}
+                                    />
+                                </>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="rounded-lg border-2 hover:bg-[#261A36]/20 transition-colors text-[#261A36] cursor-pointer"
+                                >
+                                    <Plus size={16} className="mr-2"/>
+                                    New
+                                </Button>
+                            )}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-y-3 font-heading font-normal text-black">
                         <div className="flex items-center gap-3">
                             <Image src="/svgs/my-events-location.svg" width="15" height="15" alt="Icon"/>
-                            <span className="text-lg truncate max-w-[700px] inline-block align-bottom">{location}</span>
+                            <span className="text-xl truncate max-w-[700px] inline-block align-bottom">{location}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <Image src="/svgs/my-events-date.svg" width="15" height="15" alt="Icon"/>
@@ -362,16 +394,17 @@ export function FeedbackSummaryCard({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            onExpand(); //
+                            onExpand();
                         }}
-                        className="w-full mt-6 pt-4 border-t-2 border-[#5C5C5C]/10 flex items-center justify-between group"
+                        className="w-full mt-4 pt-4 border-t-2 border-[#5C5C5C]/10 flex items-center justify-between group cursor-pointer"
                     >
-                        <div className="flex items-center gap-3 text-[#261A36] font-black uppercase tracking-wider text-sm">
-                            {/*<BarChart2 size={20} className={isExpanded ? "text-[#7B55A3]" : ""} />*/}
+                        <div
+                            className="flex items-center gap-5 text-[#261A36] font-bold font-heading uppercase tracking-wider text-lg">
+                            <Image src="/svgs/feedbacks-summary-icon.svg" width="24" height="24" alt="Icon"/>
                             View Feedback Summary
                         </div>
                         <ChevronDown
-                            className={cn("transition-transform duration-300", isExpanded && "rotate-180 text-[#7B55A3]")}/>
+                            className={cn("transition-transform duration-300", isExpanded && "rotate-180")}/>
                     </button>
                 )
             }
