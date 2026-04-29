@@ -2,8 +2,9 @@
 
 import * as React from "react"
 import {ChevronDown} from "lucide-react"
-import {addDays, format, differenceInDays, isSameDay} from "date-fns"
+import {addDays, format, differenceInDays, isSameDay, parseISO} from "date-fns"
 import {DateRange} from "react-day-picker"
+import {usePathname} from "next/navigation"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
 import {Calendar} from "@/components/ui/calendar"
@@ -13,20 +14,60 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import {Input} from "@/components/ui/input"
-import {useEffect, useState} from "react";
+import {useEffect, useState, useMemo} from "react";
 
-export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: DateRange | undefined) => void }) {
-    const [tempDate, setTempDate] = useState<DateRange | undefined>({
-        from: addDays(new Date(), -6),
-        to: new Date(),
-    })
+export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRange | undefined) => void }) {
+    const pathname = usePathname();
 
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: addDays(new Date(), -6),
-        to: new Date(),
-    })
+    const storageKey = useMemo(() => `date_range_${pathname}`, [pathname]);
 
-    const [isOpen, setIsOpen] = useState(false)
+    const getInitialDate = (): DateRange => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    return {
+                        from: parseISO(parsed.from),
+                        to: parseISO(parsed.to)
+                    };
+                } catch (e) {
+                    console.error("Failed to parse stored date", e);
+                }
+            }
+        }
+
+        return {
+            from: addDays(new Date(), -6),
+            to: new Date(),
+        };
+    };
+
+    const [date, setDate] = useState<DateRange | undefined>(getInitialDate);
+    const [tempDate, setTempDate] = useState<DateRange | undefined>(getInitialDate);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const initial = getInitialDate();
+        setDate(initial);
+        setTempDate(initial);
+        onDateChange(initial);
+    }, [storageKey]);
+
+    const handleApply = () => {
+        if (!tempDate?.from || !tempDate?.to) return;
+
+        // Update Local State
+        setDate(tempDate);
+        onDateChange(tempDate);
+
+        localStorage.setItem(storageKey, JSON.stringify({
+            from: tempDate.from.toISOString(),
+            to: tempDate.to.toISOString()
+        }));
+
+        setIsOpen(false);
+    }
 
     const getLabel = () => {
         if (date?.from && date?.to) {
@@ -35,7 +76,6 @@ export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: Da
 
             if (isToToday) {
                 const dayCount = differenceInDays(date.to, date.from) + 1;
-
                 if (dayCount === 1) return "Today";
                 return `Last ${dayCount} days`;
             }
@@ -44,12 +84,6 @@ export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: Da
         }
         return "Pick a date";
     };
-
-    const handleApply = () => {
-        setDate(tempDate);
-        onDateChange(tempDate);
-        setIsOpen(false);
-    }
 
     return (
         <div className="grid gap-2">
@@ -91,24 +125,20 @@ export function DashboardDatePicker({ onDateChange }: { onDateChange: (range: Da
                             classNames={{
                                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                                 month: "space-y-4",
-
                                 range_start: "!bg-blue-600 !text-white !rounded-l-full",
                                 range_end: "!bg-blue-600 !text-white !rounded-r-full",
                                 range_middle: "!bg-blue-50 !text-blue-600 !rounded-none",
-
                                 selected: "!bg-blue-600 !text-white hover:!bg-blue-600",
-
                                 day_range_start: "!bg-blue-600 !text-white !rounded-full !opacity-100",
                                 day_range_end: "!bg-blue-600 !text-white !rounded-full !opacity-100",
                                 day_range_middle: "!bg-blue-50 !text-blue-600 !rounded-none",
                                 day_selected: "!bg-blue-600 !text-white hover:!bg-blue-600 focus:!bg-blue-600 !opacity-100",
-                                day: "!h-9 !w-9 !p-0 !font-normal aria-selected:!opacity-100 hover:!bg- !rounded-full transition-colors",
+                                day: "!h-9 !w-9 !p-0 !font-normal aria-selected:!opacity-100 hover:!bg-blue-50 !rounded-full transition-colors",
                             }}
                         />
                     </div>
 
-                    <div
-                        className="border-t-2 border-gray-100 px-4 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white">
+                    <div className="border-t-2 border-gray-100 px-4 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white pt-4">
                         <div className="flex items-center gap-1.5">
                             <Input
                                 readOnly

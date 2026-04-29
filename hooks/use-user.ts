@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
-import { FullUserProfile } from '@/types/user';
+import { FullUser } from '@/types/user';
 
 export function useUser() {
     const supabase = createClient();
 
-    return useQuery<FullUserProfile | null>({
+    return useQuery<FullUser | null>({
         queryKey: ['user-profile'],
         queryFn: async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -22,8 +22,8 @@ export function useUser() {
                 throw userDataError;
             }
 
-            return { ...user, ...userData } as FullUserProfile;
+            return { ...user, ...userData } as FullUser;
         },
-        staleTime: 1000 * 60 * 5, // 5 minutes cache
+        staleTime: 1000 * 60 * 5,
     });
 }

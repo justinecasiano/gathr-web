@@ -3,6 +3,7 @@ import {Instrument_Sans, Inter, Rethink_Sans} from "next/font/google";
 import "./globals.css";
 import {cn} from "@/lib/utils";
 import QueryProvider from "@/providers/query-provider";
+import '@/bones/registry'
 
 const inter = Inter({subsets: ['latin'], variable: '--font-sans'});
 

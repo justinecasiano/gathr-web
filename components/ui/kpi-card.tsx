@@ -11,9 +11,10 @@ interface KpiCardProps {
     trendUp?: boolean
     bgColor: string
     cardBg?: string
+    comparisonLabel: string
 }
 
-export function KpiCard({label, value, icon, trend, trendUp, bgColor, cardBg}: KpiCardProps) {
+export function KpiCard({label, value, icon, trend, trendUp, bgColor, cardBg, comparisonLabel}: KpiCardProps) {
     return (
         <Card className={cn("relative overflow-hidden border-2 border-[#5C5C5C] shadow-[4px_4px_0px_0px_rgba(87,66,114,1)]", bgColor)}>
             {cardBg && (
@@ -34,7 +35,7 @@ export function KpiCard({label, value, icon, trend, trendUp, bgColor, cardBg}: K
                 <p className="text-lg font-heading font-bold text-[#574272]">{label}</p>
                 <div
                     className={cn("flex items-center text-sm font-medium font-display", trendUp ? "text-[#003F1F]" : "text-[#820006]")}>
-                    {trend} from last month
+                    {trend} vs {comparisonLabel}
                 </div>
             </CardContent>
         </Card>

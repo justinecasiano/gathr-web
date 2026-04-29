@@ -25,7 +25,7 @@ export function Header() {
     }, [pathname]);
 
     return (
-        <header className="sticky top-0 z-60 flex h-21 items-center justify-between px-10 pt-3">
+        <header className="sticky top-0 z-45 flex h-21 items-center justify-between px-10 pt-3">
             <div className="flex items-center gap-6">
                 <div className="rounded-full border-2 border-[#5C5C5C] bg-white p-2.5 text-[#261A36] shadow-[0px_4px_0px_0px_rgba(87,66,114,1)] transition-colors hover:!brightness-80">
                     <Icon

@@ -1,17 +1,12 @@
 "use client"
 
 import * as React from "react"
-import {
-    ChevronDown, MapPin, BarChart2, CheckCircle2
-} from "lucide-react"
-import {cn, mapToFeedbackEvent} from "@/lib/utils"
-import {Button} from "@/components/ui/button"
+import {cn, mapToFeedbackEvent, mapToIndividualSummary} from "@/lib/utils"
 import {Header} from "@/components/ui/header";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import {motion} from "motion/react";
 import {TabButton} from "@/components/ui/tab-button"
-import {useMemo, useState} from "react"
-import {FeedbackEvent} from "@/types/base-event";
+import {useEffect, useMemo, useState} from "react"
+import {BaseEvent, FeedbackEvent, IndividualResponse} from "@/types/base-event";
 import {FeedbackSummaryCard} from "@/components/ui/feedback-summary-card";
 import {useOrganizerEvents} from "@/hooks/use-organizer-events";
 import {usePagination} from "@/hooks/use-pagination";
@@ -19,53 +14,156 @@ import {NotificationToast, ToastVariant} from "@/components/ui/notification-toas
 import {useUpdateFormStatus} from "@/hooks/use-update-form-status";
 import {useSearchStore} from "@/hooks/use-search-store";
 import _my_feedback from "@/bones/my-feedback.bones.json";
+import _my_individual_feedback from "@/bones/my-individual-feedback.bones.json";
 import {ResponsiveBones} from "boneyard-js";
 import {Skeleton} from "boneyard-js/react";
 import {useSkeleton} from "@/hooks/use-skeleton";
 import FeedbackFormEditor from "@/components/ui/form-editor";
 import {Dialog, DialogContent, DialogDescription, DialogTitle} from "@/components/ui/dialog"
 import {FormEditorValues} from "@/types/feedback";
-import { VisuallyHidden } from "radix-ui"
+import {VisuallyHidden} from "radix-ui"
+import {useUpdateFeedbackForm} from "@/hooks/use-update-feedback-form";
+import {useRouter, useSearchParams} from "next/navigation";
+import {IndividualSummaryCard} from "@/components/ui/individual-summary-card";
+import {useEventParticipants} from "@/hooks/use-event-participants";
+import {PaginationControls} from "@/components/ui/pagination-controls";
+import {BackgroundBubbles} from "@/components/ui/background-bubbles";
+
+const MOCK_INDIVIDUAL_SUMMARIES: IndividualResponse[] = [
+    {
+        id: "501",
+        fullName: "Justin Rivera",
+        eventId: 101,
+        eventLocation: "Main Auditorium, University of Makati",
+        hasFeedback: true
+    },
+    {
+        id: "502",
+        fullName: "Sarah Mae Santos",
+        eventId: 101,
+        eventLocation: "Main Auditorium, University of Makati",
+        hasFeedback: false
+    },
+    {
+        id: "503",
+        fullName: "Michael Chen",
+        eventId: 105,
+        eventLocation: "IT Laboratory 3, Admin Building",
+        hasFeedback: true
+    },
+    {
+        id: "504",
+        fullName: "Elena De Cruz",
+        eventId: 110,
+        eventLocation: "Grand Ballroom, Heritage Hotel",
+        hasFeedback: false
+    },
+    {
+        id: "505",
+        fullName: "David Gumabao",
+        eventId: 101,
+        eventLocation: "Main Auditorium, University of Makati",
+        hasFeedback: true
+    }
+];
+
+const MOCK_BASE_EVENT: BaseEvent = {
+    id: 101,
+    parent_event_id: null,
+    title: "InnovateU: Tech & Career Summit 2026",
+    description: "A flagship summit bringing together industry leaders and students to explore future trends in AI, Web Development, and Digital Design.",
+    roles: ["Student", "Faculty", "Alumni", "Guest"],
+    allowed_departments: ["Computer Science", "Information Technology", "Digital Arts"],
+    allow_non_umak: true,
+    allow_alumni: true,
+    background_image: "/images/infotech_placeholder_landscape.png",
+    location: "Main Auditorium, University of Makati",
+    start_time: "2026-05-15T08:00:00Z",
+    end_time: "2026-05-15T17:00:00Z",
+    capacity: 500,
+    created_by: "user_001",
+    creator: null,
+    status: 'APPROVED',
+    submitted_at: "2026-04-01T10:00:00Z",
+    updated_at: "2026-04-05T14:30:00Z",
+    approved_by: "admin_99",
+    comment: "Event plan looks solid and aligns with university objectives.",
+    approved_at: "2026-04-05T14:30:00Z",
+    is_archive: false,
+    is_form_active: true,
+    form_title: "Summit Satisfaction Survey",
+    has_feedback_form: true,
+    question_count: 4,
+    avg_rating: 4.8,
+    participants: [{count: 482}],
+    response_count: [{count: 233}],
+    present_count: [{count: 450}],
+    event_status: 'ENDED',
+    feedback_form: null
+};
 
 export default function FeedbackFormsPage() {
+    const searchQuery = useSearchStore(state => state.query);
     const [activeTab, setActiveTab] = useState<'forms' | 'individual'>('forms')
-    const [selectedIndividual, setSelectedIndividual] = useState<number | null>(null)
-    const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
-    const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
+    const [selectedEventId, setSelectedEventId] = useState<string | undefined>(() => {
+        if (typeof window !== 'undefined') return localStorage.getItem('gathr_selected_event') || undefined;
+        return undefined;
+    });
+
+    useEffect(() => {
+        if (selectedEventId) localStorage.setItem('gathr_selected_event', selectedEventId);
+    }, [selectedEventId]);
 
     const {data: rawEvents, isLoading: isEventsLoading} = useOrganizerEvents();
-
-    const showSkeleton = useSkeleton(isEventsLoading, 500);
-
-    const searchQuery = useSearchStore(state => state.query);
+    const showEventSkeleton = useSkeleton(isEventsLoading, 500);
+    const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
     const events = useMemo(() => {
-        if (!rawEvents) return [];
-        const allEvents = rawEvents.map(event => mapToFeedbackEvent(event));
+            if (!rawEvents) return [];
+            const allEvents = rawEvents.filter(event => event.status !== 'REJECTED')
+                .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+                .map(event => mapToFeedbackEvent(event));
 
-        if (searchQuery.trim() !== '') {
-            return allEvents.filter(event =>
-                event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                event.questionCount.toString().includes(searchQuery) ||
-                event.responseCount.toString().includes(searchQuery)
-            );
+            if (searchQuery.trim() !== '') {
+                return allEvents.filter(event =>
+                    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    event.questionCount.toString().includes(searchQuery) ||
+                    event.responseCount.toString().includes(searchQuery)
+                );
+            }
+
+            return allEvents;
+        }, [rawEvents, searchQuery]
+    );
+
+    const {data: participants, isLoading: isEventParticipantsLoading} = useEventParticipants(Number(selectedEventId));
+    const showIndivSkeleton = useSkeleton(isEventParticipantsLoading, 400);
+    const [expandedIndivId, setexpandedIndivId] = useState<string | null>(null);
+    const selectedEvent = events.find(e => e.id.toString() === selectedEventId);
+    const individualResponses = useMemo(() => {
+        if (!participants || !selectedEvent) return [];
+        return mapToIndividualSummary(participants, selectedEvent.location);
+    }, [participants, selectedEvent]);
+
+    const formPagination = usePagination<FeedbackEvent>({
+        items: events,
+        itemsPerPage: 8
+    });
+
+    const indivPagination = usePagination<IndividualResponse>({
+        items: individualResponses,
+        itemsPerPage: 8
+    });
+
+    const activePagination = activeTab === 'forms' ? formPagination : indivPagination;
+    const totalItems = activeTab === 'forms' ? events.length : individualResponses.length;
+
+    useEffect(() => {
+        if (selectedEventId) {
+            indivPagination.setCurrentPage(1);
+            setexpandedIndivId(null);
         }
-
-        return allEvents;
-    }, [rawEvents, searchQuery]);
-
-    const {
-        currentItems,
-        currentPage,
-        setCurrentPage,
-        visiblePages,
-        totalPages,
-        paginationLabel,
-        nextPage,
-        prevPage,
-        hasPrevPage,
-        hasNextPage
-    } = usePagination<FeedbackEvent>({items: events, itemsPerPage: 8});
+    }, [selectedEventId]);
 
     const [toastConfig, setToastConfig] = useState({
         isOpen: false,
@@ -73,11 +171,11 @@ export default function FeedbackFormsPage() {
         description: "",
         variant: "success" as ToastVariant,
     });
-
+    const {mutateAsync: updateFeedbackForm} = useUpdateFeedbackForm();
     const {mutate: updateStatus, isPending} = useUpdateFormStatus();
     const [isDelaying, setIsDelaying] = useState<number | null>(null);
-    const isCardUpdating = (eventId: number) => isPending || isDelaying === eventId;
 
+    const isCardUpdating = (eventId: number) => isPending || isDelaying === eventId;
     const handleStatusToggle = (eventId: number, title: string, isActive: boolean) => {
         setIsDelaying(eventId);
 
@@ -109,16 +207,22 @@ export default function FeedbackFormsPage() {
         );
     };
 
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const targetEventId = searchParams.get('eventId');
+
     const [editorConfig, setEditorConfig] = useState<{
         isOpen: boolean;
         mode: 'new' | 'edit' | 'preview';
         initialData: FormEditorValues | null;
         eventId: number | null;
+        eventTitle: string;
     }>({
         isOpen: false,
         mode: 'preview',
         initialData: null,
-        eventId: null
+        eventId: null,
+        eventTitle: ""
     });
 
     const handleOpenEditor = (mode: 'new' | 'edit' | 'preview', event?: FeedbackEvent) => {
@@ -126,14 +230,74 @@ export default function FeedbackFormsPage() {
             isOpen: true,
             mode,
             initialData: event?.feedbackForm || null,
-            eventId: event?.id || null
+            eventId: event?.id || null,
+            eventTitle: event?.title || ""
         });
     };
 
-    const handleSaveForm = async (data: FormEditorValues) => {
-        console.log("Saving form for Event ID:", editorConfig.eventId, data);
-        setEditorConfig(prev => ({...prev, isOpen: false}));
+    const handleSaveForm = async (data: FormEditorValues, isDirty: boolean) => {
+        if (!isDirty) {
+            setToastConfig({
+                isOpen: true,
+                title: "Action Failed",
+                description: "No changes detected to save.",
+                variant: "warning"
+            });
+            return;
+        }
+
+        if (!editorConfig.eventId) {
+            setToastConfig({
+                isOpen: true,
+                title: "Error",
+                description: "No event selected to update.",
+                variant: "error"
+            });
+            return;
+        }
+
+        try {
+            await updateFeedbackForm({
+                eventId: editorConfig.eventId,
+                formData: data
+            });
+
+            setEditorConfig(prev => ({...prev, isOpen: false}));
+
+            setToastConfig({
+                isOpen: true,
+                title: "Form Saved",
+                description: `The feedback form for ${editorConfig.eventTitle} has been updated successfully.`,
+                variant: "success"
+            });
+        } catch (error: unknown) {
+            setToastConfig({
+                isOpen: true,
+                title: "Save Failed",
+                description: "There was an error saving the form.",
+                variant: "error"
+            });
+        }
     };
+
+    useEffect(() => {
+        if (targetEventId && events) {
+            const targetEvent = events.find(e => e.id === Number(targetEventId));
+
+            if (targetEvent) {
+                setEditorConfig({
+                    isOpen: true,
+                    mode: 'new',
+                    initialData: null,
+                    eventId: targetEvent.id,
+                    eventTitle: targetEvent.title
+                });
+
+                const newRelativePathQuery = window.location.pathname;
+                router.replace(newRelativePathQuery, {scroll: false});
+            }
+        }
+    }, [targetEventId, events, router]);
 
     return (
         <div className="flex relative h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
@@ -157,6 +321,7 @@ export default function FeedbackFormsPage() {
                         initialData={editorConfig.initialData}
                         readOnly={editorConfig.mode === 'preview'}
                         onSave={handleSaveForm}
+                        onClose={() => setEditorConfig(prev => ({...prev, isOpen: false}))}
                     />
                 </DialogContent>
             </Dialog>
@@ -197,37 +362,61 @@ export default function FeedbackFormsPage() {
 
                 <div className="flex justify-end gap-4 mt-2">
                     {activeTab === 'individual' && (
-                        <Select onValueChange={setSelectedEventId} value={selectedEventId}>
-                            <SelectTrigger
-                                className="w-full md:w-64 h-12 rounded-sm border-2 text-lg border-black bg-white font-display font-semibold text-black  focus:ring-0"
-                            >
-                                <SelectValue placeholder="Select Specific Event"/>
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                {events.map((event) => (
-                                    <SelectItem
-                                        key={event.id}
-                                        value={event.id.toString()}
-                                        className="font-display font-medium focus:bg-slate-100 cursor-pointer"
-                                    >
-                                        {event.title}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="my-2">
+                            <Select onValueChange={setSelectedEventId} value={selectedEventId}>
+                                <SelectTrigger
+                                    className="w-full md:w-64 h-12 rounded-sm border-2 text-lg border-black bg-white font-display font-semibold text-black  focus:ring-0 cursor-pointer"
+                                >
+                                    <SelectValue placeholder="Select Specific Event"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {events.map((event) => (
+                                        <SelectItem
+                                            key={event.id}
+                                            value={event.id.toString()}
+                                            className="font-display font-medium focus:bg-slate-100 cursor-pointer"
+                                        >
+                                            {event.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     )}
                 </div>
 
                 <div
                     className="space-y-6 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-[#7B55A3] scrollbar-track-transparent">
+                    <div className="mt-4"></div>
+
+                    {searchQuery.trim() !== '' && activePagination.currentItems.length === 0 && (!showEventSkeleton || !showIndivSkeleton) && (
+                        <div className="flex flex-col items-center justify-center h-64 text-center">
+                            <h2 className="text-2xl font-bold text-[#261A36] font-display">
+                                {activeTab === 'forms'
+                                    ? `No event${events.length === 1 ? "" : "s"} found`
+                                    : `No response${individualResponses.length === 1 ? "" : "s"} found`
+                                }
+                            </h2>
+                            <p className="text-[#676767] mt-2">
+                                We couldn&apos;t find anything matching &quot;{searchQuery}&quot;
+                            </p>
+                        </div>
+                    )}
+
+                    {searchQuery.trim() === '' && activePagination.currentItems.length === 0 && (!showEventSkeleton || !showIndivSkeleton) && (
+                        <div className="flex flex-col items-center justify-center h-64 text-center">
+                            <h2 className="text-2xl font-bold text-[#261A36] font-display">{activeTab === 'forms' ? "No events yet" : "No responses yet"}</h2>
+                            <p className="text-[#676767] mt-2">Get started
+                                by {activeTab === 'forms' ? "creating" : "sharing"} your first event!</p>
+                        </div>
+                    )}
                     {activeTab === 'forms' ? (
                         <>
-                            <div className="mt-4"></div>
-                            {events.map((event) => (
+                            {(activePagination.currentItems as FeedbackEvent[]).map((event) => (
                                 <Skeleton key={event.id} initialBones={(_my_feedback as unknown) as ResponsiveBones}
-                                          animate="shimmer" name={`my-feedback-item-${event.id}`} loading={showSkeleton}
-                                          className={cn(showSkeleton && "h-[220px] rounded-[14px] bg-white/40 px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all")}
+                                          animate="shimmer" name={`my-feedback-item-${event.id}`}
+                                          loading={showEventSkeleton}
+                                          className={cn(showEventSkeleton && "h-[220px] rounded-[14px] bg-white/40 px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all")}
                                           color="#574272" boneClass="opacity-40"
                                 >
                                     <FeedbackSummaryCard key={event.id} {...event}
@@ -241,152 +430,46 @@ export default function FeedbackFormsPage() {
                                     />
                                 </Skeleton>
                             ))}
-                            <div className="mb-8"></div>
                         </>
                     ) : (
-                        <div
-                            className="bg-white rounded-[32px] border-2 border-[#5C5C5C]/10 p-6 shadow-sm overflow-hidden">
-                            <div className="flex items-center gap-6">
-                                <div
-                                    className="h-20 w-20 rounded-full border-4 border-[#261A36] bg-[#7B55A3] overflow-hidden flex items-end justify-center">
-                                    <div
-                                        className="w-10 h-10 bg-white rounded-full mb-[-5px] border-2 border-[#261A36]"/>
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="text-2xl font-black text-[#261A36]">Angela Mae Cabrera</h3>
-                                    <div className="flex items-center gap-2 text-sm font-bold text-[#5C5C5C]/80 mt-1">
-                                        <MapPin size={14} className="text-[#FF8C66]"/> 4th IT Skills Olympics
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setSelectedIndividual(selectedIndividual === 1 ? null : 1)}
-                                    className="flex items-center gap-3 text-[#261A36] font-black uppercase"
+                        <>
+                            {(activePagination.currentItems as IndividualResponse[]).map((indiv) => {
+                                return <Skeleton key={indiv.id}
+                                                 initialBones={(_my_individual_feedback as unknown) as ResponsiveBones}
+                                                 animate="shimmer" name={`my-individual-feedback-item-${indiv.id}`}
+                                                 loading={showIndivSkeleton}
+                                                 className={cn(showIndivSkeleton && "rounded-[14px] bg-white/40 px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all")}
+                                                 color="#574272" boneClass="opacity-40"
                                 >
-                                    <BarChart2 size={20}/> View Feedback
-                                    <ChevronDown
-                                        className={cn("transition-transform", selectedIndividual === 1 && "rotate-180")}/>
-                                </button>
-                            </div>
-
-                            {selectedIndividual === 1 && (
-                                <div
-                                    className="mt-8 border-t-2 border-[#5C5C5C]/10 pt-8 space-y-8 animate-in fade-in duration-500">
-                                    <div className="p-6 rounded-[32px] border-2 border-[#7B55A3]">
-                                        <p className="text-xs font-black text-[#7B55A3] uppercase mb-1">Question 1 /
-                                            10</p>
-                                        <p className="font-bold text-[#261A36] mb-4">What are the things you observed
-                                            during the event...?</p>
-                                        <div className="space-y-3">
-                                            {[1, 2, 3].map((i) => (
-                                                <div key={i}
-                                                     className={cn("h-12 border-2 rounded-xl flex items-center px-4 justify-between", i === 2 ? "border-[#7B55A3] bg-[#F3E8FF]/20" : "border-[#5C5C5C]/10 text-[#5C5C5C]/40")}>
-                                                    <span>Option {i} Text</span>
-                                                    <div
-                                                        className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", i === 2 ? "border-[#7B55A3] bg-[#7B55A3]" : "border-[#5C5C5C]/20")}>
-                                                        {i === 2 && <CheckCircle2 size={12} className="text-white"/>}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 rounded-[32px] border-2 border-[#7B55A3]">
-                                        <p className="text-xs font-black text-[#7B55A3] uppercase mb-1">Question 2 /
-                                            10</p>
-                                        <p className="font-bold text-[#261A36] mb-8">How satisfied are you?</p>
-                                        <div className="px-4">
-                                            <div className="relative h-2 bg-[#5C5C5C]/10 rounded-full">
-                                                <div className="absolute h-full w-1/2 bg-[#7B55A3] rounded-full"/>
-                                                <div
-                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#7B55A3] rounded-full border-2 border-white shadow-lg"/>
-                                            </div>
-                                            <div
-                                                className="flex justify-between mt-4 text-[10px] font-black text-[#5C5C5C]/50">
-                                                <span>1</span><span>2</span><span
-                                                className="text-[#7B55A3]">3</span><span>4</span><span>5</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                    <IndividualSummaryCard key={indiv.id} {...indiv}
+                                                           isExpanded={expandedIndivId === indiv.id}
+                                                           onExpand={() => setexpandedIndivId(expandedIndivId === indiv.id ? null : indiv.id)}
+                                    />
+                                </Skeleton>
+                            })}
+                        </>
                     )}
+                    <div className="mb-8"></div>
                 </div>
             </main>
 
-            {events.length > 8 && (
-                <div className="bg-white border-t-2 border-[#5C5C5C] px-6 py-3 shrink-0">
-                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="font-display text-base font-normal text-[#676767]">
-                            {paginationLabel}
-                        </p>
-
-                        <div className="flex items-center gap-2">
-                            <Button
-                                disabled={!hasPrevPage}
-                                onClick={prevPage}
-                                className="h-11 rounded-xl border-2 border-[#5C5C5C]/10 bg-white font-bold text-[#574272] hover:bg-[#574272] hover:text-white transition-colors"
-                            >
-                                Previous
-                            </Button>
-
-                            {visiblePages.map((num) => (
-                                <Button
-                                    key={num}
-                                    onClick={() => setCurrentPage(num)}
-                                    className={cn(
-                                        "h-11 w-11 rounded-xl font-bold transition-all",
-                                        currentPage === num
-                                            ? "bg-[#574272] text-white hover:bg-[#574272]"
-                                            : "bg-white border-2 border-[#5C5C5C]/10 text-[#574272] hover:bg-[#574272] hover:text-white"
-                                    )}
-                                >
-                                    {num}
-                                </Button>
-                            ))}
-
-                            <Button
-                                variant="outline"
-                                disabled={!hasNextPage}
-                                onClick={nextPage}
-                                className="h-11 rounded-xl border-2 border-[#5C5C5C]/10 bg-white font-bold text-[#574272] hover:bg-[#574272] hover:text-white transition-colors"
-                            >
-                                Next
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="hidden lg:block absolute inset-0 pointer-events-none h-full">
-                <motion.div
-                    className="absolute -top-5 -right-55 h-90 w-90 rounded-full bg-[#7B55A3]/10"
-                    initial={{x: 0, y: 0}}
-                    whileHover={{x: 50}}
-                    transition={{type: "spring", stiffness: 200, damping: 15}}
+            {totalItems > 8 && (
+                <PaginationControls
+                    currentPage={activePagination.currentPage}
+                    totalPages={activePagination.totalPages}
+                    visiblePages={activePagination.visiblePages}
+                    paginationLabel={activePagination.paginationLabel + (activeTab === 'forms' ? " Events" : " Responses")}
+                    onPageChange={activePagination.setCurrentPage}
+                    nextPage={activePagination.nextPage}
+                    prevPage={activePagination.prevPage}
+                    hasPrevPage={activePagination.hasPrevPage}
+                    hasNextPage={activePagination.hasNextPage}
+                    totalItems={totalItems}
                 />
+            )
+            }
 
-                <motion.div
-                    className="absolute -top-22 left-90 h-40 w-40 rounded-full bg-[#7B55A3]/10"
-                    initial={{x: 0, y: 0}}
-                    whileHover={{y: -40, scale: 1.1}}
-                    transition={{type: "spring", stiffness: 200, damping: 15}}
-                />
-
-                <motion.div
-                    className="absolute top-35 left-10 h-130 w-130 rounded-full bg-[#7B55A3]/10"
-                    initial={{x: 0, y: 0}}
-                    whileHover={{x: -60, scale: 1.05}}
-                    transition={{type: "spring", stiffness: 200, damping: 20}}
-                />
-
-                <motion.div
-                    className="absolute -bottom-65 -right-20 h-160 w-160 rounded-full bg-[#7B55A3]/10"
-                    initial={{x: 0, y: 0}}
-                    whileHover={{x: -60, scale: 1.05}}
-                    transition={{type: "spring", stiffness: 200, damping: 20}}
-                />
-            </div>
+            <BackgroundBubbles isEventsOrFeedbackPage={true}/>
         </div>
     )
 }

@@ -151,7 +151,7 @@ export default function SettingsPage() {
             setToastData({
                 title: "No Changes Detected",
                 description: "You haven't modified your name or username.",
-                variant: "error",
+                variant: "warning",
             });
             setShouldShowToast(true);
             return;

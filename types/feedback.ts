@@ -6,6 +6,7 @@ interface BaseQuestion {
     questionText: string;
     required: boolean;
     order: number;
+    isMandatory?: boolean;
 }
 
 export interface ChoiceQuestion extends BaseQuestion {
@@ -38,5 +39,10 @@ export interface FormSubmission {
     participantId?: string;
     responses: QuestionResponse[];
     submittedAt: string;
+}
+
+export interface FormEditorValues {
+    title: string;
+    questions: FeedbackQuestion[];
 }
 

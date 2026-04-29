@@ -2,7 +2,7 @@ import { User as SupabaseAuthUser } from '@supabase/supabase-js';
 
 export type UserRole = 'PARTICIPANT' | 'MODERATOR';
 
-export interface UserTableData {
+export interface User {
     id: string;
     display_name: string | null;
     first_name: string | null;
@@ -18,4 +18,4 @@ export interface UserTableData {
     email: string | null;
 }
 
-export type FullUserProfile = SupabaseAuthUser & UserTableData;
+export type FullUser = SupabaseAuthUser & User;

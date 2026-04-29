@@ -162,7 +162,7 @@ export default function VerifyPage() {
                                 type="button"
                                 disabled={isResending || countdown > 0}
                                 onClick={handleResendEmail}
-                                className="text-[#820006] text-sm font-semibold hover:brightness-90 disabled:opacity-50 text-right"
+                                className="text-[#820006] text-sm font-semibold hover:brightness-90 disabled:opacity-50 text-right cursor-pointer"
                             >
                                 Resend Again {countdown > 0 ? `in ${countdown}s` : ""}
                             </button>

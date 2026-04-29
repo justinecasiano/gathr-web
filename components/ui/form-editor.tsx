@@ -6,7 +6,7 @@ import {motion, AnimatePresence} from 'motion/react';
 import {
     Plus, Trash2, Circle, SlidersHorizontal,
     AlignLeft, LayoutTemplate, CheckSquare,
-    Loader2, Lock, Save
+    Loader2, Lock, Save, ChevronUp, ChevronDown
 } from 'lucide-react';
 
 import {Button} from '@/components/ui/button';
@@ -15,7 +15,6 @@ import {Label} from '@/components/ui/label';
 import {Slider} from '@/components/ui/slider';
 import {Badge} from '@/components/ui/badge';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {NotificationToast, ToastVariant} from '@/components/ui/notification-toast';
 import {cn} from "@/lib/utils";
 import {
     ChoiceQuestion,
@@ -85,8 +84,6 @@ const MANDATORY_QUESTIONS: FeedbackQuestion[] = [
     } as TextQuestion
 ];
 
-// --- SUB-COMPONENTS ---
-
 interface OptionsEditorProps {
     nest: `questions.${number}`;
     control: Control<FormEditorValues>;
@@ -96,7 +93,7 @@ interface OptionsEditorProps {
 }
 
 function OptionsEditor({nest, control, register, type, readOnly}: OptionsEditorProps) {
-    const {fields, append, remove} = useFieldArray({
+    const {fields, append, remove, move} = useFieldArray({
         control,
         name: `${nest}.options` as const as `questions.${number}.options`
     });
@@ -104,36 +101,36 @@ function OptionsEditor({nest, control, register, type, readOnly}: OptionsEditorP
     return (
         <div className="space-y-2 mt-3 pl-4 border-l-2 border-slate-100">
             {fields.map((item, i) => (
-                <div key={item.id} className="flex items-center gap-3">
-                    <div className={cn(
-                        "shrink-0 size-4 border-2 border-slate-300",
-                        type === 'radio' ? 'rounded-full' : 'rounded-md'
-                    )}/>
-                    <Input
-                        {...register(`${nest}.options.${i}.label` as const as `questions.${number}.options.${number}.label`)}
-                        disabled={readOnly}
-                        placeholder="Option text"
-                        className="h-9 text-sm font-heading"
-                    />
+                <div key={item.id} className="flex items-center gap-3 group/option">
+                    <div
+                        className={cn("shrink-0 size-4 border-2 border-slate-300", type === 'radio' ? 'rounded-full' : 'rounded-md')}/>
+
+                    <Input {...register(`${nest}.options.${i}.label` as const as `questions.${number}.options.${number}.label`)}
+                           disabled={readOnly} placeholder="Option text" className="h-9 !text-base font-heading"/>
+
                     {!readOnly && (
-                        <button
-                            type="button"
-                            onClick={() => remove(i)}
-                            className="text-slate-400 hover:text-red-500 cursor-pointer"
-                        >
-                            <Trash2 size={14}/>
-                        </button>
+                        <div
+                            className="flex items-center gap-1 opacity-0 group-hover/option:opacity-100 transition-opacity">
+                            <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0}
+                                    className="text-slate-400 hover:text-[#7B55A3] disabled:opacity-30 cursor-pointer">
+                                <ChevronUp size={14}/>
+                            </button>
+                            <button type="button" onClick={() => move(i, i + 1)} disabled={i === fields.length - 1}
+                                    className="text-slate-400 hover:text-[#7B55A3] disabled:opacity-30 cursor-pointer">
+                                <ChevronDown size={14}/>
+                            </button>
+                            <button type="button" onClick={() => remove(i)}
+                                    className="text-slate-400 hover:text-red-500 ml-1 cursor-pointer">
+                                <Trash2 size={14}/>
+                            </button>
+                        </div>
                     )}
                 </div>
             ))}
             {!readOnly && (
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => append({id: crypto.randomUUID(), label: ''})}
-                    className="text-[#7B55A3] h-7 text-xs px-2 hover:bg-[#7B55A3]/90 hover:text-white font-heading"
-                >
+                <Button type="button" variant="ghost" size="sm"
+                        onClick={() => append({id: crypto.randomUUID(), label: ''})}
+                        className="text-[#7B55A3] h-7 text-base px-2 hover:bg-[#7B55A3]/90 hover:text-white font-heading">
                     <Plus size={12} className="mr-1"/> Add option
                 </Button>
             )}
@@ -141,16 +138,14 @@ function OptionsEditor({nest, control, register, type, readOnly}: OptionsEditorP
     );
 }
 
-// --- MAIN COMPONENT ---
-
 interface FeedbackFormEditorProps {
     initialData?: FormEditorValues | null;
     readOnly?: boolean;
-    onSave?: (data: FormEditorValues) => void;
+    onSave?: (data: FormEditorValues, isDirty: boolean) => void;
+    onClose?: () => void;
 }
 
-export default function FeedbackFormEditor({initialData, readOnly = false, onSave}: FeedbackFormEditorProps) {
-    const [toast, setToast] = useState({isOpen: false, title: '', description: '', variant: 'success' as ToastVariant});
+export default function FeedbackFormEditor({initialData, readOnly = false, onSave, onClose}: FeedbackFormEditorProps) {
     const [activeTab, setActiveTab] = useState(readOnly ? 'preview' : 'editor');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -161,20 +156,17 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
         }
     });
 
-    const {fields, remove} = useFieldArray({
+    const {fields, remove, move, prepend} = useFieldArray({
         control: form.control,
         name: 'questions'
     });
 
     const handleAddQuestion = useCallback((type: QuestionType) => {
-        const current = form.getValues('questions');
-        const insertIndex = Math.max(0, current.length - 2);
-
         const base = {
             id: crypto.randomUUID(),
             questionText: '',
             required: true,
-            order: insertIndex,
+            order: 0,
             isMandatory: false
         };
 
@@ -187,35 +179,20 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
             newObj = {...base, type, placeholder: 'Write your answer...'} as TextQuestion;
         }
 
-        form.setValue('questions', [
-            ...current.slice(0, insertIndex),
-            newObj,
-            ...current.slice(insertIndex)
-        ]);
-    }, [form]);
+        prepend(newObj);
+    }, [prepend]);
 
     const handleRemove = (index: number) => {
-        const field = fields[index] as FeedbackQuestion;
-        if (field.isMandatory) {
-            setToast({
-                isOpen: true,
-                title: "Action Restricted",
-                description: "This question is required and cannot be removed.",
-                variant: "warning"
-            });
-            return;
-        }
         remove(index);
     };
 
     const handleFormSubmit = async (data: FormEditorValues) => {
         if (readOnly) return;
         setIsSaving(true);
+
         try {
-            if (onSave) await onSave(data);
-            setToast({isOpen: true, title: "Success", description: "Form saved successfully.", variant: "success"});
+            if (onSave) await onSave(data, form.formState.isDirty);
         } catch (e) {
-            setToast({isOpen: true, title: "Error", description: "Failed to save form.", variant: "error"});
         } finally {
             setIsSaving(false);
         }
@@ -226,42 +203,37 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
 
     return (
         <div className="flex h-screen flex-col bg-white overflow-hidden font-sans">
-            <NotificationToast
-                onClose={() => setToast(p => ({...p, isOpen: false}))}
-                {...toast}
-            />
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
                 <header
                     className="shrink-0 border-b border-slate-100 bg-white px-6 py-3 flex items-center justify-between z-50">
                     <div className="flex items-center gap-4 flex-1">
                         <div
                             className="size-9 rounded-xl bg-[#7B55A3] flex items-center justify-center text-white shadow-lg">
-                            <LayoutTemplate size={20}/>
-                        </div>
-                        <input
-                            {...form.register('title')}
-                            disabled={readOnly}
-                            className="text-xl font-bold font-heading bg-transparent outline-none w-full border-none focus:ring-0 disabled:opacity-70"
-                        />
+                            <LayoutTemplate size={20}/></div>
+                        <input {...form.register('title')} disabled={readOnly}
+                               className="text-xl font-bold font-heading bg-transparent outline-none w-[600px] border-none focus:ring-0 disabled:opacity-70"/>
                     </div>
-
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                         <TabsList className="bg-slate-100 p-1 rounded-xl">
-                            <TabsTrigger value="editor"
-                                         className="rounded-lg font-heading font-semibold text-sm px-6 data-[state=active]:bg-white cursor-pointer">Editor</TabsTrigger>
+                            {!readOnly && (
+                                <TabsTrigger value="editor"
+                                             className="rounded-lg font-heading font-semibold text-base px-6 data-[state=active]:bg-white cursor-pointer">Editor</TabsTrigger>
+                            )
+                            }
                             <TabsTrigger value="preview"
-                                         className="rounded-lg font-heading font-semibold text-sm px-6 data-[state=active]:bg-white cursor-pointer">Preview</TabsTrigger>
+                                         className="rounded-lg font-heading font-semibold text-base px-6 data-[state=active]:bg-white cursor-pointer">Preview</TabsTrigger>
                         </TabsList>
-
+                        <Button
+                            variant="ghost"
+                            onClick={onClose}
+                            className="text-slate-500 hover:bg-slate-100 rounded-xl text-base px-5 font-semibold cursor-pointer"
+                        >
+                            {readOnly ? "Close" : "Cancel"}
+                        </Button>
                         {!readOnly && (
-                            <Button
-                                onClick={form.handleSubmit(handleFormSubmit)}
-                                disabled={isSaving}
-                                className="bg-[#7B55A3] hover:bg-[#7B55A3]/90 text-white rounded-xl h-10 px-6 font-bold shadow-lg gap-2 cursor-pointer"
-                            >
-                                {isSaving ? <Loader2 className="size-4 animate-spin"/> : <Save size={18}/>}
-                                Save Form
+                            <Button onClick={form.handleSubmit(handleFormSubmit)} disabled={isSaving}
+                                    className="bg-[#7B55A3] hover:bg-[#7B55A3]/90 text-white text-base rounded-xl h-10 px-5 font-bold shadow-lg gap-2 cursor-pointer">
+                                {isSaving ? <Loader2 className="size-4 animate-spin"/> : <Save size={18}/>} Save Form
                             </Button>
                         )}
                     </div>
@@ -273,19 +245,16 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                             {!readOnly && (
                                 <aside
                                     className="w-64 shrink-0 border-r-2 border-[#5C5C5C]/10 bg-slate-100/50 p-5 flex flex-col gap-3 overflow-y-auto">
-                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Add
+                                    <p className="text-sm font-black text-slate-600 uppercase tracking-widest px-1">Add
                                         Element</p>
                                     {CONTROLS.map(ctrl => (
-                                        <button
-                                            key={ctrl.type}
-                                            onClick={() => handleAddQuestion(ctrl.type)}
-                                            className="flex items-center gap-3 bg-white border-2 border-slate-200 rounded-xl p-3 text-left hover:border-[#7B55A3] transition-all group active:scale-95 cursor-pointer"
-                                        >
+                                        <button key={ctrl.type} onClick={() => handleAddQuestion(ctrl.type)}
+                                                className="flex items-center gap-3 bg-white border-2 border-slate-200 rounded-xl p-3 text-left hover:border-[#7B55A3] transition-all group active:scale-95 cursor-pointer">
                                         <span
                                             className={cn("size-8 rounded-lg flex items-center justify-center border", ctrl.color)}>{ctrl.icon}</span>
                                             <div>
-                                                <p className="text-xs font-bold text-slate-700 group-hover:text-[#7B55A3]">{ctrl.label}</p>
-                                                <p className="text-[10px] text-slate-400">{ctrl.desc}</p>
+                                                <p className="text-sm font-bold text-slate-700 group-hover:text-[#7B55A3]">{ctrl.label}</p>
+                                                <p className="text-xs text-slate-400">{ctrl.desc}</p>
                                             </div>
                                         </button>
                                     ))}
@@ -305,24 +274,42 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                                                     animate={{opacity: 1, y: 0}}
                                                     className="bg-white border-3 border-[#7B55A3] rounded-[20px] p-6 shadow-sm group relative"
                                                 >
-                                                    <div className="flex items-center justify-between mb-4">
+                                                    {!readOnly && (
+                                                        <div
+                                                            className="absolute -left-12 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Button
+                                                                variant="ghost" size="icon"
+                                                                className="h-8 w-8 rounded-full bg-white shadow-sm border border-slate-200 hover:text-[#7B55A3]"
+                                                                disabled={index === 0}
+                                                                onClick={() => move(index, index - 1)}
+                                                            >
+                                                                <ChevronUp size={18}/>
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost" size="icon"
+                                                                className="h-8 w-8 rounded-full bg-white shadow-sm border border-slate-200 hover:text-[#7B55A3]"
+                                                                disabled={index === fields.length - 1}
+                                                                onClick={() => move(index, index + 1)}
+                                                            >
+                                                                <ChevronDown size={18}/>
+                                                            </Button>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center justify-between mb-3">
                                                         <div className="flex items-center gap-2">
                                                             <Badge variant="outline"
-                                                                   className={cn("border-2 rounded-full px-3 py-1 text-[10px] font-bold", TYPE_COLOR[q.type])}>
+                                                                   className={cn("border-2 rounded-full px-3 py-1 text-[12px] font-bold", TYPE_COLOR[q.type])}>
                                                                 {q.type.toUpperCase()}
                                                             </Badge>
-                                                            {q.isMandatory && (
-                                                                <Badge
-                                                                    className="bg-slate-900 text-white border-none rounded-full flex gap-1 items-center text-[10px]">
-                                                                    <Lock size={10}/> REQUIRED
-                                                                </Badge>
-                                                            )}
+                                                            {q.isMandatory && <Badge
+                                                                className="bg-slate-900 text-white border-none rounded-full flex gap-1 items-center text-[10px]"><Lock
+                                                                size={10}/> REQUIRED</Badge>}
                                                         </div>
                                                         {!q.isMandatory && !readOnly && (
                                                             <button onClick={() => handleRemove(index)}
                                                                     className="text-slate-400 hover:text-red-500 cursor-pointer">
-                                                                <Trash2 size={18}/>
-                                                            </button>
+                                                                <Trash2 size={18}/></button>
                                                         )}
                                                     </div>
 
@@ -330,39 +317,24 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                                                         {...form.register(`questions.${index}.questionText`)}
                                                         placeholder="Enter question text..."
                                                         readOnly={readOnly || q.isMandatory}
-                                                        className={cn(
-                                                            "text-lg font-bold border-0 border-b border-slate-100 rounded-none px-0 focus-visible:ring-0 mb-4 bg-transparent shadow-none",
-                                                            q.isMandatory && "opacity-60 cursor-default"
-                                                        )}
+                                                        className={cn("!text-lg font-bold border-0 border-b border-slate-100 rounded-none px-0 focus-visible:ring-0 mb-4 bg-transparent shadow-none", q.isMandatory && "opacity-60 cursor-default")}
                                                     />
 
-                                                    {(q.type === 'radio' || q.type === 'checkbox') && (
-                                                        <OptionsEditor
-                                                            nest={`questions.${index}`}
-                                                            control={form.control}
-                                                            register={form.register}
-                                                            type={q.type}
-                                                            readOnly={readOnly}
-                                                        />
-                                                    )}
-
-                                                    {q.type === 'slider' && (
-                                                        <div
-                                                            className="py-4 text-center bg-slate-50 border-2 border-dashed border-slate-100 rounded-xl">
-                                                            <p className="text-xs font-bold text-slate-400 uppercase">Fixed
-                                                                Rating Scale: 1 — 5</p>
-                                                        </div>
-                                                    )}
-
+                                                    {(q.type === 'radio' || q.type === 'checkbox') &&
+                                                        <OptionsEditor nest={`questions.${index}`}
+                                                                       control={form.control}
+                                                                       register={form.register} type={q.type}
+                                                                       readOnly={readOnly}/>}
+                                                    {q.type === 'slider' && <div
+                                                        className="py-4 text-center bg-slate-50 border-2 border-dashed border-slate-100 rounded-xl">
+                                                        <p className="text-base font-bold text-slate-400 uppercase">Fixed
+                                                            Rating Scale: 1 — 5</p></div>}
                                                     {q.type === 'text_input' && !q.isMandatory && (
                                                         <div className="ml-4">
                                                             <Label
-                                                                className="text-[10px] font-bold text-slate-400 uppercase">Placeholder</Label>
-                                                            <Input
-                                                                {...form.register(`questions.${index}.placeholder` as const as `questions.${number}.placeholder`)}
-                                                                readOnly={readOnly}
-                                                                className="h-8 text-sm mt-1"
-                                                            />
+                                                                className="text-sm font-bold text-slate-400 uppercase">Placeholder</Label>
+                                                            <Input {...form.register(`questions.${index}.placeholder` as const as `questions.${number}.placeholder`)}
+                                                                   readOnly={readOnly} className="h-8 !text-base mt-2"/>
                                                         </div>
                                                     )}
                                                 </motion.div>
@@ -373,26 +345,29 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                             </main>
                         </TabsContent>
                     </div>
-                )}
+                )
+                }
 
-                <TabsContent value="preview" className="flex-1 bg-slate-50 overflow-y-auto p-10 outline-none">
+                <TabsContent value="preview" className="flex-1 bg-slate-50 overflow-y-auto p-10 pb-27 outline-none">
                     <div className="max-w-2xl mx-auto space-y-8 pb-32">
-                        <div className="border-b border-slate-200 pb-6">
-                            <h1 className="text-4xl font-bold text-[#261A36] tracking-tight">{watchedTitle}</h1>
+                        <div className="border-b border-slate-200 pb-6"><h1
+                            className="text-4xl font-bold text-[#261A36] tracking-tight break-words">{watchedTitle}</h1>
                         </div>
                         <AnimatePresence>
                             {watchedQuestions.map((q, i) => (
-                                <motion.div
-                                    key={q.id}
-                                    initial={{opacity: 0, y: 10}}
-                                    animate={{opacity: 1, y: 0}}
-                                    transition={{delay: i * 0.05}}
-                                    className="bg-white border-3 border-[#7B55A3] rounded-[20px] p-6 shadow-sm"
-                                >
+                                <motion.div key={q.id} initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}}
+                                            transition={{delay: i * 0.05}}
+                                            className="bg-white border-3 border-[#7B55A3] rounded-[20px] p-6 shadow-sm">
                                     <span
                                         className="text-xs font-bold text-[#3C2457] tracking-widest mb-2 block uppercase">Question {i + 1}</span>
-                                    <h3 className="text-lg font-bold text-[#444444] mb-4">{q.questionText || "Untitled Question"}</h3>
-
+                                    <h3
+                                        className={cn(
+                                            "text-lg font-bold text-[#444444] leading-tight",
+                                            q.type === 'slider' ? "mb-4" : "mb-2"
+                                        )}
+                                    >
+                                        {q.questionText || "Untitled Question"}
+                                    </h3>
                                     {(q.type === 'radio' || q.type === 'checkbox') && (q as ChoiceQuestion).options?.map(o => (
                                         <div key={o.id}
                                              className="flex items-center gap-3 p-3 border border-slate-100 rounded-xl mb-2 bg-slate-50/50">
@@ -413,7 +388,7 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                                     )}
                                     {q.type === 'text_input' &&
                                         <Input disabled placeholder={(q as TextQuestion).placeholder}
-                                               className="h-12 rounded-xl bg-slate-50 mt-2"/>}
+                                               className="h-12 rounded-xl !text-base bg-slate-50 mt-2"/>}
                                 </motion.div>
                             ))}
                         </AnimatePresence>

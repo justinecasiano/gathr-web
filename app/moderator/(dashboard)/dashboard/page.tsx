@@ -27,11 +27,11 @@ import { Header } from "@/components/ui/header";
 import { Stats } from "@/components/ui/stats";
 import Image from "next/image";
 import { useUser } from "@/hooks/use-user";
-import { DashboardDatePicker } from "@/components/ui/dashboard-date-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {motion} from "motion/react";
 import { DateRange } from 'react-day-picker'
 import { addDays } from 'date-fns/addDays'
-import { useDashboard } from '@/hooks/use-dashboard'
+import { useOrganizerDashboard } from '@/hooks/use-organizer-dashboard'
 
 // const dashboardStats = [
 //     { value: "12,256", trend: "+12%", trendUp: true },
@@ -74,7 +74,7 @@ export default function DashboardPage() {
     });
 
     const { data: user, isLoading: isUserLoading } = useUser();
-    const { data, isLoading: isDashboardLoading } = useDashboard(dateRange);
+    const { data, isLoading: isDashboardLoading } = useOrganizerDashboard(dateRange);
 
     const dashboardStats = [
         data?.stats?.total_events,
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-6">
                             <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Dashboard</h1>
-                            <DashboardDatePicker onDateChange={setDateRange}/>
+                            <DateRangePicker onDateChange={setDateRange}/>
                         </div>
                         <p className="text-[#261A36] text-lg font-display font-bold mt-1">Overview of your events and feedback</p>
                     </div>

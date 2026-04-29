@@ -3,7 +3,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DateRange } from "react-day-picker";
 import { useUser } from "@/hooks/use-user";
 
-export function useDashboard(range: DateRange | undefined) {
+export function useOrganizerDashboard(range: DateRange | undefined) {
     const { data: user } = useUser();
 
     return useQuery({
@@ -13,7 +13,7 @@ export function useDashboard(range: DateRange | undefined) {
             if (!range?.from || !range?.to || !user?.id) return null;
 
             const { data, error } = await supabase.rpc('get_organizer_dashboard_stats', {
-                p_organizer_id: user.id, // Pass the explicit organizer ID
+                p_organizer_id: user.id,
                 p_start_date: range.from.toISOString(),
                 p_end_date: range.to.toISOString()
             });

@@ -54,7 +54,8 @@ export function FeedbackSummaryCard({
     }
 
     return (
-        <div className="rounded-[14px] bg-white px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
+        <div
+            className="rounded-[14px] bg-white px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
             <div className="flex items-start gap-6">
                 <div className={cn(
                     "relative h-40 w-40 shrink-0 overflow-hidden rounded-[15px]",
@@ -71,10 +72,12 @@ export function FeedbackSummaryCard({
                         <div className="flex items-center gap-x-5 gap-y-2 flex-wrap">
                             <h3 className="text-2xl font-heading font-bold text-black truncate max-w-[300px] lg:max-w-[650px] shrink-0">{title}</h3>
                             <div className="flex items-center gap-3 min-w-0 shrink-0">
-                                <Badge className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap transition-all duration-300", formStatusColors[formStatus as keyof typeof formStatusColors])}>
+                                <Badge
+                                    className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap transition-all duration-300", formStatusColors[formStatus as keyof typeof formStatusColors])}>
                                     {formStatus}
                                 </Badge>
-                                <Badge className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap transition-all duration-300", statusColors[status as keyof typeof statusColors])}>
+                                <Badge
+                                    className={cn("rounded-full font-bold font-display text-sm px-6 py-1.5 whitespace-nowrap transition-all duration-300", statusColors[status as keyof typeof statusColors])}>
                                     {`Event ${status}`}
                                 </Badge>
                             </div>
@@ -131,11 +134,13 @@ export function FeedbackSummaryCard({
                         </div>
                         <div className="flex items-center gap-3">
                             <Image src="/svgs/my-events-date.svg" width="15" height="15" alt="Icon"/>
-                            <span className="text-base truncate max-w-[700px] inline-block align-bottom">{`${questionCount} Questions`}</span>
+                            <span
+                                className="text-base truncate max-w-[700px] inline-block align-bottom">{`${questionCount} Questions`}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <Image src="/svgs/my-events-organizer.svg" width="15" height="15" alt="Icon"/>
-                            <span className="text-base truncate max-w-[700px] inline-block align-bottom">{`${responseCount} Responses`}</span>
+                            <span
+                                className="text-base truncate max-w-[700px] inline-block align-bottom">{`${responseCount} Responses`}</span>
                         </div>
                     </div>
                 </div>
@@ -149,14 +154,16 @@ export function FeedbackSummaryCard({
                     }}
                     className="w-full mt-4 pt-4 border-t-2 border-[#5C5C5C]/10 flex items-center justify-between group cursor-pointer"
                 >
-                    <div className="flex items-center gap-5 text-[#261A36] font-bold font-heading uppercase tracking-wider text-lg">
-                        <Image src="/svgs/feedbacks-summary-icon.svg" width="24" height="24" alt="Icon"/> View Feedback Summary
+                    <div
+                        className="flex items-center gap-4 text-[#261A36] font-bold font-heading uppercase tracking-wider text-lg">
+                        <Image src="/svgs/feedbacks-summary-icon.svg" width="24" height="24" alt="Icon"/> View Feedback
+                        Summary
                     </div>
                     <ChevronDown className={cn("transition-transform duration-300", isExpanded && "rotate-180")}/>
                 </button>
             )}
 
-            {isExpanded && <FeedbackExpansion responseCount={responseCount}/>}
+            {isExpanded && <FeedbackExpansion eventId={id}/>}
         </div>
     )
 }

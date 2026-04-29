@@ -114,7 +114,7 @@ export function NotificationToast({
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     className={cn(
-                        "fixed left-1/2 z-[100]",
+                        "fixed left-1/2 z-[1000]",
                         "flex w-[90%] md:w-full md:max-w-[22rem] flex-col rounded-2xl border-4 md:border-6 shadow-2xl",
                         positionClasses,
                         activeColors.bg,
