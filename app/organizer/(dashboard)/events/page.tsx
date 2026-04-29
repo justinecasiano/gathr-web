@@ -123,7 +123,7 @@ export default function EventsPage() {
             </main>
 
             {events.length > 8 && (
-                <div className="bg-white border-t-2 border-[#5C5C5C] px-6 py-3 shrink-0">
+                <div className="bg-white border-t-2 border-[#5C5C5C] px-6 py-3 shrink-0 z-20">
                     <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p className="font-display text-base font-normal text-[#676767]">{paginationLabel}</p>
 
