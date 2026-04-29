@@ -1,27 +1,20 @@
-"use client"
+"use client";
 
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {usePathname, useRouter} from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function NotFound() {
     const router = useRouter();
     const pathname = usePathname();
-    const currentUserType = pathname.includes('moderator') ? 'moderator' : 'organizer';
+    const currentUserType = pathname.includes("moderator") ? "moderator" : "organizer";
 
     return (
         <main className="relative flex min-h-screen items-center justify-center w-full bg-brand-dark p-6 overflow-hidden">
             <div className="max-w-4xl w-full flex flex-col md:flex-row gap-10 items-center z-20">
-
                 <div className="relative h-64 w-64 md:h-100 md:w-100 shrink-0 hidden sm:block">
-                    <Image
-                        src="/svgs/error-image.svg"
-                        alt="404 Illustration"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
+                    <Image src="/svgs/error-image.svg" alt="404 Illustration" fill className="object-contain" priority />
                 </div>
 
                 <div className="relative flex flex-col justify-center items-center md:items-start text-center md:text-left w-full">

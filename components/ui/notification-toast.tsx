@@ -27,12 +27,15 @@ interface NotificationToastProps {
     };
 }
 
-const VARIANT_THEMES: Record<ToastVariant, {
-    border: string;
-    progress: string;
-    icon: string;
-    bubbleColor: string
-}> = {
+const VARIANT_THEMES: Record<
+    ToastVariant,
+    {
+        border: string;
+        progress: string;
+        icon: string;
+        bubbleColor: string;
+    }
+> = {
     success: {
         border: "border-[#9FC090]",
         progress: "bg-[#61924B]",
@@ -66,17 +69,16 @@ const VARIANT_THEMES: Record<ToastVariant, {
 };
 
 export function NotificationToast({
-                                      isOpen,
-                                      onClose,
-                                      title,
-                                      description,
-                                      variant = "success",
-                                      icon,
-                                      duration = 4000,
-                                      position = "top",
-                                      colors,
-                                  }: NotificationToastProps) {
-
+    isOpen,
+    onClose,
+    title,
+    description,
+    variant = "success",
+    icon,
+    duration = 4000,
+    position = "top",
+    colors,
+}: NotificationToastProps) {
     const theme = VARIANT_THEMES[variant];
 
     const activeColors = {
@@ -118,25 +120,29 @@ export function NotificationToast({
                         "flex w-[90%] md:w-full md:max-w-[22rem] flex-col rounded-2xl border-4 md:border-6 shadow-2xl",
                         positionClasses,
                         activeColors.bg,
-                        activeColors.border
+                        activeColors.border,
                     )}
                 >
                     <div className="relative flex items-center gap-2 md:gap-3 p-3 overflow-hidden rounded-xl">
                         <div className={cn("shrink-0 z-10 w-10 h-10 md:w-12 md:h-12 relative")}>
-                            <Image
-                                src={`${theme.icon}`}
-                                alt="Toast Icon"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
+                            <Image src={`${theme.icon}`} alt="Toast Icon" fill className="object-contain" priority />
                         </div>
 
                         <div className="flex flex-col gap-0.5 md:gap-1 pr-6 z-10">
-                            <h3 className={cn("font-heading text-base md:text-lg font-bold leading-tight", activeColors.textPrimary)}>
+                            <h3
+                                className={cn(
+                                    "font-heading text-base md:text-lg font-bold leading-tight",
+                                    activeColors.textPrimary,
+                                )}
+                            >
                                 {title}
                             </h3>
-                            <p className={cn("font-heading text-xs md:text-sm font-normal leading-snug", activeColors.textSecondary)}>
+                            <p
+                                className={cn(
+                                    "font-heading text-xs md:text-sm font-normal leading-snug",
+                                    activeColors.textSecondary,
+                                )}
+                            >
                                 {description}
                             </p>
                         </div>
@@ -149,9 +155,9 @@ export function NotificationToast({
                         </button>
 
                         <div className="absolute inset-0 pointer-events-none z-0 opacity-10 md:opacity-15 hidden sm:block">
-                            <div className={cn("h-12 w-12 rounded-full absolute right-4 top-1", activeColors.bubble)}/>
-                            <div className={cn("h-9 w-9 rounded-full absolute right-4 -bottom-1", activeColors.bubble)}/>
-                            <div className={cn("h-4 w-4 rounded-full absolute right-1 bottom-6.5", activeColors.bubble)}/>
+                            <div className={cn("h-12 w-12 rounded-full absolute right-4 top-1", activeColors.bubble)} />
+                            <div className={cn("h-9 w-9 rounded-full absolute right-4 -bottom-1", activeColors.bubble)} />
+                            <div className={cn("h-4 w-4 rounded-full absolute right-1 bottom-6.5", activeColors.bubble)} />
                         </div>
                     </div>
 

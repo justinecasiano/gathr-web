@@ -1,4 +1,4 @@
-import {QuestionType} from "./feedback";
+import { QuestionType } from "./feedback";
 
 export interface ChoiceSummary {
     optionId: string;
@@ -34,7 +34,6 @@ export interface EventAnalytics {
     questions: QuestionAnalytics[];
 }
 
-
 export interface ChoiceResult {
     optionId: string;
     optionLabel: string;
@@ -58,7 +57,7 @@ export interface IndividualQuestionAnalytics {
 export interface IndividualEventAnalytics {
     id: number;
     participantId: string;
-    status: 'ANSWERED' | 'NO_RESPONSE' | 'ABSENT';
+    status: "ANSWERED" | "NO_RESPONSE" | "ABSENT";
     submittedAt: string | null;
     questions: IndividualQuestionAnalytics[];
 }

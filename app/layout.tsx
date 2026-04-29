@@ -1,11 +1,10 @@
-import type {Metadata} from "next";
-import {Instrument_Sans, Inter, Rethink_Sans} from "next/font/google";
+import type { Metadata } from "next";
+import { Instrument_Sans, Inter, Rethink_Sans } from "next/font/google";
 import "./globals.css";
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import QueryProvider from "@/providers/query-provider";
-import '@/bones/registry'
 
-const inter = Inter({subsets: ['latin'], variable: '--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const instrumentSans = Instrument_Sans({
     variable: "--font-instrument-sans",
@@ -23,19 +22,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+    children,
+}: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
         <html lang="en" className={cn("font-sans", inter.variable)}>
-        <body
-            className={`${instrumentSans.variable} ${rethinkSans.variable} antialiased`}
-        >
-        <QueryProvider>
-            {children}
-        </QueryProvider>
-        </body>
+            <body className={`${instrumentSans.variable} ${rethinkSans.variable} antialiased`}>
+                <QueryProvider>{children}</QueryProvider>
+            </body>
         </html>
     );
 }

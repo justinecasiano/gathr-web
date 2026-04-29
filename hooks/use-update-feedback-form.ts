@@ -1,6 +1,6 @@
-import {useMutation, useQueryClient} from '@tanstack/react-query';
-import {FormEditorValues} from '@/types/feedback';
-import {supabase} from "@/lib/supabase/supabase";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { FormEditorValues } from "@/types/feedback";
+import { supabase } from "@/lib/supabase/supabase";
 
 interface UpdateFeedbackFormPayload {
     eventId: number;
@@ -11,15 +11,15 @@ export function useUpdateFeedbackForm() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({eventId, formData}: UpdateFeedbackFormPayload) => {
-            const {data, error} = await supabase
-                .from('events')
+        mutationFn: async ({ eventId, formData }: UpdateFeedbackFormPayload) => {
+            const { data, error } = await supabase
+                .from("events")
                 .update({
                     feedback_form: formData,
                     form_title: formData.title,
                     updated_at: new Date().toISOString(),
                 })
-                .eq('id', eventId)
+                .eq("id", eventId)
                 .select()
                 .single();
 
@@ -28,11 +28,11 @@ export function useUpdateFeedbackForm() {
         },
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({
-                queryKey: ['event-analytics', variables.eventId]
+                queryKey: ["event-analytics", variables.eventId],
             });
 
             queryClient.invalidateQueries({
-                queryKey: ['events', 'organizer', 'mine']
+                queryKey: ["events", "organizer", "mine"],
             });
         },
     });

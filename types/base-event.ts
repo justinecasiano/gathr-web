@@ -1,5 +1,5 @@
-import {FormEditorValues} from "@/types/feedback";
-import {User} from "@/types/user";
+import { FormEditorValues } from "@/types/feedback";
+import { User } from "@/types/user";
 
 export interface BaseEvent {
     id: number;
@@ -18,7 +18,7 @@ export interface BaseEvent {
     feedback_form: FormEditorValues | null;
     created_by: string;
     creator?: User;
-    status: 'APPROVED' | 'PENDING' | 'REJECTED' | string;
+    status: "APPROVED" | "PENDING" | "REJECTED" | string;
     submitted_at: string;
     updated_at: string | null;
     approved_by: string | null;
@@ -29,7 +29,7 @@ export interface BaseEvent {
     form_title: string | null;
     participants?: { count: number }[];
     response_count: { count: number }[];
-    event_status: 'UPCOMING' | 'ONGOING' | 'ENDED';
+    event_status: "UPCOMING" | "ONGOING" | "ENDED";
     has_feedback_form: boolean;
     question_count: number;
     present_count: { count: number }[];

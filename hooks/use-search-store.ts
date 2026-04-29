@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { SearchResult, searchIndex } from '@/config/search-index';
+import { create } from "zustand";
+import { SearchResult, searchIndex } from "@/config/search-index";
 
 interface SearchStore {
     query: string;
@@ -11,7 +11,7 @@ interface SearchStore {
 }
 
 export const useSearchStore = create<SearchStore>((set, get) => ({
-    query: '',
+    query: "",
     setQuery: (val) => set({ query: val }),
     dynamicResults: [],
     setDynamicResults: (results) => set({ dynamicResults: results }),

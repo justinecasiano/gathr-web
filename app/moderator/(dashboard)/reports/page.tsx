@@ -1,192 +1,218 @@
-"use client"
-import * as React from 'react'
-import {Header} from "@/components/ui/header";
+"use client";
+
+import * as React from "react";
+import { Circle } from "lucide-react";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import Image from "next/image"
-import {Search, PieChart, BarChart2, Users,X} from "lucide-react"
-import {cn} from "@/lib/utils"
-import {Input} from "@/components/ui/input"
-import {ScrollArea} from "@/components/ui/scroll-area"
-import {Stats} from "@/components/ui/stats";
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 
-const dashboardStats = [
-    {value: "12", trend: "+12%", trendUp: true},
-    {value: "2,412", trend: "-3%", trendUp: false},
-    {value: "67.21%", trend: "-3%", trendUp: false},
-    {value: "1,521", trend: "+12%", trendUp: true},
-];
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn, generateOrganizerDashboardAnalytics } from "@/lib/utils";
+import { useEffect, useMemo, useState } from "react";
+import { Header } from "@/components/ui/header";
+import { Stats } from "@/components/ui/stats";
+import Image from "next/image";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { motion } from "motion/react";
+import { DateRange } from "react-day-picker";
+import { addDays } from "date-fns/addDays";
+import { useOrganizerEvents } from "@/hooks/use-organizer-events";
+import { differenceInDays, subDays } from "date-fns";
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
 
-const AttendanceKpi = ({label, value, bgColor, icon: Icon}: any) => (
-    <div
-        className={cn("flex flex-1 flex-col items-center justify-center p-4 rounded-2xl text-white shadow-lg", bgColor)}>
-        <span className="text-4xl font-black">{value}</span>
-        <span className="text-sm font-bold opacity-80 uppercase tracking-tight">{label}</span>
-    </div>
-)
-
-const FeedbackOption = ({index, label, percentage}: { index: number, label: string, percentage: number }) => (
-    <div
-        className="relative h-14 w-full rounded-full border-2 border-[#7B55A3] flex items-center px-4 overflow-hidden bg-white">
-        {/* Progress Fill */}
-        <div
-            className="absolute left-0 top-0 bottom-0 bg-[#7B55A3]/80 rounded-full transition-all duration-1000 ease-out"
-            style={{width: `${percentage}%`}}
-        />
-        {/* Content */}
-        <div className="relative z-10 w-full flex justify-between items-center">
-            <div className="flex items-center gap-3">
-        <span
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#261A36] text-white text-xs font-black">
-          {index}
-        </span>
-                <span className="font-bold text-[#261A36] truncate max-w-[200px]">{label}</span>
-            </div>
-            <span className="font-black text-[#261A36]">{percentage}%</span>
-        </div>
-    </div>
-)
+const STATUS_COLORS: Record<string, string> = {
+    APPROVED: "#94B983",
+    PENDING: "#F6835E",
+    REJECTED: "#CD4249",
+};
 
 export default function ReportsPage() {
-    const [search, setSearch] = React.useState("")
+    const [mounted, setMounted] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: addDays(new Date(), -29),
+        to: new Date(),
+    });
 
-    const participants = [
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Present", color: "text-[#D1E9D2]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Absent", color: "text-[#820006]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled", color: "text-[#FF8C66]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Present", color: "text-[#D1E9D2]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Absent", color: "text-[#820006]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Present", color: "text-[#D1E9D2]"},
-        {name: "Angela Cabrera", time: "Oct. 13, 2025 - 12:03 pm", status: "Absent", color: "text-[#820006]"},
-    ]
+    const activeFrom = dateRange?.from || addDays(new Date(), -29);
+    const activeTo = dateRange?.to || new Date();
+    const daysDiff = differenceInDays(activeTo, activeFrom) + 1;
+    const fetchFrom = subDays(activeFrom, daysDiff);
+
+    const { data: rawEvents, isLoading: isEventsLoading } = useOrganizerEvents({ from: fetchFrom, to: activeTo });
+
+    const analytics = useMemo(() => {
+        if (!rawEvents) return null;
+        return generateOrganizerDashboardAnalytics(rawEvents, dateRange);
+    }, [rawEvents, dateRange]);
+
+    const stats = analytics?.dashboardStats ?? [];
+    const barData = analytics?.eventAttendeeData ?? [];
+    const pieData = analytics?.eventStatusData ?? [];
+    const areaData = analytics?.feedbackTrendData ?? [];
+    const comparisonLabel = analytics?.comparisonLabel ?? "last month";
+
+    useEffect(() => setMounted(true), []);
+
+    if (!mounted) return null;
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-white">
-            <Header/>
-            <div className="flex min-h-screen w-full flex-col bg-[#F9F7FD] px-10 py-6 space-y-8">
+        <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
+            <Header />
+            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-50">
                 <div className="flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-6">
-                            <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Reports</h1>
-                            <Select defaultValue="7d">
-                                <SelectTrigger
-                                    className="w-40 h-12 rounded-sm border-2 text-lg border-black bg-white font-display font-semibold text-black ">
-                                    <SelectValue/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="7d">Last 7 days</SelectItem>
-                                    <SelectItem value="30d">Last 30 days</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Dashboard</h1>
+                            <DateRangePicker onDateChange={setDateRange} />
                         </div>
-                        <p className="text-[#261A36] text-lg font-display font-bold mt-1">Overview of your events and
-                            feedback</p>
+                        <p className="text-[#261A36] text-lg font-display font-bold mt-1">
+                            Overview of your events and feedback
+                        </p>
                     </div>
                 </div>
 
-                <Stats data={dashboardStats}/>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <Stats data={stats} loading={isEventsLoading} comparisonLabel={comparisonLabel} />
 
-                    <div
-                        className="rounded-[32px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
-                        <div className="flex items-center gap-3 mb-8">
-                            <BarChart2 className="text-[#FF8C66]" size={28}/>
-                            <h2 className="text-2xl font-black text-[#261A36] uppercase tracking-tight">Attendance
-                                Summary</h2>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    <Card className="lg:col-span-2 border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
+                        <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
+                            <Image src="/svgs/monthly-event-icon.svg" width="25" height="25" alt="Icon" />
+                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">
+                                Monthly Events and Attendees
+                            </CardTitle>
+                        </CardHeader>
+                        <div className="h-[300px] w-full mt-8">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={barData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#261A36", fontWeight: 700, fontSize: 12 }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#261A36", fontWeight: 700, fontSize: 12 }}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: "#F1F5F9" }}
+                                        contentStyle={{
+                                            borderRadius: "12px",
+                                            border: "none",
+                                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                        }}
+                                    />
+                                    <Legend verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: "20px" }} />
+                                    <Bar dataKey="Events" fill="#5E338A" radius={[6, 6, 0, 0]} barSize={20} />
+                                    <Bar dataKey="Attendees" fill="#FF8C66" radius={[6, 6, 0, 0]} barSize={20} />
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
+                    </Card>
 
-                        <div className="flex gap-4 mb-8">
-                            <AttendanceKpi label="Present" value="789" bgColor="bg-[#5E338A]"/>
-                            <AttendanceKpi label="Cancelled" value="192" bgColor="bg-[#F8B195]"/>
-                            <AttendanceKpi label="Absent" value="201" bgColor="bg-[#820006]"/>
+                    <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
+                        <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
+                            <Image src="/svgs/event-status-icon.svg" width="25" height="25" alt="Icon" />
+                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">Event Status</CardTitle>
+                        </CardHeader>
+                        <div className="h-[200px] mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="#261A36"
+                                        strokeWidth={2}
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </div>
-
-                        <div className="relative mb-6">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5C5C5C]/50" size={20}/>
-                            <Input
-                                placeholder="Search in 1904 participants"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="h-12 rounded-2xl border-2 border-[#5C5C5C]/10 bg-[#F9F7FD] pl-12 pr-10 font-bold focus-visible:ring-0"
-                            />
-                            {search && <X className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer" size={18}
-                                          onClick={() => setSearch("")}/>}
-                        </div>
-
-                        <div
-                            className="grid grid-cols-3 bg-[#5E338A] rounded-t-xl p-3 text-white text-sm font-black uppercase tracking-wider">
-                            <span>Name</span>
-                            <span className="text-center">Date & Time</span>
-                            <span className="text-right">Status</span>
-                        </div>
-
-                        <ScrollArea className="h-[400px] border-x-2 border-b-2 border-[#5C5C5C]/10 rounded-b-xl">
-                            {participants.map((p, i) => (
-                                <div key={i}
-                                     className="grid grid-cols-3 p-4 border-b border-[#5C5C5C]/5 text-sm font-bold items-center">
-                                    <span className="text-[#261A36]">{p.name}</span>
-                                    <span className="text-center text-[#5C5C5C]/70">{p.time}</span>
-                                    <span className={cn("text-right font-black", p.color)}>{p.status}</span>
+                        <div className="space-y-3">
+                            {pieData.map((status) => (
+                                <div key={status.name} className="flex items-center justify-between mx-auto w-[70%]">
+                                    <div className="flex items-center gap-2">
+                                        <Circle className="h-4 w-4" fill={status.color} stroke="none"></Circle>
+                                        <span className="text-base font-normal font-display text-black">{status.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span
+                                            className={cn(
+                                                "text-base font-black",
+                                                status.percentage.startsWith("+") ? "text-[#94B983]" : "text-[#820006]",
+                                            )}
+                                        >
+                                            {status.percentage} {status.percentage.startsWith("+") ? "↑" : "↓"}
+                                        </span>
+                                    </div>
                                 </div>
                             ))}
-                        </ScrollArea>
-                    </div>
-
-                    <div
-                        className="rounded-[32px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
-                        <div className="flex items-center gap-3 mb-8">
-                            <PieChart className="text-[#FF8C66]" size={28}/>
-                            <h2 className="text-2xl font-black text-[#261A36] uppercase tracking-tight">Feedback
-                                Summary</h2>
                         </div>
-
-                        <div className="relative w-full rounded-3xl bg-[#5E338A] p-8 mb-8 overflow-hidden">
-                            <div className="relative z-10 max-w-[60%]">
-                                <h3 className="text-2xl font-black text-white uppercase leading-tight">Summary of
-                                    Feedback
-                                    for this event</h3>
-                                <div className="flex items-center gap-2 mt-4 text-white/80 font-bold">
-                                    <div className="bg-white rounded-full p-1">
-                                        <Users className="text-[#5E338A]"
-                                               size={14}/>
-                                    </div>
-                                    Total Respondents: 234
-                                </div>
-                            </div>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 w-40 h-40">
-                                <Image src="/svgs/feedback-hero-illus.svg" alt="Illustration" fill
-                                       className="object-contain"/>
-                            </div>
-                        </div>
-
-                        <p className="text-sm font-bold text-[#5C5C5C] leading-relaxed mb-8 italic">
-                            "Lorem Ipsum Dolor Sit Amet! These are the feedbacks of this survey, helping the host to
-                            improve
-                            their services for everyone."
-                        </p>
-
-                        <div className="rounded-[32px] border-2 border-[#7B55A3] p-8 space-y-6">
-                            <div>
-                                <p className="text-xs font-black text-[#7B55A3] uppercase tracking-widest">Question 1 /
-                                    10</p>
-                                <h4 className="text-lg font-black text-[#261A36] mt-1">What are the things you observed
-                                    during the event and lorem ipsum dolor sit amet?</h4>
-                            </div>
-
-                            <div className="space-y-4">
-                                <FeedbackOption index={1} label="The Speakers are too" percentage={35}/>
-                                <FeedbackOption index={2} label="Accommodation is Good" percentage={40}/>
-                                <FeedbackOption index={3} label="The Lorem Ipsum is" percentage={35}/>
-                            </div>
-                        </div>
-                    </div>
+                    </Card>
                 </div>
-            </div>
+
+                <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6 mb-5">
+                    <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
+                        <Image src="/svgs/average-feedback-icon.svg" width="25" height="25" alt="Icon" />
+                        <CardTitle className="text-xl font-bold font-display text-[#261A36]">
+                            Average Feedback Rating Trend
+                        </CardTitle>
+                    </CardHeader>
+                    <div className="h-[300px] w-full mt-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={areaData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={true}
+                                    tickLine={true}
+                                    tick={{ fill: "#261A36", fontWeight: 700 }}
+                                />
+                                <YAxis
+                                    domain={[0, 5]}
+                                    axisLine={true}
+                                    tickLine={true}
+                                    tick={{ fill: "#261A36", fontWeight: 700 }}
+                                />
+                                <Tooltip />
+                                <Area
+                                    type="monotone"
+                                    dataKey="rating"
+                                    stroke="#38B2AC"
+                                    strokeWidth={4}
+                                    fillOpacity={1}
+                                    fill="url(#colorRating)"
+                                    dot={{ r: 6, fill: "#38B2AC", strokeWidth: 3, stroke: "#fff" }}
+                                    activeDot={{ r: 8 }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+            </main>
+
+            <BackgroundBubbles />
         </div>
-    )
+    );
 }

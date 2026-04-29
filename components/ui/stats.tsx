@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import React from 'react';
-import {usePathname} from 'next/navigation';
-import {KpiCard} from '@/components/ui/kpi-card';
-import {useSkeleton} from "@/hooks/use-skeleton";
-import {Skeleton} from "boneyard-js/react";
-import _dashboard_stats from '@/bones/dashboard-stats-kpi.bones.json';
-import {ResponsiveBones} from "boneyard-js";
-import {cn} from "@/lib/utils";
+import React from "react";
+import { usePathname } from "next/navigation";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { useSkeleton } from "@/hooks/use-skeleton";
+import { Skeleton } from "boneyard-js/react";
+import _dashboard_stats from "@/bones/dashboard-stats-kpi.bones.json";
+import { ResponsiveBones } from "boneyard-js";
+import { cn } from "@/lib/utils";
 
 interface StatItem {
     value: string;
@@ -67,13 +67,13 @@ const CONFIGS = {
             bgColor: "bg-[#F3E8FF]",
             cardBg: "/svgs/total-attendees-background.svg",
         },
-    ]
+    ],
 };
 
-export function Stats({data, loading, comparisonLabel}: StatsProps) {
+export function Stats({ data, loading, comparisonLabel }: StatsProps) {
     const pathname = usePathname();
 
-    const isModerator = pathname.includes('/moderator');
+    const isModerator = pathname.includes("/moderator");
     const currentConfig = isModerator ? CONFIGS.moderator : CONFIGS.organizer;
 
     const showSkeleton = useSkeleton(loading, 400);
@@ -81,10 +81,18 @@ export function Stats({data, loading, comparisonLabel}: StatsProps) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-[20%_20%_25%_30%] gap-4 w-full">
             {currentConfig.map((config, index) => (
-                <Skeleton key={index} initialBones={(_dashboard_stats as unknown) as ResponsiveBones}
-                          animate="shimmer" name={`dashboard-stats-kpi`} loading={showSkeleton}
-                          className={cn(showSkeleton && "rounded-xl bg-white/40 border-2 border-[#5C5C5C] shadow-[4px_4px_0px_0px_rgba(87,66,114,1)]")}
-                          color="#574272" boneClass="opacity-40"
+                <Skeleton
+                    key={index}
+                    initialBones={_dashboard_stats as unknown as ResponsiveBones}
+                    animate="shimmer"
+                    name={`dashboard-stats-kpi`}
+                    loading={showSkeleton}
+                    className={cn(
+                        showSkeleton &&
+                            "rounded-xl bg-white/40 border-2 border-[#5C5C5C] shadow-[4px_4px_0px_0px_rgba(87,66,114,1)]",
+                    )}
+                    color="#574272"
+                    boneClass="opacity-40"
                 >
                     <KpiCard
                         key={config.label}

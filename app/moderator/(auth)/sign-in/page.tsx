@@ -1,17 +1,17 @@
 "use client";
 
-import {useState} from "react";
-import {useRouter} from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {Eye, EyeOff, Loader2} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Checkbox} from "@/components/ui/checkbox";
-import {Label} from "@/components/ui/label";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import WelcomeSide from "@/components/ui/welcome-side";
-import {cn} from "@/lib/utils";
-import {supabase} from "@/lib/supabase/supabase";
-import {z} from "zod";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/supabase";
+import { z } from "zod";
 
 export default function SignInPage() {
     const router = useRouter();
@@ -45,7 +45,7 @@ export default function SignInPage() {
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = e.target;
+        const { id, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [id]: value,
@@ -87,7 +87,7 @@ export default function SignInPage() {
         }
 
         try {
-            const {data: authCheck, error: authError} = await supabase.auth.signInWithPassword({
+            const { data: authCheck, error: authError } = await supabase.auth.signInWithPassword({
                 email: formData.email,
                 password: formData.password,
             });
@@ -99,7 +99,7 @@ export default function SignInPage() {
                 return;
             }
 
-            const {data: userData, error: roleError} = await supabase
+            const { data: userData, error: roleError } = await supabase
                 .from("users")
                 .select("role")
                 .eq("id", authCheck.user.id)
@@ -115,7 +115,7 @@ export default function SignInPage() {
 
             await supabase.auth.signOut();
 
-            const {error: otpError} = await supabase.auth.signInWithOtp({
+            const { error: otpError } = await supabase.auth.signInWithOtp({
                 email: formData.email,
                 options: {
                     shouldCreateUser: false,
@@ -129,7 +129,6 @@ export default function SignInPage() {
             } else {
                 router.push(`sign-in/verify?email=${encodeURIComponent(formData.email)}`);
             }
-
         } catch (error: unknown) {
             setHasError(true);
             setIsLoading(false);
@@ -144,7 +143,7 @@ export default function SignInPage() {
 
     return (
         <main className="flex min-h-screen w-full bg-brand-dark">
-            <WelcomeSide/>
+            <WelcomeSide />
 
             <div className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-12 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
@@ -153,8 +152,7 @@ export default function SignInPage() {
                             Sign In
                         </h1>
                         <p className="mt-4 text-sm text-[#C2C2C2]">
-                            Please log in to access the{" "}
-                            <span className="font-semibold text-gray-200">moderator</span> account.
+                            Please log in to access the <span className="font-semibold text-gray-200">moderator</span> account.
                         </p>
                     </div>
 
@@ -170,7 +168,7 @@ export default function SignInPage() {
                                 placeholder="Enter email address here"
                                 className={cn(
                                     "h-14 mt-2 rounded-xl border-3 bg-[#312245] px-4 text-white placeholder:text-white/60 focus-visible:ring-offset-0 transition-colors",
-                                    hasError ? "border-[#C44E52]" : "border-[#574272]"
+                                    hasError ? "border-[#C44E52]" : "border-[#574272]",
                                 )}
                             />
                         </div>
@@ -188,7 +186,7 @@ export default function SignInPage() {
                                     placeholder="Enter password here"
                                     className={cn(
                                         "h-14 mt-2 rounded-xl border-3 bg-[#312245] px-4 text-white placeholder:text-white/60 focus-visible:ring-offset-0 transition-colors",
-                                        hasError ? "border-[#C44E52]" : "border-[#574272]"
+                                        hasError ? "border-[#C44E52]" : "border-[#574272]",
                                     )}
                                 />
                                 {formData.password.length > 0 && (
@@ -198,20 +196,16 @@ export default function SignInPage() {
                                         className="absolute right-4 mt-1 top-1/2 -translate-y-1/2"
                                     >
                                         {shouldShowPassword ? (
-                                            <Eye
-                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <Eye className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors" />
                                         ) : (
-                                            <EyeOff
-                                                className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors"/>
+                                            <EyeOff className="h-7 w-7 text-brand-accent hover:brightness-110 transition-colors" />
                                         )}
                                     </button>
                                 )}
                             </div>
 
                             {hasError && (
-                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1">
-                                    {errorMessage}
-                                </p>
+                                <p className="text-[#C44E52] text-sm animate-in fade-in slide-in-from-top-1">{errorMessage}</p>
                             )}
                         </div>
 
@@ -227,8 +221,7 @@ export default function SignInPage() {
                                     Remember me
                                 </Label>
                             </div>
-                            <Link href="forgot-password"
-                                  className="text-sm font-bold text-[#E05723] hover:underline">
+                            <Link href="forgot-password" className="text-sm font-bold text-[#E05723] hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
@@ -236,12 +229,12 @@ export default function SignInPage() {
                         <Button
                             type="submit"
                             variant={"elevated"}
-                            disabled={isLoading || (!formData.email.trim() || !formData.password.trim())}
+                            disabled={isLoading || !formData.email.trim() || !formData.password.trim()}
                             className="h-16 w-full rounded-2xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-all "
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
+                                    <Loader2 className="mr-2 h-8 w-8 animate-spin" />
                                     Please Wait
                                 </>
                             ) : (
@@ -252,8 +245,7 @@ export default function SignInPage() {
 
                     <p className="mt-8 text-center text-sm font-bold text-[#C2C2C2]">
                         Are you an Organizer?{" "}
-                        <Link href="/organizer/sign-in"
-                              className="text-[#C2C2C2] font-medium underline underline-offset-3">
+                        <Link href="/organizer/sign-in" className="text-[#C2C2C2] font-medium underline underline-offset-3">
                             Switch to Organizer
                         </Link>
                     </p>

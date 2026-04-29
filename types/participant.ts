@@ -1,9 +1,9 @@
-import {User} from "@/types/user";
-import {FormSubmission} from "@/types/feedback";
+import { User } from "@/types/user";
+import { FormSubmission } from "@/types/feedback";
 
-export type ParticipantType = 'ATTENDEE' | 'ORGANIZER' | 'STAFF';
-export type ParticipantStatus = 'REGISTERED' | 'CHECKED_IN' | 'CANCELLED' | 'PRESENT' | 'ABSENT';
-export type ResponseStatus = 'ANSWERED' | 'NO_RESPONSE' | 'ABSENT';
+export type ParticipantType = "ATTENDEE" | "ORGANIZER" | "STAFF";
+export type ParticipantStatus = "REGISTERED" | "CHECKED_IN" | "CANCELLED" | "PRESENT" | "ABSENT";
+export type ResponseStatus = "ANSWERED" | "NO_RESPONSE" | "ABSENT";
 
 export interface Participant {
     event_id: number;

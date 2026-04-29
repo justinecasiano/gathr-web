@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 
 interface UsePaginationProps<T> {
     items: T[];
@@ -6,20 +6,13 @@ interface UsePaginationProps<T> {
     maxVisiblePages?: number;
 }
 
-export function usePagination<T>({
-                                     items,
-                                     itemsPerPage,
-                                     maxVisiblePages = 4
-                                 }: UsePaginationProps<T>) {
+export function usePagination<T>({ items, itemsPerPage, maxVisiblePages = 4 }: UsePaginationProps<T>) {
     const [currentPage, setCurrentPage] = useState(1);
 
     const totalPages = Math.ceil(items.length / itemsPerPage);
 
     const currentItems = useMemo(() => {
-        return items.slice(
-            (currentPage - 1) * itemsPerPage,
-            currentPage * itemsPerPage
-        );
+        return items.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     }, [items, currentPage, itemsPerPage]);
 
     const visiblePages = useMemo(() => {
@@ -30,10 +23,7 @@ export function usePagination<T>({
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        return Array.from(
-            { length: Math.max(0, (endPage - startPage) + 1) },
-            (_, i) => startPage + i
-        );
+        return Array.from({ length: Math.max(0, endPage - startPage + 1) }, (_, i) => startPage + i);
     }, [currentPage, totalPages, maxVisiblePages]);
 
     const startIndex = (currentPage - 1) * itemsPerPage + 1;
@@ -49,7 +39,7 @@ export function usePagination<T>({
         paginationLabel,
         hasNextPage: currentPage < totalPages,
         hasPrevPage: currentPage > 1,
-        nextPage: () => setCurrentPage(prev => Math.min(prev + 1, totalPages)),
-        prevPage: () => setCurrentPage(prev => Math.max(prev - 1, 1)),
+        nextPage: () => setCurrentPage((prev) => Math.min(prev + 1, totalPages)),
+        prevPage: () => setCurrentPage((prev) => Math.max(prev - 1, 1)),
     };
 }

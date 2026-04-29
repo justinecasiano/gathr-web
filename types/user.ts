@@ -1,6 +1,6 @@
-import { User as SupabaseAuthUser } from '@supabase/supabase-js';
+import { User as SupabaseAuthUser } from "@supabase/supabase-js";
 
-export type UserRole = 'PARTICIPANT' | 'MODERATOR';
+export type UserRole = "PARTICIPANT" | "MODERATOR";
 
 export interface User {
     id: string;

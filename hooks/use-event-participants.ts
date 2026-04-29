@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase/supabase';
-import {Participant, } from '@/types/participant';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/supabase";
+import { Participant } from "@/types/participant";
 
 export interface ParticipantWithUsers extends Participant {
     users: {
@@ -20,7 +20,8 @@ export function useEventParticipants(eventId: number) {
 
             const { data, error } = await supabase
                 .from("participants")
-                .select<string, ParticipantWithUsers>(`
+                .select<string, ParticipantWithUsers>(
+                    `
                     *,
                     users (
                         first_name,
@@ -29,7 +30,8 @@ export function useEventParticipants(eventId: number) {
                         avatar_url,
                         email
                     )
-                `)
+                `,
+                )
                 .eq("event_id", eventId)
                 .eq("participant_type", "ATTENDEE")
                 .eq("response_status", "ANSWERED")

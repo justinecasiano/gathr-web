@@ -5,48 +5,31 @@ export default function WelcomeSide() {
     return (
         <div className="hidden lg:block lg:flex lg:flex-col items-center justify-center relative w-[35%] h-screen bg-gradient-to-b from-brand to-brand-dark overflow-hidden">
             <div className="flex items-center justify-center p-6 ">
-
                 <div className="relative h-18 w-18">
-                    <Image
-                        src="/svgs/gathr-logo-initial.svg"
-                        alt="Gathr Logo"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
+                    <Image src="/svgs/gathr-logo-initial.svg" alt="Gathr Logo" fill className="object-contain" priority />
                 </div>
 
                 <div className="flex flex-col items-start">
-                        <span className="text-lg font-semibold tracking-wider font-display text-white">
-         Event Management System
-        </span>
+                    <span className="text-lg font-semibold tracking-wider font-display text-white">
+                        Event Management System
+                    </span>
                     <div className="relative h-8 w-28">
-                        <Image
-                            src="/svgs/gathr-logo-full.svg"
-                            alt="Gathr Logo Full"
-                            fill
-                            className="object-contain"
-                        />
+                        <Image src="/svgs/gathr-logo-full.svg" alt="Gathr Logo Full" fill className="object-contain" />
                     </div>
                 </div>
-
             </div>
 
             <div className="relative flex items-center justify-center w-full">
                 <div className="flex items-center justify-center w-100 h-100">
-                    <Image
-                        src="/svgs/auth-welcome.svg"
-                        alt="Welcome SVG"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
+                    <Image src="/svgs/auth-welcome.svg" alt="Welcome SVG" fill className="object-contain" priority />
                 </div>
             </div>
 
             <div className="mt-5 relative flex flex-col items-center justify-center w-full px-25 gap-2">
                 <h1 className="font-display text-white text-3xl font-bold">WELCOME!</h1>
-                <p className="mt-2 font-heading text-white text-base text-center">Gathr is a modern event management system that helps you organize, manage, and monitor events with ease.</p>
+                <p className="mt-2 font-heading text-white text-base text-center">
+                    Gathr is a modern event management system that helps you organize, manage, and monitor events with ease.
+                </p>
             </div>
 
             <div className="absolute inset-0 z-0">
@@ -57,7 +40,7 @@ export default function WelcomeSide() {
                     transition={{
                         type: "spring",
                         stiffness: 200,
-                        damping: 15
+                        damping: 15,
                     }}
                 />
 
@@ -68,7 +51,7 @@ export default function WelcomeSide() {
                     transition={{
                         type: "spring",
                         stiffness: 200,
-                        damping: 20
+                        damping: 20,
                     }}
                 />
 
@@ -79,10 +62,10 @@ export default function WelcomeSide() {
                     transition={{
                         type: "spring",
                         stiffness: 200,
-                        damping: 20
+                        damping: 20,
                     }}
                 />
             </div>
         </div>
-    )
+    );
 }

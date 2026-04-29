@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import * as React from "react"
-import { Loader2 } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import * as React from "react";
+import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/ui/header";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -12,11 +12,11 @@ import { NotificationToast, ToastVariant } from "@/components/ui/notification-to
 import { useUser } from "@/hooks/use-user";
 import { supabase } from "@/lib/supabase/supabase";
 import { z } from "zod";
-import {motion} from "motion/react";
-import {getURL} from "@/lib/utils";
+import { motion } from "motion/react";
+import { getURL } from "@/lib/utils";
 import { useRef } from "react";
 import PopupModal from "@/components/ui/popup-modal";
-import { BackgroundBubbles } from "@/components/ui/background-bubbles"
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
 
 interface ToastState {
     title: string;
@@ -44,7 +44,7 @@ export default function SettingsPage() {
     const [toastData, setToastData] = useState<ToastState>({
         title: "",
         description: "",
-        variant: "success"
+        variant: "success",
     });
 
     useEffect(() => {
@@ -97,7 +97,7 @@ export default function SettingsPage() {
             setToastData({
                 title: "File Too Large",
                 description: "Image must be less than 5MB.",
-                variant: "error"
+                variant: "error",
             });
             setShouldShowToast(true);
             return;
@@ -108,25 +108,23 @@ export default function SettingsPage() {
         try {
             const filePath = `${user.id}/profile`;
 
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, file, {
-                    upsert: true,
-                    contentType: file.type
-                });
+            const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, {
+                upsert: true,
+                contentType: file.type,
+            });
 
             if (uploadError) throw uploadError;
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
+            const {
+                data: { publicUrl },
+            } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
             const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
 
             const { error: dbError } = await supabase
-                .from('users')
+                .from("users")
                 .update({ avatar_url: urlWithCacheBuster })
-                .eq('id', user.id);
+                .eq("id", user.id);
 
             if (dbError) throw dbError;
 
@@ -145,10 +143,7 @@ export default function SettingsPage() {
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (
-            formData.fullName === lastSavedData.fullName &&
-            formData.username === lastSavedData.username
-        ) {
+        if (formData.fullName === lastSavedData.fullName && formData.username === lastSavedData.username) {
             setToastData({
                 title: "No Changes Detected",
                 description: "You haven't modified your name or username.",
@@ -216,7 +211,7 @@ export default function SettingsPage() {
 
             setLastSavedData({
                 fullName: formData.fullName,
-                username: formData.username
+                username: formData.username,
             });
 
             setToastData({
@@ -224,7 +219,6 @@ export default function SettingsPage() {
                 description: "Your profile has been updated successfully.",
                 variant: "success",
             });
-
         } catch (error: any) {
             const msg = error.message || "An unexpected error occurred";
             setToastData({
@@ -255,7 +249,7 @@ export default function SettingsPage() {
             setToastData({
                 title: "Error",
                 description: "User email not found.",
-                variant: "error"
+                variant: "error",
             });
             setShouldShowToast(true);
             return;
@@ -264,7 +258,7 @@ export default function SettingsPage() {
         try {
             const handshakeKey = crypto.randomUUID();
 
-            localStorage.setItem('reset_handshake_key', handshakeKey);
+            localStorage.setItem("reset_handshake_key", handshakeKey);
 
             const siteUrl = getURL();
             const { error: resetError } = await supabase.auth.resetPasswordForEmail(user.email, {
@@ -275,13 +269,13 @@ export default function SettingsPage() {
                 setToastData({
                     title: "Error Sending Link",
                     description: resetError.message,
-                    variant: "error"
+                    variant: "error",
                 });
             } else {
                 setToastData({
                     title: "Password Reset Link Sent",
                     description: `Please check your email for password reset link.`,
-                    variant: "success"
+                    variant: "success",
                 });
                 setCountdown(60);
             }
@@ -290,7 +284,7 @@ export default function SettingsPage() {
             setToastData({
                 title: "System Error",
                 description: message,
-                variant: "error"
+                variant: "error",
             });
         } finally {
             setIsLoadingReset(false);
@@ -305,7 +299,10 @@ export default function SettingsPage() {
             <PopupModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onConfirm={() => { setIsModalOpen(false); fileInputRef.current?.click(); }}
+                onConfirm={() => {
+                    setIsModalOpen(false);
+                    fileInputRef.current?.click();
+                }}
                 title="Update Profile Picture?"
                 confirmText="Upload New"
                 cancelText="Cancel"
@@ -327,8 +324,9 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-6">
                             <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Settings</h1>
                         </div>
-                        <p className="text-[#261A36] text-lg font-display font-bold mt-1">Configure your account and
-                            system preferences</p>
+                        <p className="text-[#261A36] text-lg font-display font-bold mt-1">
+                            Configure your account and system preferences
+                        </p>
                     </div>
                 </div>
 
@@ -336,7 +334,9 @@ export default function SettingsPage() {
                     <Card className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
                         <CardHeader className="flex flex-row items-center gap-3 p-0">
                             <Image src="/svgs/user-profile-icon.svg" width="30" height="30" alt="Icon" />
-                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Profile</CardTitle>
+                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">
+                                Profile
+                            </CardTitle>
                         </CardHeader>
 
                         <CardContent className="py-5 flex flex-col items-center gap-8">
@@ -399,7 +399,9 @@ export default function SettingsPage() {
                                         <Loader2 className="mr-2 h-10 w-10 animate-spin" />
                                         Please Wait
                                     </>
-                                ) : "UPDATE PROFILE"}
+                                ) : (
+                                    "UPDATE PROFILE"
+                                )}
                             </Button>
                         </CardContent>
                     </Card>
@@ -407,7 +409,9 @@ export default function SettingsPage() {
                     <Card className="rounded-[20px] border-2 border-[#5C5C5C] bg-white p-8 shadow-[8px_8px_0px_0px_rgba(87,66,114,1)]">
                         <CardHeader className="flex flex-row items-center gap-3 p-0">
                             <Image src="/svgs/security-icon.svg" width="30" height="30" alt="Icon" />
-                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">Security</CardTitle>
+                            <CardTitle className="text-2xl font-bold font-display text-[#261A36] tracking-tight">
+                                Security
+                            </CardTitle>
                         </CardHeader>
 
                         <CardContent className="py-5 space-y-8">
@@ -425,14 +429,20 @@ export default function SettingsPage() {
                                 disabled={isLoadingReset}
                                 className="h-16 w-full rounded-3xl bg-brand-accent font-display text-xl font-black uppercase text-white shadow-lg transition-transform active:scale-95"
                             >
-                                {isLoadingReset ? <Loader2 className="h-10 w-10 animate-spin" /> : countdown > 0 ? `Retry in ${countdown}s` : "RESET PASSWORD"}
+                                {isLoadingReset ? (
+                                    <Loader2 className="h-10 w-10 animate-spin" />
+                                ) : countdown > 0 ? (
+                                    `Retry in ${countdown}s`
+                                ) : (
+                                    "RESET PASSWORD"
+                                )}
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
             </main>
 
-            <BackgroundBubbles/>
+            <BackgroundBubbles />
         </div>
-    )
+    );
 }

@@ -1,15 +1,15 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
-import {Loader2} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import WelcomeSide from "@/components/ui/welcome-side";
-import {NotificationToast} from "@/components/ui/notification-toast";
-import {cn} from "@/lib/utils";
-import {supabase} from "@/lib/supabase/supabase";
-import {z} from "zod";
+import { NotificationToast } from "@/components/ui/notification-toast";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/supabase";
+import { z } from "zod";
 
 export default function VerifyPage() {
     const searchParams = useSearchParams();
@@ -57,10 +57,10 @@ export default function VerifyPage() {
         }
 
         try {
-            const {error: verifyError} = await supabase.auth.verifyOtp({
+            const { error: verifyError } = await supabase.auth.verifyOtp({
                 email: email!,
                 token: otp,
-                type: 'email',
+                type: "email",
             });
 
             if (verifyError) {
@@ -75,7 +75,6 @@ export default function VerifyPage() {
             setTimeout(() => {
                 router.push("../dashboard");
             }, 3000);
-
         } catch (error: unknown) {
             setIsLoading(false);
             setHasError(true);
@@ -86,7 +85,7 @@ export default function VerifyPage() {
     const handleResendEmail = async () => {
         if (!email) return;
         setIsResending(true);
-        const {error} = await supabase.auth.signInWithOtp({email});
+        const { error } = await supabase.auth.signInWithOtp({ email });
         if (error) {
             setHasError(true);
             setErrorMessage(error.message);
@@ -99,7 +98,7 @@ export default function VerifyPage() {
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (countdown > 0) {
-            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
+            timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
         }
         return () => clearInterval(timer);
     }, [countdown]);
@@ -123,18 +122,16 @@ export default function VerifyPage() {
                 duration={3000}
             />
 
-            <WelcomeSide/>
+            <WelcomeSide />
 
-            <div
-                className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-16 pb-10 lg:py-20 px-6 lg:px-20">
+            <div className="w-full lg:w-[65%] min-h-screen flex lg:items-center justify-center pt-16 pb-10 lg:py-20 px-6 lg:px-20">
                 <div className="max-w-2xl w-full text-white">
                     <div className="mb-7">
                         <h1 className="text-3xl lg:text-4xl font-display font-black tracking-tight text-[#4C3668] uppercase">
                             Verify Login
                         </h1>
                         <p className="mt-4 text-sm text-[#888888] break-words leading-relaxed">
-                            Please check email <span className="text-[#888888] font-medium">{email}</span> to see your OTP
-                            code.
+                            Please check email <span className="text-[#888888] font-medium">{email}</span> to see your OTP code.
                         </p>
                     </div>
 
@@ -142,11 +139,11 @@ export default function VerifyPage() {
                         <Input
                             id="otp"
                             value={otp}
-                            onChange={e => setOtp(e.target.value)}
+                            onChange={(e) => setOtp(e.target.value)}
                             placeholder="Enter OTP code here"
                             className={cn(
                                 "h-14 rounded-xl border-3 bg-white px-4 text-[#302F35] placeholder:text-[#302F35]/60 focus-visible:ring-offset-0 transition-colors",
-                                hasError ? "border-[#C44E52]" : "border-[#574272]"
+                                hasError ? "border-[#C44E52]" : "border-[#574272]",
                             )}
                         />
 
@@ -185,7 +182,7 @@ export default function VerifyPage() {
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-8 w-8 animate-spin"/>
+                                        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
                                         Please Wait
                                     </>
                                 ) : (

@@ -1,20 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {ChevronDown} from "lucide-react"
-import {addDays, format, differenceInDays, isSameDay, parseISO} from "date-fns"
-import {DateRange} from "react-day-picker"
-import {usePathname} from "next/navigation"
-import {cn} from "@/lib/utils"
-import {Button} from "@/components/ui/button"
-import {Calendar} from "@/components/ui/calendar"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import {Input} from "@/components/ui/input"
-import {useEffect, useState, useMemo} from "react";
+import * as React from "react";
+import { ChevronDown } from "lucide-react";
+import { addDays, format, differenceInDays, isSameDay, parseISO } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { useEffect, useState, useMemo } from "react";
 
 export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRange | undefined) => void }) {
     const pathname = usePathname();
@@ -29,7 +25,7 @@ export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRa
                     const parsed = JSON.parse(saved);
                     return {
                         from: parseISO(parsed.from),
-                        to: parseISO(parsed.to)
+                        to: parseISO(parsed.to),
                     };
                 } catch (e) {
                     console.error("Failed to parse stored date", e);
@@ -61,13 +57,16 @@ export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRa
         setDate(tempDate);
         onDateChange(tempDate);
 
-        localStorage.setItem(storageKey, JSON.stringify({
-            from: tempDate.from.toISOString(),
-            to: tempDate.to.toISOString()
-        }));
+        localStorage.setItem(
+            storageKey,
+            JSON.stringify({
+                from: tempDate.from.toISOString(),
+                to: tempDate.to.toISOString(),
+            }),
+        );
 
         setIsOpen(false);
-    }
+    };
 
     const getLabel = () => {
         if (date?.from && date?.to) {
@@ -94,14 +93,14 @@ export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRa
                         variant={"outline"}
                         className={cn(
                             "cursor-pointer w-fit h-12 justify-between text-left font-display font-bold text-lg border-2 border-black rounded-sm bg-white hover:bg-white text-black px-4 gap-3",
-                            !date && "text-muted-foreground"
+                            !date && "text-muted-foreground",
                         )}
                     >
                         {getLabel()}
                         <ChevronDown
                             className={cn(
                                 "h-5 w-5 transition-transform duration-200 ease-in-out text-black",
-                                isOpen ? "rotate-180" : "rotate-0"
+                                isOpen ? "rotate-180" : "rotate-0",
                             )}
                         />
                     </Button>
@@ -118,10 +117,7 @@ export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRa
                             selected={tempDate}
                             onSelect={setTempDate}
                             numberOfMonths={2}
-                            disabled={[
-                                { before: new Date(2024, 0, 1) },
-                                { after: new Date() }
-                            ]}
+                            disabled={[{ before: new Date(2024, 0, 1) }, { after: new Date() }]}
                             classNames={{
                                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                                 month: "space-y-4",
@@ -173,5 +169,5 @@ export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRa
                 </PopoverContent>
             </Popover>
         </div>
-    )
+    );
 }

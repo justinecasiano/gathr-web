@@ -21,7 +21,8 @@ export function useIndividualEventAnalytics(eventId: number, userId: string | un
 
             const { data, error } = await supabase
                 .from("participants")
-                .select<string, ParticipantJoinResult>(`
+                .select<string, ParticipantJoinResult>(
+                    `
                     response_status,
                     feedback_submission,
                     feedback_submitted_at,
@@ -29,7 +30,8 @@ export function useIndividualEventAnalytics(eventId: number, userId: string | un
                         id,
                         feedback_form
                     )
-                `)
+                `,
+                )
                 .eq("event_id", eventId)
                 .eq("user_id", userId)
                 .single();
@@ -38,7 +40,7 @@ export function useIndividualEventAnalytics(eventId: number, userId: string | un
 
             if (!data.events) throw new Error("Event configuration not found");
 
-            const submission = data.feedback_submission as QuestionResponse[] ?? [];
+            const submission = (data.feedback_submission as QuestionResponse[]) ?? [];
             const eventData = data.events;
             const formQuestions = eventData.feedback_form?.questions ?? [];
 
@@ -52,28 +54,26 @@ export function useIndividualEventAnalytics(eventId: number, userId: string | un
                     type: q.type,
                 };
 
-                if (q.type === 'radio' || q.type === 'checkbox') {
+                if (q.type === "radio" || q.type === "checkbox") {
                     const choiceQ = q as ChoiceQuestion;
-                    base.choiceResults = choiceQ.options.map(opt => ({
+                    base.choiceResults = choiceQ.options.map((opt) => ({
                         optionId: opt.id,
                         optionLabel: opt.label,
-                        isSelected: Array.isArray(answer)
-                            ? answer.includes(opt.id)
-                            : answer === opt.id
+                        isSelected: Array.isArray(answer) ? answer.includes(opt.id) : answer === opt.id,
                     }));
                 }
 
-                if (q.type === 'slider') {
+                if (q.type === "slider") {
                     const SLIDER_LABELS = ["Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied", "Very Satisfied"];
-                    const val = typeof answer === 'number' ? answer : Number(answer);
+                    const val = typeof answer === "number" ? answer : Number(answer);
                     base.sliderResult = {
                         ratingValue: val,
-                        ratingLabel: SLIDER_LABELS[val - 1] || "No Rating"
+                        ratingLabel: SLIDER_LABELS[val - 1] || "No Rating",
                     };
                 }
 
-                if (q.type === 'text_input') {
-                    base.textAnswer = typeof answer === 'string' ? answer : "";
+                if (q.type === "text_input") {
+                    base.textAnswer = typeof answer === "string" ? answer : "";
                 }
 
                 return base;
@@ -82,7 +82,7 @@ export function useIndividualEventAnalytics(eventId: number, userId: string | un
             return {
                 id: eventData.id,
                 participantId: userId,
-                status: data.response_status as IndividualEventAnalytics['status'],
+                status: data.response_status as IndividualEventAnalytics["status"],
                 submittedAt: data.feedback_submitted_at,
                 questions,
             };

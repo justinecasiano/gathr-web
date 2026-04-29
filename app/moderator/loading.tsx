@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { motion } from "motion/react";
 
@@ -11,31 +11,20 @@ export default function LoadingPage() {
                     initial={{ scale: 1, opacity: 0.8 }}
                     animate={{
                         scale: [1, 1.15, 1],
-                        opacity: [0.7, 1, 0.7]
+                        opacity: [0.7, 1, 0.7],
                     }}
                     transition={{
                         duration: 2,
                         repeat: Infinity,
                         repeatType: "reverse",
-                        ease: "easeInOut"
+                        ease: "easeInOut",
                     }}
                 >
-                    <Image
-                        src="/svgs/gathr-logo-initial.svg"
-                        alt="Gathr Logo"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
+                    <Image src="/svgs/gathr-logo-initial.svg" alt="Gathr Logo" fill className="object-contain" priority />
                 </motion.div>
 
                 <div className="absolute bottom-16 lg:bottom-7 left-1/2 -translate-x-1/2 h-10 w-20 md:h-15 md:w-25 pb-[env(safe-area-inset-bottom)]">
-                    <Image
-                        src="/svgs/gathr-logo-full.svg"
-                        alt="Gathr Logo"
-                        fill
-                        className="object-contain"
-                    />
+                    <Image src="/svgs/gathr-logo-full.svg" alt="Gathr Logo" fill className="object-contain" />
                 </div>
 
                 <div className="hidden lg:block absolute inset-0 pointer-events-none">

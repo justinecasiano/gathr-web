@@ -1,4 +1,4 @@
-export type QuestionType = 'radio' | 'checkbox' | 'slider' | 'text_input';
+export type QuestionType = "radio" | "checkbox" | "slider" | "text_input";
 
 interface BaseQuestion {
     id: string;
@@ -10,19 +10,19 @@ interface BaseQuestion {
 }
 
 export interface ChoiceQuestion extends BaseQuestion {
-    type: 'radio' | 'checkbox';
+    type: "radio" | "checkbox";
     options: { id: string; label: string }[];
 }
 
 export interface SliderQuestion extends BaseQuestion {
-    type: 'slider';
+    type: "slider";
     minLabel?: string;
     maxLabel?: string;
     maxRating: 5;
 }
 
 export interface TextQuestion extends BaseQuestion {
-    type: 'text_input';
+    type: "text_input";
     placeholder?: string;
 }
 
@@ -45,4 +45,3 @@ export interface FormEditorValues {
     title: string;
     questions: FeedbackQuestion[];
 }
-
