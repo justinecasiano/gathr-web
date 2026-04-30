@@ -70,7 +70,7 @@ export default function ReportsPage() {
     return (
         <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
             <Header />
-            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-50">
+            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-40">
                 <div className="flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-6">

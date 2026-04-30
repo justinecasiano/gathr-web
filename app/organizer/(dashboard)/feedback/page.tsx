@@ -257,7 +257,7 @@ export default function FeedbackFormsPage() {
                 onClose={() => setToastConfig((prev) => ({ ...prev, isOpen: false }))}
             />
             <Header />
-            <main className="relative flex-1 flex flex-col px-10 pt-6 max-w-[1600px] mx-auto w-full z-50 overflow-hidden">
+            <main className="relative flex-1 flex flex-col px-10 pt-6 max-w-[1600px] mx-auto w-full z-40 overflow-hidden">
                 <div className="flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-6">

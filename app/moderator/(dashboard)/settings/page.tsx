@@ -24,7 +24,7 @@ interface ToastState {
 }
 
 export default function SettingsPage() {
-    const { data: user, isLoading: isUserLoading, refetch } = useUser(); // Ensure refetch is destructured
+    const { data: user, isLoading: isUserLoading, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
