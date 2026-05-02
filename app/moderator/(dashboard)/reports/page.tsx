@@ -74,11 +74,11 @@ export default function ReportsPage() {
                 <div className="flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-6">
-                            <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Dashboard</h1>
+                            <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Reports</h1>
                             <DateRangePicker onDateChange={setDateRange} />
                         </div>
                         <p className="text-[#261A36] text-lg font-display font-bold mt-1">
-                            Overview of your events and feedback
+                            Oversee reports on events, feedback and attendee summary.
                         </p>
                     </div>
                 </div>

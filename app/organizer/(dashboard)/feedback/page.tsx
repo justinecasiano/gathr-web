@@ -33,12 +33,12 @@ export default function FeedbackFormsPage() {
     const searchQuery = useSearchStore((state) => state.query);
     const [activeTab, setActiveTab] = useState<"forms" | "individual">("forms");
     const [selectedEventId, setSelectedEventId] = useState<string | undefined>(() => {
-        if (typeof window !== "undefined") return localStorage.getItem("gathr_selected_event") || undefined;
+        if (typeof window !== "undefined") return localStorage.getItem("feedback_selected_event") || undefined;
         return undefined;
     });
 
     useEffect(() => {
-        if (selectedEventId) localStorage.setItem("gathr_selected_event", selectedEventId);
+        if (selectedEventId) localStorage.setItem("feedback_selected_event", selectedEventId);
     }, [selectedEventId]);
 
     const { data: rawEvents, isLoading: isEventsLoading } = useOrganizerEvents();

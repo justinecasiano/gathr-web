@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { SimpleEvent, BaseEvent, FeedbackEvent, IndividualResponse } from "@/types/base-event";
-import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, differenceInDays, subDays } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { ParticipantWithUsers } from "@/hooks/use-event-participants";
+import {clsx, type ClassValue} from "clsx";
+import {twMerge} from "tailwind-merge";
+import {SimpleEvent, BaseEvent, FeedbackEvent, IndividualResponse} from "@/types/base-event";
+import {format, subMonths, startOfMonth, endOfMonth, isWithinInterval, differenceInDays, subDays} from "date-fns";
+import {DateRange} from "react-day-picker";
+import {ParticipantWithUsers} from "@/hooks/use-event-participants";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -102,7 +102,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
 
     const getTrend = (current: number, previous: number) => {
         if (previous === 0) {
-            return { string: current > 0 ? "+100%" : "0%", up: current > 0 };
+            return {string: current > 0 ? "+100%" : "0%", up: current > 0};
         }
         const percentage = ((current - previous) / previous) * 100;
         const sign = percentage >= 0 ? "+" : "";
@@ -136,7 +136,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     const feedbackTrend = getTrend(curr.responses, prev.responses);
 
     const dashboardStats = [
-        { label: "My Events", value: curr.total.toLocaleString(), trend: eventTrend.string, trendUp: eventTrend.up },
+        {label: "My Events", value: curr.total.toLocaleString(), trend: eventTrend.string, trendUp: eventTrend.up},
         {
             label: "Total Participants",
             value: curr.attendees.toLocaleString(),
@@ -160,9 +160,9 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     const getStatusCount = (list: BaseEvent[], status: string) => list.filter((e) => e.status === status).length;
 
     const statuses = [
-        { name: "Approved", key: "APPROVED", color: "#94B983" },
-        { name: "Pending", key: "PENDING", color: "#F6835E" },
-        { name: "Rejected", key: "REJECTED", color: "#CD4249" },
+        {name: "Approved", key: "APPROVED", color: "#94B983"},
+        {name: "Pending", key: "PENDING", color: "#F6835E"},
+        {name: "Rejected", key: "REJECTED", color: "#CD4249"},
     ];
 
     const eventStatusData = statuses.map((s) => {
@@ -188,7 +188,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
         };
     });
 
-    const last6Months = Array.from({ length: 6 }, (_, i) => {
+    const last6Months = Array.from({length: 6}, (_, i) => {
         const referenceDate = dateRange?.to || new Date();
         return subMonths(referenceDate, i);
     }).reverse();
@@ -200,7 +200,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
 
         const eventsInMonth = events.filter((e) => {
             const eventDate = new Date(e.start_time);
-            return isWithinInterval(eventDate, { start: monthStart, end: monthEnd });
+            return isWithinInterval(eventDate, {start: monthStart, end: monthEnd});
         });
 
         let totalWeightedRating = 0;
@@ -232,7 +232,86 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     if (daysDiff === 1) prevLabel = "yesterday";
     else prevLabel = `prev. ${daysDiff} days`;
 
-    return { dashboardStats, eventAttendeeData, eventStatusData, feedbackTrendData, comparisonLabel: prevLabel };
+    return {dashboardStats, eventAttendeeData, eventStatusData, feedbackTrendData, comparisonLabel: prevLabel};
+};
+
+export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[], selectedEventId: number) => {
+    const targetEvent = events.find(e => e.id === selectedEventId);
+
+    const otherEvents = events
+        .filter(e => e.id !== selectedEventId)
+        .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
+
+    const referenceEvent = otherEvents[0];
+
+    const getTrend = (current: number, previous: number) => {
+        if (!previous || previous === 0) {
+            return {string: current > 0 ? "+100%" : "0%", up: current > 0};
+        }
+        const percentage = ((current - previous) / previous) * 100;
+        const sign = percentage >= 0 ? "+" : "";
+        return {
+            string: `${sign}${percentage.toFixed(1)}%`,
+            up: percentage >= 0,
+        };
+    };
+
+    const extractStats = (event: BaseEvent | undefined) => {
+        if (!event) return {total: 0, attendees: 0, responses: 0, rate: 0, rating: 0};
+
+        const registered = event.participants?.[0]?.count ?? 0;
+        const present = event.present_count?.[0]?.count ?? 0;
+        const responses = event.response_count?.[0]?.count ?? 0;
+        const rate = registered > 0 ? (present / registered) * 100 : 0;
+        const rating = Number(event.avg_rating ?? 0);
+
+        return {attendees: present, total: registered, responses, rate, rating};
+    };
+
+    const curr = extractStats(targetEvent);
+    const prev = extractStats(referenceEvent);
+
+    const attendeeTrend = getTrend(curr.attendees, prev.attendees);
+    const totalTrend = getTrend(curr.total, prev.total);
+    const rateTrend = getTrend(curr.rate, prev.rate);
+    const feedbackTrend = getTrend(curr.responses, prev.responses);
+
+    const dashboardStats = [
+        {
+            label: "Attendees",
+            value: curr.attendees.toLocaleString(),
+            trend: attendeeTrend.string,
+            trendUp: attendeeTrend.up,
+        },
+        {
+            label: "Total Participants",
+            value: curr.total.toLocaleString(),
+            trend: totalTrend.string,
+            trendUp: totalTrend.up,
+        },
+        {
+            label: "Attendance Rate",
+            value: curr.rate.toFixed(1) + "%",
+            trend: rateTrend.string,
+            trendUp: rateTrend.up,
+        },
+        {
+            label: "Event Feedback",
+            value: curr.responses.toLocaleString(),
+            trend: feedbackTrend.string,
+            trendUp: feedbackTrend.up,
+        },
+    ];
+
+    const comparisonLabel = referenceEvent
+        ? `vs. latest event`
+        : "no previous events to compare";
+
+    return {
+        dashboardStats,
+        comparisonLabel,
+        targetEventTitle: targetEvent?.title
+    };
 };
 
 export const mapToIndividualSummary = (participants: ParticipantWithUsers[], location: string): IndividualResponse[] => {
