@@ -1,4 +1,5 @@
 import { QuestionType } from "./feedback";
+import { ParticipantStatus } from "./participant";
 
 export interface ChoiceSummary {
     optionId: string;
@@ -60,4 +61,20 @@ export interface IndividualEventAnalytics {
     status: "ANSWERED" | "NO_RESPONSE" | "ABSENT";
     submittedAt: string | null;
     questions: IndividualQuestionAnalytics[];
+}
+
+export interface ParticipantReportRow {
+    name: string;
+    date: string;
+    status: ParticipantStatus;
+}
+
+export interface ParticipantReportData {
+    participants: ParticipantReportRow[];
+    stats: {
+        present: number;
+        cancelled: number;
+        absent: number;
+        total: number;
+    };
 }

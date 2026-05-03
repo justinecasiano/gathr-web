@@ -25,7 +25,6 @@ import { Header } from "@/components/ui/header";
 import { Stats } from "@/components/ui/stats";
 import Image from "next/image";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { motion } from "motion/react";
 import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns/addDays";
 import { useOrganizerEvents } from "@/hooks/use-organizer-events";

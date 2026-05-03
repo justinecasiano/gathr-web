@@ -261,7 +261,7 @@ function renderCheckboxAnalytics(data: ChoiceSummary[]) {
     );
 }
 
-function renderSliderAnalytics(data: SliderSummary[]) {
+export function renderSliderAnalytics(data: SliderSummary[], shouldShowSlider: boolean = true) {
     const COLORS = ["#5687F2", "#EAB308", "#EA3A88", "#60CA3B", "#9151FF"];
     const LABELS = ["Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied", "Very Satisfied"];
 
@@ -294,14 +294,16 @@ function renderSliderAnalytics(data: SliderSummary[]) {
                             {avg}
                         </span>
                     </motion.div>
-                    <div className="absolute inset-0 flex justify-between px-[2px] z-20 pointer-events-none">
-                        {[1, 2, 3, 4, 5].map((num) => (
-                            <div key={num} className="relative h-full flex flex-col items-center">
+                    {shouldShowSlider && (
+                        <div className="absolute inset-0 flex justify-between px-[2px] z-20 pointer-events-none">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                                <div key={num} className="relative h-full flex flex-col items-center">
                                 <span
                                     className="absolute top-6 text-xs font-normal font-heading text-black">{num}</span>
-                            </div>
-                        ))}
-                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -332,7 +334,7 @@ function renderSliderAnalytics(data: SliderSummary[]) {
     );
 }
 
-function renderRadioAnalytics(data: ChoiceSummary[]) {
+export function renderRadioAnalytics(data: ChoiceSummary[], isReports: boolean = false) {
     const maxCount = Math.max(...data.map((item) => item.count));
 
     return (
@@ -343,7 +345,7 @@ function renderRadioAnalytics(data: ChoiceSummary[]) {
                     <div
                         key={idx}
                         className={cn(
-                            "px-4 py-2 border-2 rounded-2xl flex justify-between items-center transition-colors",
+                            "px-4 py-2 border-2 rounded-2xl flex justify-between items-center transition-colors flex-shrink-0",
                             isHighest
                                 ? "bg-[#7954AB] border-[#7954AB] shadow-md"
                                 : "bg-slate-50/50 border-[#5C5C5C]/10 hover:border-[#7954AB]/20",
@@ -359,7 +361,15 @@ function renderRadioAnalytics(data: ChoiceSummary[]) {
                                 {idx + 1}
                             </div>
                             <span
-                                className={cn("font-bold", isHighest ? "text-white" : "text-black")}>{item.optionLabel}</span>
+                                className={cn(
+                                    "font-bold block",
+                                    "line-clamp-4 overflow-hidden",
+                                    isReports ? "max-w-[350px]": "max-w-[800px]",
+                                    isHighest ? "text-white" : "text-black"
+                                )}
+                                title={item.optionLabel}
+                            >
+                                {item.optionLabel}</span>
                         </div>
 
                         <div className="flex flex-col items-end">
@@ -379,7 +389,7 @@ function renderRadioAnalytics(data: ChoiceSummary[]) {
     );
 }
 
-function renderTextAnalytics(responses: string[]) {
+export function renderTextAnalytics(responses: string[]) {
     return (
         <div className="flex flex-wrap gap-2">
             {responses.map((resp, i) => (

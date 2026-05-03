@@ -84,7 +84,7 @@ export function Stats({data, loading, comparisonLabel}: StatsProps) {
     const showSkeleton = useSkeleton(loading, 400);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[20%_20%_25%_30%] gap-4 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-[20%_20%_25%_30%] gap-4 w-full print:block">
             {currentConfig.map((config, index) => (
                 <Skeleton
                     key={index}
