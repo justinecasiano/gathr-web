@@ -1,18 +1,17 @@
 "use client";
 
-import * as React from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { motion, Variants, AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { Loader2, Menu, X } from "lucide-react";
-import { Icon, IconName } from "@/components/icons";
 import { signOut } from "@/app/actions";
-import { useState, useEffect } from "react";
+import { Icon, IconName } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import PopupModal from "@/components/ui/popup-modal";
 import { useUser } from "@/hooks/use-user";
+import { cn } from "@/lib/utils";
+import { Loader2, Menu, X } from "lucide-react";
+import { AnimatePresence, motion, Variants } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface SidebarItem {
     href: string;

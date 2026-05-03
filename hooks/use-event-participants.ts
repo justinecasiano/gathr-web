@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/supabase";
 import { Participant } from "@/types/participant";
+import { useQuery } from "@tanstack/react-query";
 
 export interface ParticipantWithUsers extends Participant {
     users: {

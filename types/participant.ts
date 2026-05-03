@@ -1,4 +1,3 @@
-import { User } from "@/types/user";
 import { FormSubmission } from "@/types/feedback";
 
 export type ParticipantType = "ATTENDEE" | "ORGANIZER" | "STAFF";

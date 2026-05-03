@@ -1,23 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import _my_events from "@/bones/my-events.bones.json";
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
+import { Button } from "@/components/ui/button";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { EventCard } from "@/components/ui/event-card";
 import { Header } from "@/components/ui/header";
-import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { DateRange } from "react-day-picker";
-import { addDays } from "date-fns/addDays";
-import { cn, mapToSimpleEvent } from "@/lib/utils";
 import { useOrganizerEvents } from "@/hooks/use-organizer-events";
-import _my_events from "@/bones/my-events.bones.json";
-import { Skeleton } from "boneyard-js/react";
-import { ResponsiveBones } from "boneyard-js";
-import { useSkeleton } from "@/hooks/use-skeleton";
 import { usePagination } from "@/hooks/use-pagination";
-import { SimpleEvent } from "@/types/base-event";
 import { useSearchStore } from "@/hooks/use-search-store";
-import { BackgroundBubbles } from "@/components/ui/background-bubbles";
+import { useSkeleton } from "@/hooks/use-skeleton";
+import { cn, mapToSimpleEvent } from "@/lib/utils";
+import { SimpleEvent } from "@/types/base-event";
+import { ResponsiveBones } from "boneyard-js";
+import { Skeleton } from "boneyard-js/react";
+import { addDays } from "date-fns/addDays";
+import { useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
 
 export default function EventsPage() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>({

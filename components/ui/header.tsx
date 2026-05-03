@@ -1,11 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { GlobalSearch } from "@/components/ui/global-search";
 import { Icon, IconName } from "@/components/icons";
-import Image from "next/image";
-import * as React from "react";
+import { GlobalSearch } from "@/components/ui/global-search";
 import { useUser } from "@/hooks/use-user";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
 const PATH_TO_ICON: Record<string, IconName> = {
     "/dashboard": "dashboard",

@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import WelcomeSide from "@/components/ui/welcome-side";
 import { NotificationToast } from "@/components/ui/notification-toast";
-import { cn } from "@/lib/utils";
+import WelcomeSide from "@/components/ui/welcome-side";
 import { supabase } from "@/lib/supabase/supabase";
+import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 export default function VerifyPage() {

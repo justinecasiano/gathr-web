@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { LucideIcon, Loader2 } from "lucide-react";
-import { AnimatePresence } from "motion/react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { Loader2, LucideIcon } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import Image from "next/image";
 
 interface PopupModalProps {

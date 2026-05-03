@@ -1,9 +1,9 @@
-import {clsx, type ClassValue} from "clsx";
-import {twMerge} from "tailwind-merge";
-import {SimpleEvent, BaseEvent, FeedbackEvent, IndividualResponse} from "@/types/base-event";
-import {format, subMonths, startOfMonth, endOfMonth, isWithinInterval, differenceInDays, subDays} from "date-fns";
-import {DateRange} from "react-day-picker";
-import {ParticipantWithUsers} from "@/hooks/use-event-participants";
+import { ParticipantWithUsers } from "@/hooks/use-event-participants";
+import { BaseEvent, FeedbackEvent, IndividualResponse, SimpleEvent } from "@/types/base-event";
+import { clsx, type ClassValue } from "clsx";
+import { differenceInDays, endOfMonth, format, isWithinInterval, startOfMonth, subDays, subMonths } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -111,7 +111,7 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
 
     const calcStats = (list: BaseEvent[]) => {
         const total = list.length;
-        const rejected = list.filter(e => e.status === "REJECTED").length;
+        const rejected = list.filter((e) => e.status === "REJECTED").length;
         const totalRegistered = list.reduce((sum, e) => sum + (e.participants?.[0]?.count ?? 0), 0);
         const totalPresent = list.reduce((sum, e) => sum + (e.present_count?.[0]?.count ?? 0), 0);
         const totalResponses = list.reduce((sum, e) => sum + (e.response_count?.[0]?.count ?? 0), 0);
@@ -128,30 +128,29 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
             label: "Total Events",
             value: curr.total.toLocaleString(),
             trend: getTrend(curr.total, prev.total).string,
-            trendUp: getTrend(curr.total, prev.total).up
+            trendUp: getTrend(curr.total, prev.total).up,
         },
         {
             label: "Rejected Events",
             value: curr.rejected.toLocaleString(),
             trend: getTrend(curr.rejected, prev.rejected).string,
-            trendUp: getTrend(curr.rejected, prev.rejected).up
+            trendUp: getTrend(curr.rejected, prev.rejected).up,
         },
         {
             label: "Attendance Rate",
             value: curr.rate.toFixed(1) + "%",
             trend: getTrend(curr.rate, prev.rate).string,
-            trendUp: getTrend(curr.rate, prev.rate).up
+            trendUp: getTrend(curr.rate, prev.rate).up,
         },
         {
             label: "Total Attendees",
             value: curr.attendees.toLocaleString(),
             trend: getTrend(curr.attendees, prev.attendees).string,
-            trendUp: getTrend(curr.attendees, prev.attendees).up
+            trendUp: getTrend(curr.attendees, prev.attendees).up,
         },
     ];
 
-    const getStatusCount = (list: BaseEvent[], status: string) =>
-        list.filter((e) => e.status === status).length;
+    const getStatusCount = (list: BaseEvent[], status: string) => list.filter((e) => e.status === status).length;
 
     const statuses = [
         { name: "Approved", key: "APPROVED", color: "#94B983" },
@@ -193,7 +192,7 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
         const monthEnd = endOfMonth(monthDate);
 
         const eventsInMonth = events.filter((e) =>
-            isWithinInterval(new Date(e.start_time), { start: monthStart, end: monthEnd })
+            isWithinInterval(new Date(e.start_time), { start: monthStart, end: monthEnd }),
         );
 
         let totalWeightedRating = 0;
@@ -221,7 +220,7 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
         eventAttendeeData,
         eventStatusData,
         feedbackTrendData,
-        comparisonLabel: prevLabel
+        comparisonLabel: prevLabel,
     };
 };
 
@@ -245,7 +244,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
 
     const getTrend = (current: number, previous: number) => {
         if (previous === 0) {
-            return {string: current > 0 ? "+100%" : "0%", up: current > 0};
+            return { string: current > 0 ? "+100%" : "0%", up: current > 0 };
         }
         const percentage = ((current - previous) / previous) * 100;
         const sign = percentage >= 0 ? "+" : "";
@@ -279,7 +278,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     const feedbackTrend = getTrend(curr.responses, prev.responses);
 
     const dashboardStats = [
-        {label: "My Events", value: curr.total.toLocaleString(), trend: eventTrend.string, trendUp: eventTrend.up},
+        { label: "My Events", value: curr.total.toLocaleString(), trend: eventTrend.string, trendUp: eventTrend.up },
         {
             label: "Total Participants",
             value: curr.attendees.toLocaleString(),
@@ -303,9 +302,9 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     const getStatusCount = (list: BaseEvent[], status: string) => list.filter((e) => e.status === status).length;
 
     const statuses = [
-        {name: "Approved", key: "APPROVED", color: "#94B983"},
-        {name: "Pending", key: "PENDING", color: "#F6835E"},
-        {name: "Rejected", key: "REJECTED", color: "#CD4249"},
+        { name: "Approved", key: "APPROVED", color: "#94B983" },
+        { name: "Pending", key: "PENDING", color: "#F6835E" },
+        { name: "Rejected", key: "REJECTED", color: "#CD4249" },
     ];
 
     const eventStatusData = statuses.map((s) => {
@@ -331,7 +330,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
         };
     });
 
-    const last6Months = Array.from({length: 6}, (_, i) => {
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
         const referenceDate = dateRange?.to || new Date();
         return subMonths(referenceDate, i);
     }).reverse();
@@ -343,7 +342,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
 
         const eventsInMonth = events.filter((e) => {
             const eventDate = new Date(e.start_time);
-            return isWithinInterval(eventDate, {start: monthStart, end: monthEnd});
+            return isWithinInterval(eventDate, { start: monthStart, end: monthEnd });
         });
 
         let totalWeightedRating = 0;
@@ -375,21 +374,21 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
     if (daysDiff === 1) prevLabel = "yesterday";
     else prevLabel = `prev. ${daysDiff} days`;
 
-    return {dashboardStats, eventAttendeeData, eventStatusData, feedbackTrendData, comparisonLabel: prevLabel};
+    return { dashboardStats, eventAttendeeData, eventStatusData, feedbackTrendData, comparisonLabel: prevLabel };
 };
 
 export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[], selectedEventId: number) => {
-    const targetEvent = events.find(e => e.id === selectedEventId);
+    const targetEvent = events.find((e) => e.id === selectedEventId);
 
     const otherEvents = events
-        .filter(e => e.id !== selectedEventId)
+        .filter((e) => e.id !== selectedEventId)
         .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
 
     const referenceEvent = otherEvents[0];
 
     const getTrend = (current: number, previous: number) => {
         if (!previous || previous === 0) {
-            return {string: current > 0 ? "+100%" : "0%", up: current > 0};
+            return { string: current > 0 ? "+100%" : "0%", up: current > 0 };
         }
         const percentage = ((current - previous) / previous) * 100;
         const sign = percentage >= 0 ? "+" : "";
@@ -400,7 +399,7 @@ export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[
     };
 
     const extractStats = (event: BaseEvent | undefined) => {
-        if (!event) return {total: 0, attendees: 0, responses: 0, rate: 0, rating: 0};
+        if (!event) return { total: 0, attendees: 0, responses: 0, rate: 0, rating: 0 };
 
         const registered = event.participants?.[0]?.count ?? 0;
         const present = event.present_count?.[0]?.count ?? 0;
@@ -408,7 +407,7 @@ export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[
         const rate = registered > 0 ? (present / registered) * 100 : 0;
         const rating = Number(event.avg_rating ?? 0);
 
-        return {attendees: present, total: registered, responses, rate, rating};
+        return { attendees: present, total: registered, responses, rate, rating };
     };
 
     const curr = extractStats(targetEvent);
@@ -446,14 +445,12 @@ export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[
         },
     ];
 
-    const comparisonLabel = referenceEvent
-        ? `vs. latest event`
-        : "no previous events to compare";
+    const comparisonLabel = referenceEvent ? `vs. latest event` : "no previous events to compare";
 
     return {
         dashboardStats,
         comparisonLabel,
-        targetEventTitle: targetEvent?.title
+        targetEventTitle: targetEvent?.title,
     };
 };
 

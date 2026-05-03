@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
-import {usePathname} from "next/navigation";
-import {KpiCard} from "@/components/ui/kpi-card";
-import {useSkeleton} from "@/hooks/use-skeleton";
-import {Skeleton} from "boneyard-js/react";
 import _dashboard_stats from "@/bones/dashboard-stats-kpi.bones.json";
-import {ResponsiveBones} from "boneyard-js";
-import {cn} from "@/lib/utils";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { useSkeleton } from "@/hooks/use-skeleton";
+import { cn } from "@/lib/utils";
+import { ResponsiveBones } from "boneyard-js";
+import { Skeleton } from "boneyard-js/react";
+import { usePathname } from "next/navigation";
 
 interface StatItem {
     value: string;
@@ -70,15 +69,13 @@ const CONFIGS = {
     ],
 };
 
-export function Stats({data, loading, comparisonLabel}: StatsProps) {
+export function Stats({ data, loading, comparisonLabel }: StatsProps) {
     const pathname = usePathname();
 
     const isModerator = pathname.includes("/moderator");
     let currentConfig = isModerator ? CONFIGS.moderator : CONFIGS.organizer;
     if (pathname.includes("/organizer/reports")) {
-        currentConfig = currentConfig.map((item, index) =>
-            index === 0 ? {...item, label: "Attendees"} : item
-        );
+        currentConfig = currentConfig.map((item, index) => (index === 0 ? { ...item, label: "Attendees" } : item));
     }
 
     const showSkeleton = useSkeleton(loading, 400);
@@ -94,7 +91,7 @@ export function Stats({data, loading, comparisonLabel}: StatsProps) {
                     loading={showSkeleton}
                     className={cn(
                         showSkeleton &&
-                        "rounded-xl bg-white/40 border-2 border-[#5C5C5C] shadow-[4px_4px_0px_0px_rgba(87,66,114,1)]",
+                            "rounded-xl bg-white/40 border-2 border-[#5C5C5C] shadow-[4px_4px_0px_0px_rgba(87,66,114,1)]",
                     )}
                     color="#574272"
                     boneClass="opacity-40"

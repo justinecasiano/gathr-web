@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import { SearchResult, searchIndex } from "@/config/search-index";
+import { create } from "zustand";
 
 interface SearchStore {
     query: string;

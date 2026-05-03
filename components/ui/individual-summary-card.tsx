@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IndividualResponse } from "@/types/base-event";
+import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { FeedbackExpansion } from "./feedback-expansion";
 
 interface ExtendedIndividualSummary extends IndividualResponse {

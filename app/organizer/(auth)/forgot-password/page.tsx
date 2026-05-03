@@ -1,16 +1,16 @@
 "use client";
-import Image from "next/image";
-import { motion } from "motion/react";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { Label } from "@/components/ui/label";
+import { NotificationToast } from "@/components/ui/notification-toast";
+import { supabase } from "@/lib/supabase/supabase";
 import { cn, getURL } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/lib/supabase/supabase";
-import { NotificationToast } from "@/components/ui/notification-toast";
 
 export default function ForgotPasswordPage() {
     const router = useRouter();

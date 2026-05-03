@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function NotFound() {

@@ -1,22 +1,20 @@
 "use client";
 
-import * as React from "react";
-import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/ui/header";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { NotificationToast, ToastVariant } from "@/components/ui/notification-toast";
+import PopupModal from "@/components/ui/popup-modal";
 import { useUser } from "@/hooks/use-user";
 import { supabase } from "@/lib/supabase/supabase";
-import { z } from "zod";
-import { motion } from "motion/react";
 import { getURL } from "@/lib/utils";
-import { useRef } from "react";
-import PopupModal from "@/components/ui/popup-modal";
-import {BackgroundBubbles} from "@/components/ui/background-bubbles";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 
 interface ToastState {
     title: string;

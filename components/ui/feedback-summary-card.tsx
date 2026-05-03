@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { ChevronDown, Edit3, Eye, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { FeedbackEvent } from "@/types/base-event";
-import { Button } from "./button";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import { FeedbackEvent } from "@/types/base-event";
+import { ChevronDown, Edit3, Eye, Plus } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Button } from "./button";
 import { FeedbackExpansion } from "./feedback-expansion";
 
 interface ExtendedFeedbackEvent extends FeedbackEvent {

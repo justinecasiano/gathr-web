@@ -1,16 +1,15 @@
 "use client";
 
-import * as React from "react";
-import { ChevronDown } from "lucide-react";
-import { addDays, format, differenceInDays, isSameDay, parseISO } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState, useMemo } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { addDays, differenceInDays, format, isSameDay, parseISO } from "date-fns";
+import { ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
 
 export function DateRangePicker({ onDateChange }: { onDateChange: (range: DateRange | undefined) => void }) {
     const pathname = usePathname();

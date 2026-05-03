@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useSearchStore } from "@/hooks/use-search-store";
 import { SearchResult } from "@/config/search-index";
+import { useSearchStore } from "@/hooks/use-search-store";
 import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const PATH_PLACEHOLDERS: Record<string, string> = {
     "/dashboard": "Search anything...",
@@ -87,7 +87,8 @@ export function GlobalSearch() {
         if (val.length > 0) {
             const items = getFullIndex();
 
-            const isFilteringPage = pathname.includes("/feedback") || pathname.includes("/events");
+            const isFilteringPage =
+                pathname.includes("/feedback") || pathname.includes("/events") || pathname.includes("moderator/reports");
 
             const filtered = items.filter((item) => {
                 const matchesUserType = item.user === currentUserType;

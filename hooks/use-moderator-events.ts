@@ -1,10 +1,10 @@
-import {supabase} from "@/lib/supabase/supabase";
-import {BaseEvent} from "@/types/base-event";
+import { EventResponse } from "@/hooks/use-organizer-events";
+import { supabase } from "@/lib/supabase/supabase";
+import { getEventStatus } from "@/lib/utils";
+import { BaseEvent } from "@/types/base-event";
 import { FormEditorValues } from "@/types/feedback";
-import {useQuery} from "@tanstack/react-query";
-import {DateRange} from "react-day-picker";
-import {EventResponse} from "@/hooks/use-organizer-events";
-import {getEventStatus} from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { DateRange } from "react-day-picker";
 
 export const useModeratorEvents = (dateRange?: DateRange) => {
     return useQuery({
@@ -12,7 +12,8 @@ export const useModeratorEvents = (dateRange?: DateRange) => {
         queryFn: async (): Promise<BaseEvent[]> => {
             let query = supabase
                 .from("events")
-                .select(`
+                .select(
+                    `
                     *,
                     creator:users!events_created_by_fkey (*),
                     participants:participants(
@@ -21,7 +22,8 @@ export const useModeratorEvents = (dateRange?: DateRange) => {
                         response_status, 
                         rating
                     )
-                `)
+                `,
+                )
                 .eq("is_archive", false);
 
             if (dateRange?.from) {
@@ -31,7 +33,7 @@ export const useModeratorEvents = (dateRange?: DateRange) => {
                 query = query.lte("start_time", dateRange.to.toISOString());
             }
 
-            const {data, error} = await query.order("start_time", {ascending: true});
+            const { data, error } = await query.order("start_time", { ascending: true });
 
             if (error) throw error;
 

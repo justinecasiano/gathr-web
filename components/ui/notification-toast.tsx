@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { X } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
+import * as React from "react";
 
 export type ToastVariant = "success" | "error" | "warning" | "info" | "neutral";
 

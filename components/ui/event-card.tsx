@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { SimpleEvent } from "@/types/base-event";
-import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
 import { FeedbackExpansion } from "@/components/ui/feedback-expansion";
+import { cn } from "@/lib/utils";
+import { SimpleEvent } from "@/types/base-event";
+import { ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface ExtendedSimpleEvent extends SimpleEvent {
     isExpanded: boolean;

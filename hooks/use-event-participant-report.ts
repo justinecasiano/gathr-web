@@ -1,8 +1,8 @@
-import {useQuery} from "@tanstack/react-query";
-import {supabase} from "@/lib/supabase/supabase";
-import {ParticipantStatus} from "@/types/participant";
-import {format} from "date-fns";
+import { supabase } from "@/lib/supabase/supabase";
 import { ParticipantReportData } from "@/types/event-analytics";
+import { ParticipantStatus } from "@/types/participant";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 export const useEventParticipantReport = (eventId: number | undefined) => {
     return useQuery({
@@ -11,14 +11,16 @@ export const useEventParticipantReport = (eventId: number | undefined) => {
         queryFn: async (): Promise<ParticipantReportData> => {
             const { data, error } = await supabase
                 .from("participants")
-                .select(`
+                .select(
+                    `
                     status,
                     check_in,
                     user:users (
                         first_name,
                         last_name
                     )
-                `)
+                `,
+                )
                 .eq("event_id", eventId)
                 .in("status", ["PRESENT", "CHECKED_IN", "CANCELLED", "ABSENT"])
                 .order("check_in", { ascending: false });
@@ -45,8 +47,7 @@ export const useEventParticipantReport = (eventId: number | undefined) => {
                 const fullName = `${firstName} ${lastName}`.trim() || "Anonymous User";
 
                 const formattedDate = row.check_in
-                    ? format(new Date(row.check_in), "MMM d, yyyy - h:mm") +
-                    format(new Date(row.check_in), " b").toLowerCase()
+                    ? format(new Date(row.check_in), "MMM d, yyyy - h:mm") + format(new Date(row.check_in), " b").toLowerCase()
                     : "N/A";
 
                 return {

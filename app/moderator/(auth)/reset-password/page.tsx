@@ -1,16 +1,16 @@
 "use client";
-import Image from "next/image";
-import { motion } from "motion/react";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { usePathname, useRouter } from "next/navigation";
+import { Label } from "@/components/ui/label";
+import { NotificationToast } from "@/components/ui/notification-toast";
+import { supabase } from "@/lib/supabase/supabase";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/lib/supabase/supabase";
-import { NotificationToast } from "@/components/ui/notification-toast";
 
 export default function ResetPasswordPage() {
     const router = useRouter();

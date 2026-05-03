@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
     const router = useRouter();

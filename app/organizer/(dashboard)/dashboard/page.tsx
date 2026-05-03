@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Circle } from "lucide-react";
 import {
     Area,
@@ -18,18 +17,18 @@ import {
     YAxis,
 } from "recharts";
 
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn, generateOrganizerDashboardAnalytics } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Header } from "@/components/ui/header";
 import { Stats } from "@/components/ui/stats";
-import Image from "next/image";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { DateRange } from "react-day-picker";
-import { addDays } from "date-fns/addDays";
 import { useOrganizerEvents } from "@/hooks/use-organizer-events";
+import { cn, generateOrganizerDashboardAnalytics } from "@/lib/utils";
 import { differenceInDays, subDays } from "date-fns";
-import { BackgroundBubbles } from "@/components/ui/background-bubbles";
+import { addDays } from "date-fns/addDays";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
 
 const STATUS_COLORS: Record<string, string> = {
     APPROVED: "#94B983",

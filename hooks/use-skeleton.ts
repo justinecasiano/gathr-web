@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const useSkeleton = (isFetching: boolean, delay: number = 400) => {
     const [showSkeleton, setShowSkeleton] = useState(true);

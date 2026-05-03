@@ -1,50 +1,26 @@
 {
-  "breakpoints": {
-    "375": {
-      "name": "my-reports-summary-respondents",
-      "viewportWidth": 179,
-      "width": 179,
-      "height": 40,
-      "bones": [
-        [
-          0,
-          0,
-          100,
-          40,
-          8
-        ]
-      ]
+    "breakpoints": {
+        "375": {
+            "name": "my-reports-summary-respondents",
+            "viewportWidth": 179,
+            "width": 179,
+            "height": 40,
+            "bones": [[0, 0, 100, 40, 8]]
+        },
+        "768": {
+            "name": "my-reports-summary-respondents",
+            "viewportWidth": 214,
+            "width": 214,
+            "height": 24,
+            "bones": [[0, 0, 100, 24, 8]]
+        },
+        "1280": {
+            "name": "my-reports-summary-respondents",
+            "viewportWidth": 214,
+            "width": 214,
+            "height": 24,
+            "bones": [[0, 0, 100, 24, 8]]
+        }
     },
-    "768": {
-      "name": "my-reports-summary-respondents",
-      "viewportWidth": 214,
-      "width": 214,
-      "height": 24,
-      "bones": [
-        [
-          0,
-          0,
-          100,
-          24,
-          8
-        ]
-      ]
-    },
-    "1280": {
-      "name": "my-reports-summary-respondents",
-      "viewportWidth": 214,
-      "width": 214,
-      "height": 24,
-      "bones": [
-        [
-          0,
-          0,
-          100,
-          24,
-          8
-        ]
-      ]
-    }
-  },
-  "_hash": "7bf7ec67a6d3487f34ffaf0042ff969e"
+    "_hash": "7bf7ec67a6d3487f34ffaf0042ff969e"
 }

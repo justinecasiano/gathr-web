@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import * as React from "react";
 import Image from "next/image";
 
 export function TabButton({ active, label, icon, onClick }: any) {

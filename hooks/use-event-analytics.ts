@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { EventAnalytics, QuestionAnalytics, ChoiceSummary, SliderSummary } from "@/types/event-analytics";
-import { ChoiceQuestion, FeedbackQuestion, QuestionResponse } from "@/types/feedback";
 import { supabase } from "@/lib/supabase/supabase";
+import { ChoiceSummary, EventAnalytics, QuestionAnalytics, SliderSummary } from "@/types/event-analytics";
+import { ChoiceQuestion, FeedbackQuestion, QuestionResponse } from "@/types/feedback";
+import { useQuery } from "@tanstack/react-query";
 
 export function useEventAnalytics(eventId: number) {
     return useQuery({

@@ -1,7 +1,7 @@
-import { supabase } from "@/lib/supabase/supabase";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { DateRange } from "react-day-picker";
 import { useUser } from "@/hooks/use-user";
+import { supabase } from "@/lib/supabase/supabase";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { DateRange } from "react-day-picker";
 
 export function useOrganizerDashboard(range: DateRange | undefined) {
     const { data: user } = useUser();

@@ -1,21 +1,19 @@
 "use client";
 
-import * as React from "react";
-import {cn, generateOrganizerDashboardAnalyticsForReports} from "@/lib/utils";
-import {useEffect, useMemo, useRef, useState} from "react";
-import {Header} from "@/components/ui/header";
-import {Stats} from "@/components/ui/stats";
-import {useOrganizerEvents} from "@/hooks/use-organizer-events";
-import {BackgroundBubbles} from "@/components/ui/background-bubbles";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {Download, FileSpreadsheet} from "lucide-react";
+import { AttendanceSummary } from "@/components/ui/attendance-summary";
+import { BackgroundBubbles } from "@/components/ui/background-bubbles";
+import { FeedbackSummary } from "@/components/ui/feedback-summary";
+import { Header } from "@/components/ui/header";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Stats } from "@/components/ui/stats";
+import { useEventAnalytics } from "@/hooks/use-event-analytics";
+import { useEventParticipantReport } from "@/hooks/use-event-participant-report";
+import { useOrganizerEvents } from "@/hooks/use-organizer-events";
+import { generateOrganizerDashboardAnalyticsForReports } from "@/lib/utils";
+import { format } from "date-fns";
 import Image from "next/image";
-import {AttendanceSummary} from "@/components/ui/attendance-summary";
-import {FeedbackSummary} from "@/components/ui/feedback-summary";
-import {useReactToPrint} from "react-to-print";
-import {format} from "date-fns";
-import {useEventParticipantReport} from "@/hooks/use-event-participant-report";
-import {useEventAnalytics} from "@/hooks/use-event-analytics";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 
 export default function ReportsPage() {
     const [mounted, setMounted] = useState(false);
@@ -30,12 +28,12 @@ export default function ReportsPage() {
         if (selectedEventId) localStorage.setItem("reports_selected_event", selectedEventId);
     }, [selectedEventId]);
 
-    const {data: rawEvents, isLoading: isEventsLoading} = useOrganizerEvents();
+    const { data: rawEvents, isLoading: isEventsLoading } = useOrganizerEvents();
     const events = useMemo(() => {
         if (!rawEvents) return [];
         const allEvents = rawEvents
             .filter((event) => event.status !== "REJECTED")
-            .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+            .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
         return allEvents;
     }, [rawEvents]);
 
@@ -49,13 +47,13 @@ export default function ReportsPage() {
 
     const reportRef = useRef<HTMLDivElement>(null);
     const currentEvent = useMemo(() => {
-        return events.find(e => e.id.toString() === selectedEventId);
+        return events.find((e) => e.id.toString() === selectedEventId);
     }, [events, selectedEventId]);
 
     const documentTitle = useMemo(() => {
         if (!currentEvent) return "Event_Report";
         const datePart = format(new Date(currentEvent.start_time), "MMM_d_yyyy");
-        return `Report_${currentEvent.title.replace(/\s+/g, '_')}_${datePart}`;
+        return `Report_${currentEvent.title.replace(/\s+/g, "_")}_${datePart}`;
     }, [currentEvent]);
 
     const handlePrint = useReactToPrint({
@@ -78,7 +76,7 @@ export default function ReportsPage() {
             [""],
             ["DASHBOARD KEY PERFORMANCE INDICATORS"],
             ["Metric", "Value", "Trend"],
-            ...stats.map(s => [s.label, s.value, s.trend]),
+            ...stats.map((s) => [s.label, s.value, s.trend]),
             [""],
             ["ATTENDANCE SUMMARY"],
             ["Status", "Total Count"],
@@ -88,37 +86,39 @@ export default function ReportsPage() {
             [""],
             ["PARTICIPANT LIST"],
             ["Name", "Check-in Date", "Status"],
-            ...reportData.participants.map(p => [p.name, p.date, p.status]),
+            ...reportData.participants.map((p) => [p.name, p.date, p.status]),
             [""],
             ["FEEDBACK & SURVEY RESPONSES SUMMARY"],
-            ["Question", "Type", "Option/Answer", "Response Count/Value"]
+            ["Question", "Type", "Option/Answer", "Response Count/Value"],
         ];
 
         analyticsData.questions.forEach((q, idx) => {
             const questionNum = `Q${idx + 1}: ${q.questionText}`;
 
-            if (q.type === 'radio' || q.type === 'checkbox') {
-                q.choiceData?.forEach(choice => {
+            if (q.type === "radio" || q.type === "checkbox") {
+                q.choiceData?.forEach((choice) => {
                     rows.push([questionNum, q.type, choice.optionLabel, choice.count]);
                 });
-            } else if (q.type === 'slider') {
-                q.sliderData?.forEach(item => {
-                    rows.push([questionNum, 'slider', `Rating: ${item.ratingValue}`, item.count]);
+            } else if (q.type === "slider") {
+                q.sliderData?.forEach((item) => {
+                    rows.push([questionNum, "slider", `Rating: ${item.ratingValue}`, item.count]);
                 });
-            } else if (q.type === 'text_input') {
-                q.textAnswers?.forEach(answer => {
-                    rows.push([questionNum, 'text', 'Response', answer]);
+            } else if (q.type === "text_input") {
+                q.textAnswers?.forEach((answer) => {
+                    rows.push([questionNum, "text", "Response", answer]);
                 });
             }
             rows.push([""]);
         });
 
         const csvString = rows
-            .map(row =>
-                row.map(value => {
-                    const str = String(value ?? "");
-                    return `"${str.replace(/"/g, '""')}"`;
-                }).join(",")
+            .map((row) =>
+                row
+                    .map((value) => {
+                        const str = String(value ?? "");
+                        return `"${str.replace(/"/g, '""')}"`;
+                    })
+                    .join(","),
             )
             .join("\n");
 
@@ -137,7 +137,7 @@ export default function ReportsPage() {
 
     return (
         <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
-            <Header/>
+            <Header />
             <main ref={reportRef} className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-40">
                 <div className="flex w-full items-start justify-between">
                     <div className="flex flex-col w-full">
@@ -146,9 +146,8 @@ export default function ReportsPage() {
                                 <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Reports</h1>
                                 <div className="print:hidden">
                                     <Select onValueChange={setSelectedEventId} value={selectedEventId}>
-                                        <SelectTrigger
-                                            className="w-full md:w-64 h-12 rounded-sm border-2 text-lg border-black bg-white font-display font-semibold text-black  focus:ring-0 cursor-pointer">
-                                            <SelectValue placeholder="Select Specific Event"/>
+                                        <SelectTrigger className="w-full md:w-64 h-12 rounded-sm border-2 text-lg border-black bg-white font-display font-semibold text-black  focus:ring-0 cursor-pointer">
+                                            <SelectValue placeholder="Select Specific Event" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {events.map((event) => (
@@ -165,21 +164,23 @@ export default function ReportsPage() {
                                 </div>
                                 <div className="hidden print:block">
                                     <span className="text-2xl font-bold font-display text-black border-b-2 border-black pb-1">
-                                        Event: {events.find(e => e.id.toString() === selectedEventId)?.title || "All Events"}
+                                        Event: {events.find((e) => e.id.toString() === selectedEventId)?.title || "All Events"}
                                     </span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 print:hidden">
                                 <button
                                     onClick={() => handlePrint()}
-                                    className="flex items-center gap-2 bg-[#F6835E] hover:bg-[#F6835E]/80 border-2 border-black px-10 py-1 rounded-md transition-all font-display font-semibold text-white text-lg cursor-pointer">
-                                    <Image src="/svgs/export-csv-icon.svg" alt="Card Icon" width={24} height={24}/>
+                                    className="flex items-center gap-2 bg-[#F6835E] hover:bg-[#F6835E]/80 border-2 border-black px-10 py-1 rounded-md transition-all font-display font-semibold text-white text-lg cursor-pointer"
+                                >
+                                    <Image src="/svgs/export-csv-icon.svg" alt="Card Icon" width={24} height={24} />
                                     Print
                                 </button>
                                 <button
                                     onClick={() => handleExportCSV()}
-                                    className="flex items-center gap-2 bg-[#CADDC2] hover:bg-[#CADDC2]/80 border-2 border-black px-5 py-1 rounded-md transition-all font-display font-semibold text-black text-lg cursor-pointer">
-                                    <Image src="/svgs/export-excel-icon.svg" alt="Card Icon" width={24} height={24}/>
+                                    className="flex items-center gap-2 bg-[#CADDC2] hover:bg-[#CADDC2]/80 border-2 border-black px-5 py-1 rounded-md transition-all font-display font-semibold text-black text-lg cursor-pointer"
+                                >
+                                    <Image src="/svgs/export-excel-icon.svg" alt="Card Icon" width={24} height={24} />
                                     Export as CSV
                                 </button>
                             </div>
@@ -190,15 +191,15 @@ export default function ReportsPage() {
                     </div>
                 </div>
 
-                <Stats data={stats} loading={isEventsLoading} comparisonLabel={comparisonLabel}/>
+                <Stats data={stats} loading={isEventsLoading} comparisonLabel={comparisonLabel} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[600px] print:display-block">
-                    <AttendanceSummary eventId={Number(selectedEventId)}/>
-                    <FeedbackSummary eventId={Number(selectedEventId)}/>
+                    <AttendanceSummary eventId={Number(selectedEventId)} />
+                    <FeedbackSummary eventId={Number(selectedEventId)} />
                 </div>
             </main>
 
-            <BackgroundBubbles/>
+            <BackgroundBubbles />
         </div>
     );
 }
