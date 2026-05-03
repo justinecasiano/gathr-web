@@ -1,218 +1,195 @@
 "use client";
 
 import * as React from "react";
-import { Circle } from "lucide-react";
-import {
-    Area,
-    AreaChart,
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts";
-
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn, generateOrganizerDashboardAnalytics } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
-import { Header } from "@/components/ui/header";
-import { Stats } from "@/components/ui/stats";
+import {cn, generateOrganizerDashboardAnalyticsForReports} from "@/lib/utils";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {Header} from "@/components/ui/header";
+import {Stats} from "@/components/ui/stats";
+import {useOrganizerEvents} from "@/hooks/use-organizer-events";
+import {BackgroundBubbles} from "@/components/ui/background-bubbles";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Download, FileSpreadsheet} from "lucide-react";
 import Image from "next/image";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { motion } from "motion/react";
-import { DateRange } from "react-day-picker";
-import { addDays } from "date-fns/addDays";
-import { useOrganizerEvents } from "@/hooks/use-organizer-events";
-import { differenceInDays, subDays } from "date-fns";
-import { BackgroundBubbles } from "@/components/ui/background-bubbles";
-
-const STATUS_COLORS: Record<string, string> = {
-    APPROVED: "#94B983",
-    PENDING: "#F6835E",
-    REJECTED: "#CD4249",
-};
+import {AttendanceSummary} from "@/components/ui/attendance-summary";
+import {FeedbackSummary} from "@/components/ui/feedback-summary";
+import {useReactToPrint} from "react-to-print";
+import {format} from "date-fns";
+import {useEventParticipantReport} from "@/hooks/use-event-participant-report";
+import {useEventAnalytics} from "@/hooks/use-event-analytics";
+import {DateRange} from "react-day-picker";
+import {addDays} from "date-fns/addDays";
+import {DateRangePicker} from "@/components/ui/date-range-picker";
 
 export default function ReportsPage() {
     const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
+    const [selectedEventId, setSelectedEventId] = useState<string | undefined>(() => {
+        if (typeof window !== "undefined") return localStorage.getItem("reports_selected_event") || undefined;
+        return undefined;
+    });
+
+    useEffect(() => {
+        if (selectedEventId) localStorage.setItem("reports_selected_event", selectedEventId);
+    }, [selectedEventId]);
+
+
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: addDays(new Date(), -29),
         to: new Date(),
     });
 
-    const activeFrom = dateRange?.from || addDays(new Date(), -29);
-    const activeTo = dateRange?.to || new Date();
-    const daysDiff = differenceInDays(activeTo, activeFrom) + 1;
-    const fetchFrom = subDays(activeFrom, daysDiff);
-
-    const { data: rawEvents, isLoading: isEventsLoading } = useOrganizerEvents({ from: fetchFrom, to: activeTo });
+    const {data: rawEvents, isLoading: isEventsLoading} = useOrganizerEvents();
+    const events = useMemo(() => {
+        if (!rawEvents) return [];
+        const allEvents = rawEvents
+            .filter((event) => event.status !== "REJECTED")
+            .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+        return allEvents;
+    }, [rawEvents]);
 
     const analytics = useMemo(() => {
         if (!rawEvents) return null;
-        return generateOrganizerDashboardAnalytics(rawEvents, dateRange);
-    }, [rawEvents, dateRange]);
+        return generateOrganizerDashboardAnalyticsForReports(rawEvents, Number(selectedEventId));
+    }, [rawEvents, selectedEventId]);
 
     const stats = analytics?.dashboardStats ?? [];
-    const barData = analytics?.eventAttendeeData ?? [];
-    const pieData = analytics?.eventStatusData ?? [];
-    const areaData = analytics?.feedbackTrendData ?? [];
-    const comparisonLabel = analytics?.comparisonLabel ?? "last month";
+    const comparisonLabel = analytics?.comparisonLabel ?? "vs. latest event";
 
-    useEffect(() => setMounted(true), []);
+    const reportRef = useRef<HTMLDivElement>(null);
+    const currentEvent = useMemo(() => {
+        return events.find(e => e.id.toString() === selectedEventId);
+    }, [events, selectedEventId]);
+
+    const documentTitle = useMemo(() => {
+        if (!currentEvent) return "Event_Report";
+        const datePart = format(new Date(currentEvent.start_time), "MMM_d_yyyy");
+        return `Report_${currentEvent.title.replace(/\s+/g, '_')}_${datePart}`;
+    }, [currentEvent]);
+
+    const handlePrint = useReactToPrint({
+        contentRef: reportRef,
+        documentTitle: documentTitle,
+    });
+
+    const { data: reportData } = useEventParticipantReport(Number(selectedEventId));
+    const { data: analyticsData } = useEventAnalytics(Number(selectedEventId));
+    const handleExportCSV = () => {
+        if (!reportData?.participants || !analyticsData?.questions) {
+            alert("Report data is still loading or unavailable.");
+            return;
+        }
+
+        const rows = [
+            ["EVENT REPORT"],
+            ["Event Title", currentEvent?.title || "N/A"],
+            ["Export Date", format(new Date(), "MMM. d, yyyy - h:mm b")],
+            [""],
+            ["DASHBOARD KEY PERFORMANCE INDICATORS"],
+            ["Metric", "Value", "Trend"],
+            ...stats.map(s => [s.label, s.value, s.trend]),
+            [""],
+            ["ATTENDANCE SUMMARY"],
+            ["Status", "Total Count"],
+            ["Present", reportData.stats.present],
+            ["Cancelled", reportData.stats.cancelled],
+            ["Absent", reportData.stats.absent],
+            [""],
+            ["PARTICIPANT LIST"],
+            ["Name", "Check-in Date", "Status"],
+            ...reportData.participants.map(p => [p.name, p.date, p.status]),
+            [""],
+            ["FEEDBACK & SURVEY RESPONSES SUMMARY"],
+            ["Question", "Type", "Option/Answer", "Response Count/Value"]
+        ];
+
+        analyticsData.questions.forEach((q, idx) => {
+            const questionNum = `Q${idx + 1}: ${q.questionText}`;
+
+            if (q.type === 'radio' || q.type === 'checkbox') {
+                q.choiceData?.forEach(choice => {
+                    rows.push([questionNum, q.type, choice.optionLabel, choice.count]);
+                });
+            } else if (q.type === 'slider') {
+                q.sliderData?.forEach(item => {
+                    rows.push([questionNum, 'slider', `Rating: ${item.ratingValue}`, item.count]);
+                });
+            } else if (q.type === 'text_input') {
+                q.textAnswers?.forEach(answer => {
+                    rows.push([questionNum, 'text', 'Response', answer]);
+                });
+            }
+            rows.push([""]);
+        });
+
+        const csvString = rows
+            .map(row =>
+                row.map(value => {
+                    const str = String(value ?? "");
+                    return `"${str.replace(/"/g, '""')}"`;
+                }).join(",")
+            )
+            .join("\n");
+
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${documentTitle}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     if (!mounted) return null;
 
     return (
         <div className="flex relative min-h-screen w-full flex-col bg-[#F7F0FF] overflow-hidden">
-            <Header />
-            <main className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-40">
-                <div className="flex items-end justify-between">
-                    <div>
-                        <div className="flex items-center gap-6">
-                            <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Reports</h1>
-                            <DateRangePicker onDateChange={setDateRange} />
+            <Header/>
+            <main ref={reportRef} className="flex-1 px-10 py-6 space-y-8 max-w-[1600px] mx-auto w-full z-40">
+                <div className="flex w-full items-start justify-between">
+                    <div className="flex flex-col w-full">
+                        <div className="flex w-full items-center justify-between">
+                            <div className="flex items-center gap-6">
+                                <h1 className="text-4xl font-bold font-display text-[#261A36] tracking-tight">Reports</h1>
+                                <DateRangePicker onDateChange={setDateRange} />
+                                <div className="hidden print:block">
+                                    <span className="text-2xl font-bold font-display text-black border-b-2 border-black pb-1">
+                                        Event: {events.find(e => e.id.toString() === selectedEventId)?.title || "All Events"}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 print:hidden">
+                                <button
+                                    onClick={() => handlePrint()}
+                                    className="flex items-center gap-2 bg-[#F6835E] hover:bg-[#F6835E]/80 border-2 border-black px-10 py-1 rounded-md transition-all font-display font-semibold text-white text-lg cursor-pointer">
+                                    <Image src="/svgs/export-csv-icon.svg" alt="Card Icon" width={24} height={24}/>
+                                    Print
+                                </button>
+                                <button
+                                    onClick={() => handleExportCSV()}
+                                    className="flex items-center gap-2 bg-[#CADDC2] hover:bg-[#CADDC2]/80 border-2 border-black px-5 py-1 rounded-md transition-all font-display font-semibold text-black text-lg cursor-pointer">
+                                    <Image src="/svgs/export-excel-icon.svg" alt="Card Icon" width={24} height={24}/>
+                                    Export as CSV
+                                </button>
+                            </div>
                         </div>
                         <p className="text-[#261A36] text-lg font-display font-bold mt-1">
-                            Oversee reports on events, feedback and attendee summary.
+                            Oversee reports on events, feedback and attendee summary
                         </p>
                     </div>
                 </div>
 
-                <Stats data={stats} loading={isEventsLoading} comparisonLabel={comparisonLabel} />
+                <Stats data={stats} loading={isEventsLoading} comparisonLabel={comparisonLabel}/>
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <Card className="lg:col-span-2 border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
-                        <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                            <Image src="/svgs/monthly-event-icon.svg" width="25" height="25" alt="Icon" />
-                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">
-                                Monthly Events and Attendees
-                            </CardTitle>
-                        </CardHeader>
-                        <div className="h-[300px] w-full mt-8">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={barData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: "#261A36", fontWeight: 700, fontSize: 12 }}
-                                    />
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: "#261A36", fontWeight: 700, fontSize: 12 }}
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: "#F1F5F9" }}
-                                        contentStyle={{
-                                            borderRadius: "12px",
-                                            border: "none",
-                                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                                        }}
-                                    />
-                                    <Legend verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: "20px" }} />
-                                    <Bar dataKey="Events" fill="#5E338A" radius={[6, 6, 0, 0]} barSize={20} />
-                                    <Bar dataKey="Attendees" fill="#FF8C66" radius={[6, 6, 0, 0]} barSize={20} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-
-                    <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6">
-                        <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                            <Image src="/svgs/event-status-icon.svg" width="25" height="25" alt="Icon" />
-                            <CardTitle className="text-xl font-bold font-display text-[#261A36]">Event Status</CardTitle>
-                        </CardHeader>
-                        <div className="h-[200px] mt-4">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        stroke="#261A36"
-                                        strokeWidth={2}
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="space-y-3">
-                            {pieData.map((status) => (
-                                <div key={status.name} className="flex items-center justify-between mx-auto w-[70%]">
-                                    <div className="flex items-center gap-2">
-                                        <Circle className="h-4 w-4" fill={status.color} stroke="none"></Circle>
-                                        <span className="text-base font-normal font-display text-black">{status.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span
-                                            className={cn(
-                                                "text-base font-black",
-                                                status.percentage.startsWith("+") ? "text-[#94B983]" : "text-[#820006]",
-                                            )}
-                                        >
-                                            {status.percentage} {status.percentage.startsWith("+") ? "↑" : "↓"}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[600px] print:display-block">
+                    <AttendanceSummary eventId={Number(selectedEventId)}/>
+                    <FeedbackSummary eventId={Number(selectedEventId)}/>
                 </div>
-
-                <Card className="border-2 border-[#5C5C5C] shadow-[8px_8px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6 mb-5">
-                    <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                        <Image src="/svgs/average-feedback-icon.svg" width="25" height="25" alt="Icon" />
-                        <CardTitle className="text-xl font-bold font-display text-[#261A36]">
-                            Average Feedback Rating Trend
-                        </CardTitle>
-                    </CardHeader>
-                    <div className="h-[300px] w-full mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={areaData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                <XAxis
-                                    dataKey="name"
-                                    axisLine={true}
-                                    tickLine={true}
-                                    tick={{ fill: "#261A36", fontWeight: 700 }}
-                                />
-                                <YAxis
-                                    domain={[0, 5]}
-                                    axisLine={true}
-                                    tickLine={true}
-                                    tick={{ fill: "#261A36", fontWeight: 700 }}
-                                />
-                                <Tooltip />
-                                <Area
-                                    type="monotone"
-                                    dataKey="rating"
-                                    stroke="#38B2AC"
-                                    strokeWidth={4}
-                                    fillOpacity={1}
-                                    fill="url(#colorRating)"
-                                    dot={{ r: 6, fill: "#38B2AC", strokeWidth: 3, stroke: "#fff" }}
-                                    activeDot={{ r: 8 }}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </Card>
             </main>
 
-            <BackgroundBubbles />
+            <BackgroundBubbles/>
         </div>
     );
 }

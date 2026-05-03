@@ -16,6 +16,7 @@ import { motion } from "motion/react";
 import { getURL } from "@/lib/utils";
 import { useRef } from "react";
 import PopupModal from "@/components/ui/popup-modal";
+import {BackgroundBubbles} from "@/components/ui/background-bubbles";
 
 interface ToastState {
     title: string;
@@ -441,35 +442,7 @@ export default function SettingsPage() {
                 </div>
             </main>
 
-            <div className="hidden lg:block absolute inset-0 pointer-events-none h-full">
-                <motion.div
-                    className="absolute -top-5 -right-55 h-90 w-90 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
-                    initial={{ x: 0, y: 0 }}
-                    whileHover={{ x: 50 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                />
-
-                <motion.div
-                    className="absolute -top-22 left-90 h-40 w-40 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
-                    initial={{ x: 0, y: 0 }}
-                    whileHover={{ y: -40, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                />
-
-                <motion.div
-                    className="absolute top-35 left-10 h-130 w-130 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
-                    initial={{ x: 0, y: 0 }}
-                    whileHover={{ x: -60, scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                />
-
-                <motion.div
-                    className="absolute -bottom-35 -right-10 h-160 w-160 rounded-full bg-[#7B55A3]/10 pointer-events-auto"
-                    initial={{ x: 0, y: 0 }}
-                    whileHover={{ x: -60, scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                />
-            </div>
+            <BackgroundBubbles />
         </div>
     );
 }
