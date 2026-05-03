@@ -72,6 +72,7 @@ export default function SettingsPage() {
         fullName: z
             .string()
             .min(3, "Full name is too short")
+            .regex(/^[a-zA-Z\s.]*$/, "Full name can only contain letters, spaces, and dots.")
             .refine((val) => val.trim().includes(" "), {
                 message: "Please enter both your first and last name.",
             }),
