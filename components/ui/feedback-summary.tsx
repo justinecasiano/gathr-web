@@ -139,7 +139,7 @@ export function FeedbackSummary({ eventId }: { eventId: number }) {
                     >
                         <p className="text-sm font-heading text-white flex items-center gap-2">
                             <Image src="/svgs/reports-feedback-summary-icon.svg" width={24} height={24} alt="Icon" />
-                            Total Respondents: 234
+                            Total Respondents: {analytics?.responseStatusSummary.answered}
                         </p>
                     </Skeleton>
                 </div>

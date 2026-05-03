@@ -77,7 +77,7 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     boneClass="opacity-40"
                 >
                     <div className="flex flex-col gap-3 bg-gradient-to-b from-[#7B55A3] to-[#583181] py-6 px-4 rounded-xl text-center text-white">
-                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.present}</p>
+                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.present ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Present</p>
                     </div>
                 </Skeleton>
@@ -94,7 +94,7 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     boneClass="opacity-40"
                 >
                     <div className="flex flex-col gap-3 bg-gradient-to-b from-[#FFBBA6] to-[#F6835E] py-6 px-4 rounded-xl text-center text-white">
-                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.cancelled}</p>
+                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.cancelled ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Cancelled</p>
                     </div>
                 </Skeleton>
@@ -111,7 +111,7 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     boneClass="opacity-40"
                 >
                     <div className="flex flex-col gap-3 bg-gradient-to-b from-[#F6835E] to-[#6C0005] py-6 px-4 rounded-xl text-center text-white">
-                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.absent}</p>
+                        <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.absent ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Absent</p>
                     </div>
                 </Skeleton>
