@@ -14,17 +14,17 @@ import {
     SlidersHorizontal,
     Trash2,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import React, { useCallback, useState } from "react";
-import { Control, useFieldArray, useForm, UseFormRegister } from "react-hook-form";
+import {AnimatePresence, motion} from "motion/react";
+import React, {useCallback, useState} from "react";
+import {Control, useFieldArray, useForm, UseFormRegister} from "react-hook-form";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Slider} from "@/components/ui/slider";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {cn} from "@/lib/utils";
 import {
     ChoiceQuestion,
     FeedbackQuestion,
@@ -33,34 +33,35 @@ import {
     SliderQuestion,
     TextQuestion,
 } from "@/types/feedback";
+import {Switch} from "@/components/ui/switch";
 
 const CONTROLS: { type: QuestionType; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
     {
         type: "radio",
         label: "Radio",
         desc: "Single choice",
-        icon: <Circle className="size-4" />,
+        icon: <Circle className="size-4"/>,
         color: "bg-violet-100 text-violet-700 border-violet-200",
     },
     {
         type: "checkbox",
         label: "Checkbox",
         desc: "Multi choice",
-        icon: <CheckSquare className="size-4" />,
+        icon: <CheckSquare className="size-4"/>,
         color: "bg-sky-100 text-sky-700 border-sky-200",
     },
     {
         type: "slider",
         label: "Rating",
         desc: "Fixed 1–5 scale",
-        icon: <SlidersHorizontal className="size-4" />,
+        icon: <SlidersHorizontal className="size-4"/>,
         color: "bg-emerald-100 text-emerald-700 border-emerald-200",
     },
     {
         type: "text_input",
         label: "Text",
         desc: "Open answer",
-        icon: <AlignLeft className="size-4" />,
+        icon: <AlignLeft className="size-4"/>,
         color: "bg-amber-100 text-amber-700 border-amber-200",
     },
 ];
@@ -101,8 +102,8 @@ interface OptionsEditorProps {
     readOnly: boolean;
 }
 
-function OptionsEditor({ nest, control, register, type, readOnly }: OptionsEditorProps) {
-    const { fields, append, remove, move } = useFieldArray({
+function OptionsEditor({nest, control, register, type, readOnly}: OptionsEditorProps) {
+    const {fields, append, remove, move} = useFieldArray({
         control,
         name: `${nest}.options` as const as `questions.${number}.options`,
     });
@@ -126,14 +127,15 @@ function OptionsEditor({ nest, control, register, type, readOnly }: OptionsEdito
                     />
 
                     {!readOnly && (
-                        <div className="flex items-center gap-1 opacity-0 group-hover/option:opacity-100 transition-opacity">
+                        <div
+                            className="flex items-center gap-1 opacity-0 group-hover/option:opacity-100 transition-opacity">
                             <button
                                 type="button"
                                 onClick={() => move(i, i - 1)}
                                 disabled={i === 0}
                                 className="text-slate-400 hover:text-[#7B55A3] disabled:opacity-30 cursor-pointer"
                             >
-                                <ChevronUp size={14} />
+                                <ChevronUp size={14}/>
                             </button>
                             <button
                                 type="button"
@@ -141,14 +143,14 @@ function OptionsEditor({ nest, control, register, type, readOnly }: OptionsEdito
                                 disabled={i === fields.length - 1}
                                 className="text-slate-400 hover:text-[#7B55A3] disabled:opacity-30 cursor-pointer"
                             >
-                                <ChevronDown size={14} />
+                                <ChevronDown size={14}/>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => remove(i)}
                                 className="text-slate-400 hover:text-red-500 ml-1 cursor-pointer"
                             >
-                                <Trash2 size={14} />
+                                <Trash2 size={14}/>
                             </button>
                         </div>
                     )}
@@ -159,10 +161,10 @@ function OptionsEditor({ nest, control, register, type, readOnly }: OptionsEdito
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => append({ id: crypto.randomUUID(), label: "" })}
+                    onClick={() => append({id: crypto.randomUUID(), label: ""})}
                     className="text-[#7B55A3] h-7 text-base px-2 hover:bg-[#7B55A3]/90 hover:text-white font-heading"
                 >
-                    <Plus size={12} className="mr-1" /> Add option
+                    <Plus size={12} className="mr-1"/> Add option
                 </Button>
             )}
         </div>
@@ -176,7 +178,7 @@ interface FeedbackFormEditorProps {
     onClose?: () => void;
 }
 
-export default function FeedbackFormEditor({ initialData, readOnly = false, onSave, onClose }: FeedbackFormEditorProps) {
+export default function FeedbackFormEditor({initialData, readOnly = false, onSave, onClose}: FeedbackFormEditorProps) {
     const [activeTab, setActiveTab] = useState(readOnly ? "preview" : "editor");
     const [isSaving, setIsSaving] = useState(false);
 
@@ -187,7 +189,7 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
         },
     });
 
-    const { fields, remove, move, prepend } = useFieldArray({
+    const {fields, remove, move, prepend} = useFieldArray({
         control: form.control,
         name: "questions",
     });
@@ -204,11 +206,11 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
 
             let newObj: FeedbackQuestion;
             if (type === "radio" || type === "checkbox") {
-                newObj = { ...base, type, options: [{ id: crypto.randomUUID(), label: "" }] } as ChoiceQuestion;
+                newObj = {...base, type, options: [{id: crypto.randomUUID(), label: ""}]} as ChoiceQuestion;
             } else if (type === "slider") {
-                newObj = { ...base, type, maxRating: 5 } as SliderQuestion;
+                newObj = {...base, type, maxRating: 5} as SliderQuestion;
             } else {
-                newObj = { ...base, type, placeholder: "Write your answer..." } as TextQuestion;
+                newObj = {...base, type, placeholder: "Write your answer..."} as TextQuestion;
             }
 
             prepend(newObj);
@@ -238,10 +240,12 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
     return (
         <div className="flex h-screen flex-col bg-white overflow-hidden font-sans">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-                <header className="shrink-0 border-b border-slate-100 bg-white px-6 py-3 flex items-center justify-between z-50">
+                <header
+                    className="shrink-0 border-b border-slate-100 bg-white px-6 py-3 flex items-center justify-between z-50">
                     <div className="flex items-center gap-4 flex-1">
-                        <div className="size-9 rounded-xl bg-[#7B55A3] flex items-center justify-center text-white shadow-lg">
-                            <LayoutTemplate size={20} />
+                        <div
+                            className="size-9 rounded-xl bg-[#7B55A3] flex items-center justify-center text-white shadow-lg">
+                            <LayoutTemplate size={20}/>
                         </div>
                         <input
                             {...form.register("title")}
@@ -279,7 +283,7 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                 disabled={isSaving}
                                 className="bg-[#7B55A3] hover:bg-[#7B55A3]/90 text-white text-base rounded-xl h-10 px-5 font-bold shadow-lg gap-2 cursor-pointer"
                             >
-                                {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save size={18} />} Save Form
+                                {isSaving ? <Loader2 className="size-4 animate-spin"/> : <Save size={18}/>} Save Form
                             </Button>
                         )}
                     </div>
@@ -289,7 +293,8 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                     <div className="flex-1 flex overflow-hidden">
                         <TabsContent value="editor" className="flex-1 flex overflow-hidden m-0 outline-none">
                             {!readOnly && (
-                                <aside className="w-64 shrink-0 border-r-2 border-[#5C5C5C]/10 bg-slate-100/50 p-5 flex flex-col gap-3 overflow-y-auto">
+                                <aside
+                                    className="w-64 shrink-0 border-r-2 border-[#5C5C5C]/10 bg-slate-100/50 p-5 flex flex-col gap-3 overflow-y-auto">
                                     <p className="text-sm font-black text-slate-600 uppercase tracking-widest px-1">
                                         Add Element
                                     </p>
@@ -323,16 +328,22 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                     <AnimatePresence mode="popLayout">
                                         {fields.map((field, index) => {
                                             const q = field as unknown as FeedbackQuestion;
+                                            const isLocked = q.isMandatory;
+
                                             return (
                                                 <motion.div
                                                     key={field.id}
                                                     layout
-                                                    initial={{ opacity: 0, y: 15 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    className="bg-white border-3 border-[#7B55A3] rounded-[20px] p-6 shadow-sm group relative"
+                                                    initial={{opacity: 0, y: 15}}
+                                                    animate={{opacity: 1, y: 0}}
+                                                    className={cn(
+                                                        "bg-white border-3 rounded-[20px] p-6 shadow-sm group relative transition-colors",
+                                                        isLocked ? "border-slate-200 bg-slate-50/30" : "border-[#7B55A3]"
+                                                    )}
                                                 >
-                                                    {!readOnly && (
-                                                        <div className="absolute -left-12 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {!readOnly && !isLocked && (
+                                                        <div
+                                                            className="absolute -left-12 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
@@ -340,16 +351,16 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                                 disabled={index === 0}
                                                                 onClick={() => move(index, index - 1)}
                                                             >
-                                                                <ChevronUp size={18} />
+                                                                <ChevronUp size={18}/>
                                                             </Button>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 rounded-full bg-white shadow-sm border border-slate-200 hover:text-[#7B55A3]"
-                                                                disabled={index === fields.length - 1}
+                                                                disabled={index === fields.length - 1 || (fields[index + 1] as any).isMandatory}
                                                                 onClick={() => move(index, index + 1)}
                                                             >
-                                                                <ChevronDown size={18} />
+                                                                <ChevronDown size={18}/>
                                                             </Button>
                                                         </div>
                                                     )}
@@ -365,18 +376,37 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                             >
                                                                 {q.type.toUpperCase()}
                                                             </Badge>
-                                                            {q.isMandatory && (
-                                                                <Badge className="bg-slate-900 text-white border-none rounded-full flex gap-1 items-center text-[10px]">
-                                                                    <Lock size={10} /> REQUIRED
+
+                                                            {q.isMandatory ? (
+                                                                <Badge
+                                                                    className="bg-slate-900 text-white border-none rounded-full flex gap-1 items-center text-[10px]">
+                                                                    <Lock size={10}/> SYSTEM DEFAULT
                                                                 </Badge>
+                                                            ) : (
+                                                                <div
+                                                                    className="flex items-center gap-2 ml-2 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                                                                    <Switch
+                                                                        id={`required-${field.id}`}
+                                                                        checked={form.watch(`questions.${index}.required`)}
+                                                                        onCheckedChange={(checked) => form.setValue(`questions.${index}.required`, checked, {shouldDirty: true})}
+                                                                        disabled={readOnly}
+                                                                        className="scale-75 data-[state=checked]:bg-[#7B55A3]"
+                                                                    />
+                                                                    <Label htmlFor={`required-${field.id}`}
+                                                                           className="text-[10px] font-black text-slate-600 uppercase cursor-pointer">
+                                                                        Required
+                                                                    </Label>
+                                                                </div>
                                                             )}
                                                         </div>
-                                                        {!q.isMandatory && !readOnly && (
+
+                                                        {!isLocked && !readOnly && (
                                                             <button
+                                                                type="button"
                                                                 onClick={() => handleRemove(index)}
-                                                                className="text-slate-400 hover:text-red-500 cursor-pointer"
+                                                                className="text-slate-400 hover:text-red-500 cursor-pointer transition-colors"
                                                             >
-                                                                <Trash2 size={18} />
+                                                                <Trash2 size={18}/>
                                                             </button>
                                                         )}
                                                     </div>
@@ -384,10 +414,10 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                     <Input
                                                         {...form.register(`questions.${index}.questionText`)}
                                                         placeholder="Enter question text..."
-                                                        readOnly={readOnly || q.isMandatory}
+                                                        readOnly={readOnly || isLocked}
                                                         className={cn(
                                                             "!text-lg font-bold border-0 border-b border-slate-100 rounded-none px-0 focus-visible:ring-0 mb-4 bg-transparent shadow-none",
-                                                            q.isMandatory && "opacity-60 cursor-default",
+                                                            isLocked && "opacity-80"
                                                         )}
                                                     />
 
@@ -401,7 +431,8 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                         />
                                                     )}
                                                     {q.type === "slider" && (
-                                                        <div className="py-4 text-center bg-slate-50 border-2 border-dashed border-slate-100 rounded-xl">
+                                                        <div
+                                                            className="py-4 text-center bg-slate-50 border-2 border-dashed border-slate-100 rounded-xl">
                                                             <p className="text-base font-bold text-slate-400 uppercase">
                                                                 Fixed Rating Scale: 1 — 5
                                                             </p>
@@ -409,7 +440,8 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                     )}
                                                     {q.type === "text_input" && !q.isMandatory && (
                                                         <div className="ml-4">
-                                                            <Label className="text-sm font-bold text-slate-400 uppercase">
+                                                            <Label
+                                                                className="text-sm font-bold text-slate-400 uppercase">
                                                                 Placeholder
                                                             </Label>
                                                             <Input
@@ -440,14 +472,21 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                             {watchedQuestions.map((q, i) => (
                                 <motion.div
                                     key={q.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
+                                    initial={{opacity: 0, y: 10}}
+                                    animate={{opacity: 1, y: 0}}
+                                    transition={{delay: i * 0.05}}
                                     className="bg-white border-3 border-[#7B55A3] rounded-[20px] p-6 shadow-sm"
                                 >
-                                    <span className="text-xs font-bold text-[#3C2457] tracking-widest mb-2 block uppercase">
-                                        Question {i + 1}
-                                    </span>
+                                    <div className="flex justify-between items-start mb-2">
+            <span className="text-xs font-bold text-[#3C2457] tracking-widest block uppercase">
+                Question {i + 1}
+            </span>
+                                        {q.required && (
+                                            <span className="text-red-500 font-bold text-sm flex items-center gap-1">
+                    Required <span className="text-lg">*</span>
+                </span>
+                                        )}
+                                    </div>
                                     <h3
                                         className={cn(
                                             "text-lg font-bold text-[#444444] leading-tight",
@@ -481,7 +520,8 @@ export default function FeedbackFormEditor({ initialData, readOnly = false, onSa
                                                 disabled
                                                 className="opacity-100"
                                             />
-                                            <div className="flex justify-between mt-2 text-xs font-bold text-slate-400 px-1">
+                                            <div
+                                                className="flex justify-between mt-2 text-xs font-bold text-slate-400 px-1">
                                                 <span>1</span>
                                                 <span>2</span>
                                                 <span>3</span>

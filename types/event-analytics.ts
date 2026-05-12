@@ -55,14 +55,6 @@ export interface IndividualQuestionAnalytics {
     textAnswer?: string;
 }
 
-export interface IndividualEventAnalytics {
-    id: number;
-    participantId: string;
-    status: "ANSWERED" | "NO_RESPONSE" | "ABSENT";
-    submittedAt: string | null;
-    questions: IndividualQuestionAnalytics[];
-}
-
 export interface ParticipantReportRow {
     name: string;
     date: string;

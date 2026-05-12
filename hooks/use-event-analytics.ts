@@ -15,7 +15,8 @@ export function useEventAnalytics(eventId: number) {
                       feedback_form,
                       participants (
                         response_status,
-                        feedback_submission
+                        feedback_submission,
+                        participant_type
                       )
                     `,
                 )
@@ -24,7 +25,9 @@ export function useEventAnalytics(eventId: number) {
 
             if (eventError || !event) throw eventError;
 
-            const participants = event.participants ?? [];
+            const participants= (event.participants ?? []).filter(
+                (p) => p.participant_type === "ATTENDEE"
+            );
             const form = event.feedback_form;
 
             const summary = {
