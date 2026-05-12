@@ -26,6 +26,7 @@ export default function EventsPage() {
     const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
 
     const { data: rawEvents, isLoading: isEventsLoading } = useOrganizerEvents(dateRange);
+    console.log(rawEvents)
 
     const showSkeleton = useSkeleton(isEventsLoading, 400);
 

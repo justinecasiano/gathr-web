@@ -1,9 +1,19 @@
 import { ParticipantWithUsers } from "@/hooks/use-event-participants";
 import { BaseEvent, FeedbackEvent, IndividualResponse, SimpleEvent } from "@/types/base-event";
 import { clsx, type ClassValue } from "clsx";
-import { differenceInDays, endOfMonth, format, isWithinInterval, startOfMonth, subDays, subMonths } from "date-fns";
+import {
+    differenceInDays, endOfDay,
+    endOfMonth,
+    format,
+    isWithinInterval,
+    startOfDay,
+    startOfMonth,
+    subDays,
+    subMonths
+} from "date-fns";
 import { DateRange } from "react-day-picker";
 import { twMerge } from "tailwind-merge";
+import {addDays} from "date-fns/addDays";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -84,17 +94,20 @@ export const mapToFeedbackEvent = (event: BaseEvent): FeedbackEvent => {
 
 export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRange: DateRange | undefined) => {
     const now = new Date();
+    const currentToOriginal = dateRange?.to || now
     const currentFrom = dateRange?.from || subDays(now, 29);
-    const currentTo = dateRange?.to || now;
+    const currentTo = addDays(dateRange?.to || now,90);
 
-    const diff = Math.abs(differenceInDays(currentTo, currentFrom)) + 1;
+    const diff = Math.abs(differenceInDays(currentToOriginal, currentFrom)) + 1;
     const previousFrom = subDays(currentFrom, diff);
     const previousTo = subDays(currentFrom, 1);
 
     const getEventsInPeriod = (start: Date, end: Date) =>
         events.filter((e) => {
             const d = new Date(e.start_time);
-            return d >= start && d <= end;
+            const startCheck = startOfDay(start);
+            const endCheck = endOfDay(end);
+            return d >= startCheck && d <= endCheck;
         });
 
     const currEvents = getEventsInPeriod(currentFrom, currentTo);
@@ -226,17 +239,20 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
 
 export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRange: DateRange | undefined) => {
     const now = new Date();
+    const currentToOriginal = dateRange?.to || now
     const currentFrom = dateRange?.from || subDays(now, 29);
-    const currentTo = dateRange?.to || now;
+    const currentTo = addDays(dateRange?.to || now,90);
 
-    const diff = Math.abs(differenceInDays(currentTo, currentFrom)) + 1;
+    const diff = Math.abs(differenceInDays(currentToOriginal, currentFrom)) + 1;
     const previousFrom = subDays(currentFrom, diff);
     const previousTo = subDays(currentFrom, 1);
 
     const getEventsInPeriod = (start: Date, end: Date) =>
         events.filter((e) => {
             const d = new Date(e.start_time);
-            return d >= start && d <= end;
+            const startCheck = startOfDay(start);
+            const endCheck = endOfDay(end);
+            return d >= startCheck && d <= endCheck;
         });
 
     const currEvents = getEventsInPeriod(currentFrom, currentTo);
@@ -366,7 +382,7 @@ export const generateOrganizerDashboardAnalytics = (events: BaseEvent[], dateRan
         };
     });
 
-    const daysDiff = Math.abs(differenceInDays(currentTo, currentFrom)) + 1;
+    const daysDiff = Math.abs(differenceInDays(currentToOriginal, currentFrom)) + 1;
 
     let prevLabel = "previous period";
     if (daysDiff === 7) prevLabel = "last week";
@@ -445,7 +461,7 @@ export const generateOrganizerDashboardAnalyticsForReports = (events: BaseEvent[
         },
     ];
 
-    const comparisonLabel = referenceEvent ? `vs. latest event` : "no previous events to compare";
+    const comparisonLabel = referenceEvent ? `latest event` : "no previous events to compare";
 
     return {
         dashboardStats,

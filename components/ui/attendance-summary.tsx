@@ -1,31 +1,31 @@
 import _my_reports_attendance_summary from "@/bones/my-reports-attendance-summary.bones.json";
 import _my_reports_responses_summary from "@/bones/my-reports-responses-summary.bones.json";
-import { useEventParticipantReport } from "@/hooks/use-event-participant-report";
-import { useSkeleton } from "@/hooks/use-skeleton";
-import { cn } from "@/lib/utils";
-import { ParticipantStatus } from "@/types/participant";
-import { ResponsiveBones } from "boneyard-js";
-import { Skeleton } from "boneyard-js/react";
-import { Search, X } from "lucide-react";
+import {useEventParticipantReport} from "@/hooks/use-event-participant-report";
+import {useSkeleton} from "@/hooks/use-skeleton";
+import {cn} from "@/lib/utils";
+import {ParticipantStatus} from "@/types/participant";
+import {ResponsiveBones} from "boneyard-js";
+import {Skeleton} from "boneyard-js/react";
+import {Search, X} from "lucide-react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Card, CardHeader, CardTitle } from "./card";
+import {useMemo, useState} from "react";
+import {Card, CardHeader, CardTitle} from "./card";
 
 const attendees = [
-    { name: "Angela Cabrera asdasda asdasda asdasdas", date: "Oct. 13, 2025 - 12:03 pm", status: "Present" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent" },
-    { name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled" },
+    {name: "Angela Cabrera asdasda asdasda asdasdas", date: "Oct. 13, 2025 - 12:03 pm", status: "Present"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Absent"},
+    {name: "Angela Cabrera", date: "Oct. 13, 2025 - 12:03 pm", status: "Cancelled"},
 ];
 
-export function AttendanceSummary({ eventId }: { eventId: number }) {
+export function AttendanceSummary({eventId}: { eventId: number }) {
     const [searchQuery, setSearchQuery] = useState("");
-    const { data, isLoading: isEventParticipantReportLoading } = useEventParticipantReport(eventId);
+    const {data, isLoading: isEventParticipantReportLoading} = useEventParticipantReport(eventId);
     const showSkeleton = useSkeleton(isEventParticipantReportLoading, 400);
 
     const participants = useMemo(() => {
@@ -57,9 +57,10 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
     };
 
     return (
-        <Card className="border-2 border-[#5C5C5C] shadow-[12px_12px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6 print:block print:break-inside-avoid print:mb-8">
+        <Card
+            className="border-2 border-[#5C5C5C] shadow-[12px_12px_0px_0px_rgba(87,66,114,1)] rounded-2xl p-6 print:block print:break-inside-avoid print:mb-8">
             <CardHeader className="flex flex-row items-center gap-3 px-0 pt-0">
-                <Image src="/svgs/monthly-event-icon.svg" width={25} height={25} alt="Icon" />
+                <Image src="/svgs/monthly-event-icon.svg" width={25} height={25} alt="Icon"/>
                 <CardTitle className="text-xl font-bold font-display text-[#261A36]">Attendance Summary</CardTitle>
             </CardHeader>
 
@@ -71,12 +72,13 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     loading={showSkeleton}
                     className={cn(
                         showSkeleton &&
-                            "bg-gradient-to-b from-[#7B55A3] to-[#583181] py-6 px-4 rounded-xl text-center text-white",
+                        "bg-gradient-to-b from-[#7B55A3] to-[#583181] py-6 px-4 rounded-xl text-center text-white",
                     )}
                     color="#574272"
                     boneClass="opacity-40"
                 >
-                    <div className="flex flex-col gap-3 bg-gradient-to-b from-[#7B55A3] to-[#583181] py-6 px-4 rounded-xl text-center text-white">
+                    <div
+                        className="flex flex-col gap-3 bg-gradient-to-b from-[#7B55A3] to-[#583181] py-6 px-4 rounded-xl text-center text-white">
                         <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.present ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Present</p>
                     </div>
@@ -88,12 +90,13 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     loading={showSkeleton}
                     className={cn(
                         showSkeleton &&
-                            "bg-gradient-to-b from-[#FFBBA6] to-[#F6835E] py-6 px-4 rounded-xl text-center text-white",
+                        "bg-gradient-to-b from-[#FFBBA6] to-[#F6835E] py-6 px-4 rounded-xl text-center text-white",
                     )}
                     color="#574272"
                     boneClass="opacity-40"
                 >
-                    <div className="flex flex-col gap-3 bg-gradient-to-b from-[#FFBBA6] to-[#F6835E] py-6 px-4 rounded-xl text-center text-white">
+                    <div
+                        className="flex flex-col gap-3 bg-gradient-to-b from-[#FFBBA6] to-[#F6835E] py-6 px-4 rounded-xl text-center text-white">
                         <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.cancelled ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Cancelled</p>
                     </div>
@@ -105,12 +108,13 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                     loading={showSkeleton}
                     className={cn(
                         showSkeleton &&
-                            "bg-gradient-to-b from-[#F6835E] to-[#6C0005] py-6 px-4 rounded-xl text-center text-white",
+                        "bg-gradient-to-b from-[#F6835E] to-[#6C0005] py-6 px-4 rounded-xl text-center text-white",
                     )}
                     color="#574272"
                     boneClass="opacity-40"
                 >
-                    <div className="flex flex-col gap-3 bg-gradient-to-b from-[#F6835E] to-[#6C0005] py-6 px-4 rounded-xl text-center text-white">
+                    <div
+                        className="flex flex-col gap-3 bg-gradient-to-b from-[#F6835E] to-[#6C0005] py-6 px-4 rounded-xl text-center text-white">
                         <p className="text-4xl text-[#F6F6F6] font-bold font-heading">{data?.stats.absent ?? 0}</p>
                         <p className="text-base opacity-80 text-[#F6F6F6] font-bold font-heading">Absent</p>
                     </div>
@@ -119,7 +123,7 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
 
             <div className="relative ">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-black">
-                    <Search size={18} strokeWidth={2.5} />
+                    <Search size={18} strokeWidth={2.5}/>
                 </div>
 
                 <input
@@ -135,19 +139,21 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                         onClick={() => setSearchQuery("")}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A9A9A9] hover:text-black transition-colors"
                     >
-                        <X size={18} strokeWidth={2.5} />
+                        <X size={18} strokeWidth={2.5}/>
                     </button>
                 )}
             </div>
 
             <div className="flex flex-col h-full bg-white">
-                <div className="grid grid-cols-[1fr_2fr_1fr] rounded-[6px] bg-gradient-to-b from-[#9B7CBC] to-[#583181] text-white font-bold font-heading text-base z-10">
+                <div
+                    className="grid grid-cols-[1fr_2fr_1fr] rounded-[6px] bg-gradient-to-b from-[#9B7CBC] to-[#583181] text-white font-bold font-heading text-base z-10">
                     <div className="pl-6 py-2 text-left">Name</div>
                     <div className="py-2 text-center">Date & Time</div>
                     <div className="pr-6 py-2 text-right">Status</div>
                 </div>
 
-                <div className="overflow-y-auto min-h-[450px] max-h-[450px] scrollbar-thin scrollbar-thumb-slate-300 print:min-h-none print:max-h-none print:overflow-visible">
+                <div
+                    className="overflow-y-auto min-h-[450px] max-h-[450px] scrollbar-thin scrollbar-thumb-slate-300 print:min-h-none print:max-h-none print:overflow-visible">
                     {participants.map((a, i) => (
                         <div key={i} className="break-inside-avoid">
                             <Skeleton
@@ -158,14 +164,18 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
                                 loading={showSkeleton}
                                 className={cn(
                                     showSkeleton &&
-                                        "grid grid-cols-[1fr_2fr_1fr] h-3 items-center border hover:bg-[#5C5C5C]/20 transition-colors",
+                                    "grid grid-cols-[1fr_2fr_1fr] h-3 items-center border hover:bg-[#5C5C5C]/20 transition-colors",
                                 )}
                                 color="#574272"
                                 boneClass="opacity-40"
                             >
-                                <div className="grid grid-cols-[1fr_2fr_1fr] items-center border hover:bg-[#5C5C5C]/20 transition-colors ">
-                                    <div className="pl-6 py-5 font-bold text-sm font-heading text-black text-left truncate">
+                                <div
+                                    className="grid grid-cols-[1fr_2fr_1fr] items-center border hover:bg-[#5C5C5C]/20 transition-colors ">
+                                    <div
+                                        className="pl-6 py-5 font-bold text-sm font-heading text-black text-left">
+                                        <span className="line-clamp-2 break-words">
                                         {a.name}
+                                        </span>
                                     </div>
 
                                     <div className="px-4 py-5 text-sm text-black font-heading font-medium text-center">
@@ -174,17 +184,17 @@ export function AttendanceSummary({ eventId }: { eventId: number }) {
 
                                     <div
                                         className={`pr-6 py-5 text-sm text-right font-bold font-heading ${
-                                            a.status === "PRESENT" || a.status === "CHECKED_IN"
+                                            a.status === "PRESENT" || a.status === "CHECKED_IN" || a.status === "REGISTERED"
                                                 ? "text-[#9FC090]"
                                                 : a.status === "ABSENT"
-                                                  ? "text-[#820006]"
-                                                  : "text-[#F36F44]"
+                                                    ? "text-[#820006]"
+                                                    : "text-[#F36F44]"
                                         }`}
                                     >
                                         {formatStatus(a.status)}
                                     </div>
                                 </div>
-                                <hr className="border-0 h-px bg-black/20 mx-2" />
+                                <hr className="border-0 h-px bg-black/20 mx-2"/>
                             </Skeleton>
                         </div>
                     ))}

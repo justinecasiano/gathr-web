@@ -12,10 +12,9 @@ export interface User {
     school: string;
     is_umak: boolean;
     is_alumni: boolean;
-    fcm_token: string | null;
     created_at: string;
-    avatar_url: string | null;
     email: string | null;
+    avatar_url: string | null;
 }
 
 export type FullUser = SupabaseAuthUser & User;

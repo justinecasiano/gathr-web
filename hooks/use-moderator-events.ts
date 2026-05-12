@@ -27,10 +27,17 @@ export const useModeratorEvents = (dateRange?: DateRange) => {
                 .eq("is_archive", false);
 
             if (dateRange?.from) {
-                query = query.gte("start_time", dateRange.from.toISOString());
+                const startOfDay = new Date(dateRange.from);
+                startOfDay.setHours(0, 0, 0, 0);
+                query = query.gte("start_time", startOfDay.toISOString());
             }
+
             if (dateRange?.to) {
-                query = query.lte("start_time", dateRange.to.toISOString());
+                const now = new Date().toISOString();
+                const endOfSelected = new Date(dateRange.to);
+                endOfSelected.setHours(23, 59, 59, 999);
+
+                query = query.or(`start_time.lte.${endOfSelected.toISOString()},start_time.gte.${now}`);
             }
 
             const { data, error } = await query.order("start_time", { ascending: true });
@@ -42,7 +49,7 @@ export const useModeratorEvents = (dateRange?: DateRange) => {
                 const rawParticipants = event.participants || [];
 
                 const registeredCount = rawParticipants.filter(
-                    (p) => ["REGISTERED", "CHECKED_IN", "PRESENT"].includes(p.status) && p.participant_type === "ATTENDEE",
+                    (p) => ["REGISTERED", "CHECKED_IN", "PRESENT", "ABSENT"].includes(p.status) && p.participant_type === "ATTENDEE",
                 ).length;
 
                 const presentCount = rawParticipants.filter(

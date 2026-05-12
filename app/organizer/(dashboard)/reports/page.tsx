@@ -46,7 +46,7 @@ export default function ReportsPage() {
     }, [rawEvents, selectedEventId]);
 
     const stats = analytics?.dashboardStats ?? [];
-    const comparisonLabel = analytics?.comparisonLabel ?? "vs. latest event";
+    const comparisonLabel = analytics?.comparisonLabel ?? "latest event";
 
     const reportRef = useRef<HTMLDivElement>(null);
     const currentEvent = useMemo(() => {

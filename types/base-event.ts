@@ -3,10 +3,8 @@ import { User } from "@/types/user";
 
 export interface BaseEvent {
     id: number;
-    parent_event_id: number | null;
     title: string;
     description: string;
-    roles: string[] | null;
     allowed_departments: string[] | null;
     allow_non_umak: boolean;
     allow_alumni: boolean;
@@ -18,21 +16,23 @@ export interface BaseEvent {
     feedback_form: FormEditorValues | null;
     created_by: string;
     creator?: User;
-    status: "APPROVED" | "PENDING" | "REJECTED" | string;
+    status: "APPROVED" | "PENDING" | "REJECTED";
     submitted_at: string;
     updated_at: string | null;
     approved_by: string | null;
     comment: string | null;
     approved_at: string | null;
     is_archive: boolean;
-    is_form_active: boolean | null;
+    is_form_active: boolean;
     form_title: string | null;
+    deleted_at: string | null;
+
     participants?: { count: number }[];
-    response_count: { count: number }[];
+    response_count?: { count: number }[];
+    present_count?: { count: number }[];
     event_status: "UPCOMING" | "ONGOING" | "ENDED";
     has_feedback_form: boolean;
     question_count: number;
-    present_count: { count: number }[];
     avg_rating: number;
 }
 

@@ -35,8 +35,14 @@ export function Header() {
             <GlobalSearch />
 
             <div className="flex max-w-[22%] items-center justify-center gap-2 rounded-2xl border-2 border-[#5C5C5C] bg-white p-1.5 shadow-[4px_4px_0px_0px_rgba(87,66,114,1)] transition-all hover:!brightness-80">
-                <div className="h-10 w-10 rounded-xl bg-purple-200 overflow-hidden shrink-0">
-                    <Image src="/svgs/organizer-profile-icon.svg" alt="Avatar" width={40} height={40} />
+                <div className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden border-2 border-[#261A36]">
+                    <Image
+                        src={user?.avatar_url ?? "/svgs/moderator-profile-icon.svg"}
+                        alt="Profile"
+                        width={40}
+                        height={40}
+                        className="aspect-square object-cover"
+                    />
                 </div>
                 <div className="flex flex-col min-w-0">
                     <p className="text-lg font-bold font-display text-[#261A36] leading-none truncate max-w-[150px]">

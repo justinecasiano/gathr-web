@@ -4,11 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { FeedbackEvent } from "@/types/base-event";
-import { ChevronDown, Edit3, Eye, Plus } from "lucide-react";
+import {ChevronDown, Edit3, Eye, Plus, Search} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "./button";
 import { FeedbackExpansion } from "./feedback-expansion";
+import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 interface ExtendedFeedbackEvent extends FeedbackEvent {
     onStatusToggle: (id: number, title: string, checked: boolean) => void;
@@ -67,22 +68,44 @@ export function FeedbackSummaryCard({
     return (
         <div className="rounded-[14px] bg-white px-6 py-5 shadow-sm border border-transparent hover:border-[#5C5C5C] transition-all">
             <div className="flex items-start gap-6">
-                <div
-                    className={cn(
-                        "relative h-40 w-40 shrink-0 overflow-hidden rounded-[15px]",
-                        "shadow-[0_6px_10px_0_rgba(0,0,0,0.25)]",
-                    )}
-                >
-                    <Image
-                        src={image}
-                        alt={title}
-                        fill
-                        className={cn(
-                            "transition-all",
-                            image.includes("placeholder_small") ? "object-contain" : "object-cover",
-                        )}
-                    />
-                </div>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <div
+                            className={cn(
+                                "group relative h-40 w-40 shrink-0 overflow-hidden rounded-[15px] cursor-zoom-in",
+                                "shadow-[0_6px_10px_0_rgba(0,0,0,0.25)] transition-transform hover:scale-[1.02]"
+                            )}
+                        >
+                            <Image
+                                src={image}
+                                alt={title}
+                                fill
+                                className={cn(
+                                    "transition-all duration-500 group-hover:scale-110",
+                                    image.includes("placeholder_small") ? "object-contain" : "object-cover"
+                                )}
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/40">
+                                    <Search className="text-white" size={20} />
+                                </div>
+                            </div>
+                        </div>
+                    </DialogTrigger>
+
+                    <DialogContent className="max-w-[95vw] sm:max-w-[80vw] lg:max-w-[70vw] p-0 border-none bg-transparent shadow-none flex items-center justify-center">
+                        <DialogTitle className="sr-only">Poster Preview: {title}</DialogTitle>
+                        <div className="relative w-full h-[85vh]">
+                            <Image
+                                src={image}
+                                alt={title}
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">

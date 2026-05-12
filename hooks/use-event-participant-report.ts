@@ -1,20 +1,21 @@
-import { supabase } from "@/lib/supabase/supabase";
-import { ParticipantReportData } from "@/types/event-analytics";
-import { ParticipantStatus } from "@/types/participant";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import {supabase} from "@/lib/supabase/supabase";
+import {ParticipantReportData} from "@/types/event-analytics";
+import {ParticipantStatus} from "@/types/participant";
+import {useQuery} from "@tanstack/react-query";
+import {format} from "date-fns";
 
 export const useEventParticipantReport = (eventId: number | undefined) => {
     return useQuery({
         queryKey: ["event-report", eventId],
         enabled: !!eventId,
         queryFn: async (): Promise<ParticipantReportData> => {
-            const { data, error } = await supabase
+            const {data, error} = await supabase
                 .from("participants")
                 .select(
                     `
                     status,
                     check_in,
+                    joined_at,
                     user:users (
                         first_name,
                         last_name
@@ -22,23 +23,27 @@ export const useEventParticipantReport = (eventId: number | undefined) => {
                 `,
                 )
                 .eq("event_id", eventId)
-                .in("status", ["PRESENT", "CHECKED_IN", "CANCELLED", "ABSENT"])
-                .order("check_in", { ascending: false });
+                .eq("participant_type", "ATTENDEE")
+                .in("status", ["REGISTERED", "PRESENT", "CHECKED_IN", "CANCELLED", "ABSENT"])
+                .order("check_in", {ascending: false});
 
             if (error) throw error;
 
             const rawData = data as unknown as {
                 status: ParticipantStatus;
                 check_in: string | null;
+                joined_at: string;
                 user: { first_name: string | null; last_name: string | null };
             }[];
 
             let presentCount = 0;
             let cancelledCount = 0;
             let absentCount = 0;
+            let registeredCount = 0;
 
             const participants = rawData.map((row) => {
                 if (row.status === "PRESENT" || row.status === "CHECKED_IN") presentCount++;
+                else if (row.status === "REGISTERED") registeredCount++;
                 else if (row.status === "CANCELLED") cancelledCount++;
                 else if (row.status === "ABSENT") absentCount++;
 
@@ -48,7 +53,7 @@ export const useEventParticipantReport = (eventId: number | undefined) => {
 
                 const formattedDate = row.check_in
                     ? format(new Date(row.check_in), "MMM d, yyyy - h:mm") + format(new Date(row.check_in), " b").toLowerCase()
-                    : "N/A";
+                    : format(new Date(row.joined_at), "MMM d, yyyy - h:mm") + format(new Date(row.joined_at), " b").toLowerCase();
 
                 return {
                     name: fullName,
@@ -63,7 +68,7 @@ export const useEventParticipantReport = (eventId: number | undefined) => {
                     present: presentCount,
                     cancelled: cancelledCount,
                     absent: absentCount,
-                    total: presentCount + cancelledCount + absentCount,
+                    total: presentCount + cancelledCount + absentCount + registeredCount,
                 },
             };
         },
