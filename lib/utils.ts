@@ -196,7 +196,7 @@ export const generateModeratorDashboardAnalytics = (events: BaseEvent[], dateRan
     });
 
     const last6Months = Array.from({ length: 6 }, (_, i) => {
-        const referenceDate = currentTo;
+        const referenceDate = currentToOriginal;
         return subMonths(referenceDate, i);
     }).reverse();
 

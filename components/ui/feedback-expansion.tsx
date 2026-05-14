@@ -2,15 +2,15 @@
 
 import _my_response_summary_question from "@/bones/my-response-summary-question.bones.json";
 import _my_response_summary from "@/bones/my-response-summary.bones.json";
-import { useEventAnalytics } from "@/hooks/use-event-analytics";
-import { useSkeleton } from "@/hooks/use-skeleton";
-import { cn } from "@/lib/utils";
-import { ChoiceSummary, EventAnalytics, SliderSummary } from "@/types/event-analytics";
-import { ResponsiveBones } from "boneyard-js";
-import { Skeleton } from "boneyard-js/react";
-import { motion } from "motion/react";
+import {useEventAnalytics} from "@/hooks/use-event-analytics";
+import {useSkeleton} from "@/hooks/use-skeleton";
+import {cn} from "@/lib/utils";
+import {ChoiceSummary, EventAnalytics, SliderSummary} from "@/types/event-analytics";
+import {ResponsiveBones} from "boneyard-js";
+import {Skeleton} from "boneyard-js/react";
+import {motion} from "motion/react";
 import Image from "next/image";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import {Cell, Pie, PieChart, ResponsiveContainer} from "recharts";
 
 const MOCK_EVENT_ANALYTICS: EventAnalytics = {
     id: 101,
@@ -34,8 +34,8 @@ const MOCK_EVENT_ANALYTICS: EventAnalytics = {
                     count: 81,
                     percentage: 35,
                 },
-                { optionId: "o2", optionLabel: "The Venue is well-ventilated", count: 93, percentage: 40 },
-                { optionId: "o3", optionLabel: "Technical issues were frequent", count: 58, percentage: 25 },
+                {optionId: "o2", optionLabel: "The Venue is well-ventilated", count: 93, percentage: 40},
+                {optionId: "o3", optionLabel: "Technical issues were frequent", count: 58, percentage: 25},
             ],
         },
         {
@@ -45,11 +45,11 @@ const MOCK_EVENT_ANALYTICS: EventAnalytics = {
             totalResponses: 233,
             averageRating: 3.5, // Calculated: (weighted sum / total responses)
             sliderData: [
-                { ratingLabel: "Very Unsatisfied", ratingValue: 1, count: 35 },
-                { ratingLabel: "Unsatisfied", ratingValue: 2, count: 73 },
-                { ratingLabel: "Neutral", ratingValue: 3, count: 27 },
-                { ratingLabel: "Satisfied", ratingValue: 4, count: 65 },
-                { ratingLabel: "Very Satisfied", ratingValue: 5, count: 33 },
+                {ratingLabel: "Very Unsatisfied", ratingValue: 1, count: 35},
+                {ratingLabel: "Unsatisfied", ratingValue: 2, count: 73},
+                {ratingLabel: "Neutral", ratingValue: 3, count: 27},
+                {ratingLabel: "Satisfied", ratingValue: 4, count: 65},
+                {ratingLabel: "Very Satisfied", ratingValue: 5, count: 33},
             ],
         },
         {
@@ -58,8 +58,8 @@ const MOCK_EVENT_ANALYTICS: EventAnalytics = {
             type: "radio",
             totalResponses: 233,
             choiceData: [
-                { optionId: "r1", optionLabel: "Morning Workshop", count: 193, percentage: 83 },
-                { optionId: "r2", optionLabel: "Afternoon Keynote", count: 40, percentage: 17 },
+                {optionId: "r1", optionLabel: "Morning Workshop", count: 193, percentage: 83},
+                {optionId: "r2", optionLabel: "Afternoon Keynote", count: 40, percentage: 17},
             ],
         },
         {
@@ -94,11 +94,11 @@ const BLANK_EVENT_ANALYTICS: EventAnalytics = {
             totalResponses: 0,
             averageRating: 0,
             sliderData: [
-                { ratingLabel: "Very Unsatisfied", ratingValue: 1, count: 0 },
-                { ratingLabel: "Unsatisfied", ratingValue: 2, count: 0 },
-                { ratingLabel: "Neutral", ratingValue: 3, count: 0 },
-                { ratingLabel: "Satisfied", ratingValue: 4, count: 0 },
-                { ratingLabel: "Very Satisfied", ratingValue: 5, count: 0 },
+                {ratingLabel: "Very Unsatisfied", ratingValue: 1, count: 0},
+                {ratingLabel: "Unsatisfied", ratingValue: 2, count: 0},
+                {ratingLabel: "Neutral", ratingValue: 3, count: 0},
+                {ratingLabel: "Satisfied", ratingValue: 4, count: 0},
+                {ratingLabel: "Very Satisfied", ratingValue: 5, count: 0},
             ],
         },
         {
@@ -111,9 +111,14 @@ const BLANK_EVENT_ANALYTICS: EventAnalytics = {
     ],
 };
 
-export function FeedbackExpansion({ eventId, showText = false }: { eventId: number; showText?: boolean }) {
-    const { data: analytics, isLoading: isEventAnalyticsLoading } = useEventAnalytics(eventId);
+export function FeedbackExpansion({eventId, showText = false, isIndividual = false}: {
+    eventId: number;
+    showText?: boolean;
+    isIndividual?: boolean
+}) {
+    const {data: analytics, isLoading: isEventAnalyticsLoading} = useEventAnalytics(eventId);
     const showSkeleton = useSkeleton(isEventAnalyticsLoading, 400);
+    console.log(analytics);
 
     const data = analytics ?? BLANK_EVENT_ANALYTICS;
 
@@ -121,67 +126,70 @@ export function FeedbackExpansion({ eventId, showText = false }: { eventId: numb
         <div>
             <div className={`h-[1.5px] w-full bg-[#979797] ${showText ? "mb-5" : "mb-7"} mt-5`}></div>
             {showText && (
-                <div className="flex items-center gap-5 text-[#261A36] font-bold font-heading uppercase tracking-wider text-lg">
+                <div
+                    className="flex items-center gap-5 text-[#261A36] font-bold font-heading uppercase tracking-wider text-lg">
                     Feedback Summary
                 </div>
             )}
             <div className="mt-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 pb-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Skeleton
-                        initialBones={_my_response_summary as unknown as ResponsiveBones}
-                        animate="shimmer"
-                        name="my-response-summary"
-                        loading={showSkeleton}
-                        className={cn(
-                            showSkeleton &&
+                {!isIndividual && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Skeleton
+                            initialBones={_my_response_summary as unknown as ResponsiveBones}
+                            animate="shimmer"
+                            name="my-response-summary"
+                            loading={showSkeleton}
+                            className={cn(
+                                showSkeleton &&
                                 "px-6 py-3 rounded-[14px] flex flex-col gap-1 items-center justify-center border-3 border-[#5C5C5C] shadow-sm",
-                        )}
-                        color="#574272"
-                        boneClass="opacity-40"
-                    >
-                        <ResponseStatCard
-                            label="Responses"
-                            value={data.responseStatusSummary.answered.toString()}
-                            bgColor="bg-[#F5F8F3]"
-                        />
-                    </Skeleton>
-                    <Skeleton
-                        initialBones={_my_response_summary as unknown as ResponsiveBones}
-                        animate="shimmer"
-                        name="my-response-summary"
-                        loading={showSkeleton}
-                        className={cn(
-                            showSkeleton &&
+                            )}
+                            color="#574272"
+                            boneClass="opacity-40"
+                        >
+                            <ResponseStatCard
+                                label="Responses"
+                                value={data.responseStatusSummary.answered.toString()}
+                                bgColor="bg-[#F5F8F3]"
+                            />
+                        </Skeleton>
+                        <Skeleton
+                            initialBones={_my_response_summary as unknown as ResponsiveBones}
+                            animate="shimmer"
+                            name="my-response-summary"
+                            loading={showSkeleton}
+                            className={cn(
+                                showSkeleton &&
                                 "px-6 py-3 rounded-[14px] flex flex-col gap-1 items-center justify-center border-3 border-[#5C5C5C] shadow-sm",
-                        )}
-                        color="#574272"
-                        boneClass="opacity-40"
-                    >
-                        <ResponseStatCard
-                            label="No Response"
-                            value={data.responseStatusSummary.noResponse.toString()}
-                            bgColor="bg-[#FCE0D6]"
-                        />
-                    </Skeleton>
-                    <Skeleton
-                        initialBones={_my_response_summary as unknown as ResponsiveBones}
-                        animate="shimmer"
-                        name="my-response-summary"
-                        loading={showSkeleton}
-                        className={cn(
-                            showSkeleton &&
+                            )}
+                            color="#574272"
+                            boneClass="opacity-40"
+                        >
+                            <ResponseStatCard
+                                label="No Response"
+                                value={data.responseStatusSummary.noResponse.toString()}
+                                bgColor="bg-[#FCE0D6]"
+                            />
+                        </Skeleton>
+                        <Skeleton
+                            initialBones={_my_response_summary as unknown as ResponsiveBones}
+                            animate="shimmer"
+                            name="my-response-summary"
+                            loading={showSkeleton}
+                            className={cn(
+                                showSkeleton &&
                                 "px-6 py-3 rounded-[14px] flex flex-col gap-1 items-center justify-center border-3 border-[#5C5C5C] shadow-sm",
-                        )}
-                        color="#574272"
-                        boneClass="opacity-40"
-                    >
-                        <ResponseStatCard
-                            label="Did not attend"
-                            value={data.responseStatusSummary.absent.toString()}
-                            bgColor="bg-[#FAD2E6]"
-                        />
-                    </Skeleton>
-                </div>
+                            )}
+                            color="#574272"
+                            boneClass="opacity-40"
+                        >
+                            <ResponseStatCard
+                                label="Did not attend"
+                                value={data.responseStatusSummary.absent.toString()}
+                                bgColor="bg-[#FAD2E6]"
+                            />
+                        </Skeleton>
+                    </div>)
+                }
 
                 <div className="space-y-6">
                     {data.questions.map((q, i) => (
@@ -193,7 +201,7 @@ export function FeedbackExpansion({ eventId, showText = false }: { eventId: numb
                             loading={showSkeleton}
                             className={cn(
                                 showSkeleton &&
-                                    "p-5 rounded-[14px] border-3 border-[#7B55A3] bg-white shadow-sm relative overflow-hidden",
+                                "p-5 rounded-[14px] border-3 border-[#7B55A3] bg-white shadow-sm relative overflow-hidden",
                             )}
                             color="#574272"
                             boneClass="opacity-40"
@@ -223,7 +231,8 @@ export function FeedbackExpansion({ eventId, showText = false }: { eventId: numb
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 }
 
 function renderCheckboxAnalytics(data: ChoiceSummary[]) {
@@ -235,14 +244,16 @@ function renderCheckboxAnalytics(data: ChoiceSummary[]) {
                     className="relative h-14 w-full rounded-[41px] border-2 border-[#7B55A3] flex items-center px-5 overflow-hidden group"
                 >
                     <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${item.percentage}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
+                        initial={{width: 0}}
+                        animate={{width: `${item.percentage}%`}}
+                        transition={{duration: 1, ease: "easeOut"}}
                         className="absolute left-0 top-0 bottom-0 bg-[#7954AB] z-0"
                     />
                     <div className="relative z-10 w-full flex justify-between items-center text-sm font-bold">
-                        <span className="flex items-center gap-3 font-bold font-heading text-base text-[#1F2937] mix-blend-difference min-w-0 flex-1">
-                            <div className="size-6 rounded-full bg-white text-black flex items-center justify-center text-base font-heading font-bold shrink-0">
+                        <span
+                            className="flex items-center gap-3 font-bold font-heading text-base text-[#1F2937] mix-blend-difference min-w-0 flex-1">
+                            <div
+                                className="size-6 rounded-full bg-white text-black flex items-center justify-center text-base font-heading font-bold shrink-0">
                                 {idx + 1}
                             </div>
                             <span className="truncate block max-w-[200px] md:max-w-[400px] lg:max-w-[900px]">
@@ -276,16 +287,17 @@ export function renderSliderAnalytics(data: SliderSummary[], shouldShowSlider: b
             <div className="flex-1 w-full max-w-md">
                 <div className="relative h-4 bg-[#E5E5E5] rounded-[8px] w-full mb-4">
                     <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${((avg - 1) / (5 - 1)) * 100}%` }}
+                        initial={{width: 0}}
+                        animate={{width: `${((avg - 1) / (5 - 1)) * 100}%`}}
                         className="absolute h-full bg-[#4C2D6C] rounded-[8px]"
                     />
                     <motion.div
-                        initial={{ left: 0 }}
-                        animate={{ left: `${((avg - 1) / (5 - 1)) * 100}%` }}
+                        initial={{left: 0}}
+                        animate={{left: `${((avg - 1) / (5 - 1)) * 100}%`}}
                         className="relative top-1/2 -translate-y-1/2 -ml-5 size-7 rounded-full bg-gradient-to-b from-[#4C2D6C] to-[#784BA6] shadow-lg flex items-center justify-center z-10"
                     >
-                        <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[#312245] text-sm font-bold font-heading pointer-events-none whitespace-nowrap">
+                        <span
+                            className="absolute -top-7 left-1/2 -translate-x-1/2 text-[#312245] text-sm font-bold font-heading pointer-events-none whitespace-nowrap">
                             {avg}
                         </span>
                     </motion.div>
@@ -293,7 +305,8 @@ export function renderSliderAnalytics(data: SliderSummary[], shouldShowSlider: b
                         <div className="absolute inset-0 flex justify-between px-[2px] z-20 pointer-events-none">
                             {[1, 2, 3, 4, 5].map((num) => (
                                 <div key={num} className="relative h-full flex flex-col items-center">
-                                    <span className="absolute top-6 text-xs font-normal font-heading text-black">{num}</span>
+                                    <span
+                                        className="absolute top-6 text-xs font-normal font-heading text-black">{num}</span>
                                 </div>
                             ))}
                         </div>
@@ -302,12 +315,12 @@ export function renderSliderAnalytics(data: SliderSummary[], shouldShowSlider: b
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-8 pr-4">
-                <div style={{ width: "200px", height: "200px" }} className="shrink-0">
+                <div style={{width: "200px", height: "200px"}} className="shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie data={chartData} innerRadius={55} outerRadius={85} dataKey="value" stroke="none">
                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                    <Cell key={`cell-${index}`} fill={entry.color}/>
                                 ))}
                             </Pie>
                         </PieChart>
@@ -317,7 +330,7 @@ export function renderSliderAnalytics(data: SliderSummary[], shouldShowSlider: b
                 <div className="flex flex-col gap-2">
                     {[...chartData].reverse().map((entry) => (
                         <div key={entry.name} className="flex items-center gap-3">
-                            <div className="size-5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                            <div className="size-5 rounded-full shrink-0" style={{backgroundColor: entry.color}}/>
                             <span className="text-xs font-normal text-black w-28">{entry.name}</span>
                             <span className="text-xs font-bold text-black">{entry.value}</span>
                         </div>
@@ -399,7 +412,7 @@ export function renderTextAnalytics(responses: string[]) {
     );
 }
 
-function ResponseStatCard({ label, value, bgColor }: { label: string; value: string; bgColor: string }) {
+function ResponseStatCard({label, value, bgColor}: { label: string; value: string; bgColor: string }) {
     return (
         <div
             className={cn(
@@ -407,7 +420,7 @@ function ResponseStatCard({ label, value, bgColor }: { label: string; value: str
                 bgColor,
             )}
         >
-            <Image src="/svgs/feedbacks-responses-icon.svg" width="17" height="17" alt="Icon" />
+            <Image src="/svgs/feedbacks-responses-icon.svg" width="17" height="17" alt="Icon"/>
             <span className="text-xl font-heading font-bold text-[#261A36] mt-1">{value}</span>
             <span className="text-lg font-heading font-bold text-[#B7B7B7]">{label}</span>
         </div>

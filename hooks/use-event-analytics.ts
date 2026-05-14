@@ -1,13 +1,13 @@
-import { supabase } from "@/lib/supabase/supabase";
-import { ChoiceSummary, EventAnalytics, QuestionAnalytics, SliderSummary } from "@/types/event-analytics";
-import { ChoiceQuestion, FeedbackQuestion, QuestionResponse } from "@/types/feedback";
-import { useQuery } from "@tanstack/react-query";
+import {supabase} from "@/lib/supabase/supabase";
+import {ChoiceSummary, EventAnalytics, QuestionAnalytics, SliderSummary} from "@/types/event-analytics";
+import {ChoiceQuestion, FeedbackQuestion, FormSubmission, QuestionResponse} from "@/types/feedback";
+import {useQuery} from "@tanstack/react-query";
 
 export function useEventAnalytics(eventId: number) {
     return useQuery({
         queryKey: ["event-analytics", eventId],
         queryFn: async (): Promise<EventAnalytics> => {
-            const { data: event, error: eventError } = await supabase
+            const {data: event, error: eventError} = await supabase
                 .from("events")
                 .select(
                     `
@@ -25,7 +25,7 @@ export function useEventAnalytics(eventId: number) {
 
             if (eventError || !event) throw eventError;
 
-            const participants= (event.participants ?? []).filter(
+            const participants = (event.participants ?? []).filter(
                 (p) => p.participant_type === "ATTENDEE"
             );
             const form = event.feedback_form;
@@ -38,7 +38,7 @@ export function useEventAnalytics(eventId: number) {
             };
 
             if (!form || !form.questions || form.questions.length === 0) {
-                return { id: event.id, responseStatusSummary: summary, questions: [] };
+                return {id: event.id, responseStatusSummary: summary, questions: []};
             }
 
             const questionsAnalytics: QuestionAnalytics[] = (form.questions as FeedbackQuestion[]).map((q) => {
@@ -48,10 +48,11 @@ export function useEventAnalytics(eventId: number) {
 
                 const allAnswers = answeredParticipants
                     .map((p) => {
-                        const submission = p.feedback_submission as unknown as QuestionResponse[];
-                        if (!Array.isArray(submission)) return undefined;
+                        const submissionData = p.feedback_submission as unknown as FormSubmission;
 
-                        const resp = submission.find((r) => r.questionId === q.id);
+                        if (!submissionData || !Array.isArray(submissionData.responses)) return undefined;
+
+                        const resp = submissionData.responses.find((r) => r.questionId === q.id);
                         return resp?.answer;
                     })
                     .filter((ans): ans is string | string[] | number => ans !== undefined);
@@ -72,11 +73,11 @@ export function useEventAnalytics(eventId: number) {
                         const count =
                             totalResponses > 0
                                 ? allAnswers.filter((ans) => {
-                                      if (Array.isArray(ans)) {
-                                          return ans.includes(opt.id);
-                                      }
-                                      return ans === opt.id;
-                                  }).length
+                                    if (Array.isArray(ans)) {
+                                        return ans.includes(opt.id);
+                                    }
+                                    return ans === opt.id;
+                                }).length
                                 : 0;
 
                         return {

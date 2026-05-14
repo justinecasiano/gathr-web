@@ -52,7 +52,7 @@ const CONTROLS: { type: QuestionType; label: string; desc: string; icon: React.R
     },
     {
         type: "slider",
-        label: "Rating",
+        label: "Slider",
         desc: "Fixed 1–5 scale",
         icon: <SlidersHorizontal className="size-4"/>,
         color: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -189,7 +189,7 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
         },
     });
 
-    const {fields, remove, move, prepend} = useFieldArray({
+    const {fields, remove, move, append, insert} = useFieldArray({
         control: form.control,
         name: "questions",
     });
@@ -213,9 +213,15 @@ export default function FeedbackFormEditor({initialData, readOnly = false, onSav
                 newObj = {...base, type, placeholder: "Write your answer..."} as TextQuestion;
             }
 
-            prepend(newObj);
+            const firstMandatoryIndex = fields.findIndex((f) => (f as any).isMandatory);
+
+            if (firstMandatoryIndex !== -1) {
+                insert(firstMandatoryIndex, newObj);
+            } else {
+                append(newObj);
+            }
         },
-        [prepend],
+        [fields, append, insert],
     );
 
     const handleRemove = (index: number) => {
