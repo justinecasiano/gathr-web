@@ -9,8 +9,6 @@ import {AnimatePresence, motion} from "motion/react";
 import Image from "next/image";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
-import Lightbox from "yet-another-react-lightbox";
-import {Zoom} from "yet-another-react-lightbox/plugins";
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 interface ExtendedSimpleEvent extends SimpleEvent {
